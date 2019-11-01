@@ -9,20 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var schedule = require('node-schedule');
 const connection_1 = require("./database/connection");
-const futures = require("./okex/futures");
-const swap = require("./okex/swap");
 const schedule_1 = require("./schedule");
 (function main() {
     return __awaiter(this, void 0, void 0, function* () {
         //连接数据库
         yield connection_1.default();
-        // 获取所有合约信息
-        const futuresInstruments = yield futures.initInstruments();
-        const swapInstruments = yield swap.initInstruments();
         // 开启定时任务获取历史K线
-        schedule_1.startSchedule(futuresInstruments, swapInstruments);
+        schedule_1.startSchedule();
     });
 })();
 //# sourceMappingURL=main.js.map

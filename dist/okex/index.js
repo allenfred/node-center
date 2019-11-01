@@ -11,14 +11,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const futures = require("./futures");
 const swap = require("./swap");
-const schedule_1 = require("../schedule");
 function initOkexMarketMonitor() {
     return __awaiter(this, void 0, void 0, function* () {
         // 获取所有合约信息
         const futuresInstruments = yield futures.initInstruments();
         const swapInstruments = yield swap.initInstruments();
         // 开启定时任务获取历史K线
-        schedule_1.startSchedule(futuresInstruments, swapInstruments);
+        // startSchedule(futuresInstruments, swapInstruments);
+        // 初始化获取所有合约K线
+        yield futures.initCandle(futuresInstruments);
+        yield swap.initCandle(swapInstruments);
     });
 }
 exports.initOkexMarketMonitor = initOkexMarketMonitor;
