@@ -1,19 +1,19 @@
-import * as bluebird from 'bluebird';
-import logger from '../logger';
-import { Instrument } from '../types';
-import { InstrumentInfoDao } from '../dao';
-import { getCandleRequestOptions, isMainCurrency } from '../util';
+import * as bluebird from "bluebird";
+import logger from "../logger";
+import { Instrument } from "../types";
+import { InstrumentInfoDao } from "../dao";
+import { getCandleRequestOptions, isMainCurrency } from "../util";
 import {
   getCandles,
   getCandlesWithLimitedSpeed,
-  getSwapInstruments,
-} from './common';
+  getSwapInstruments
+} from "./common";
 
 export async function initInstruments(): Promise<Instrument[]> {
   //获取全量永续合约信息
   const instruments: Array<Instrument> = await getSwapInstruments();
   logger.info(
-    `[永续合约] - 获取公共合约全量信息成功，共: ${instruments.length} 条 ...`,
+    `[永续合约] - 获取公共合约全量信息成功，共: ${instruments.length} 条 ...`
   );
 
   //更新永续合约信息
@@ -34,17 +34,17 @@ export async function initCandle(instruments: Instrument[]): Promise<void> {
 
   //初始化所有合约candle请求参数
   instruments
-    // .filter(i => isMainCurrency(i.underlying_index))
+    .filter(i => isMainCurrency(i.underlying_index))
     .map((instrument: Instrument) => {
       for (let option of options) {
         readyOptions.push(
-          Object.assign({}, option, instrument, { alias: 'swap' }),
+          Object.assign({}, option, instrument, { alias: "swap" })
         );
       }
     });
 
   logger.info(
-    `[永续合约] - 获取candle数据需请求 ${readyOptions.length} 次 ...`,
+    `[永续合约] - 获取candle数据需请求 ${readyOptions.length} 次 ...`
   );
   await getCandlesWithLimitedSpeed(readyOptions);
 }

@@ -32,10 +32,10 @@ function initCandle(instruments) {
         const readyOptions = [];
         //初始化所有合约candle请求参数
         instruments
-            // .filter(i => isMainCurrency(i.underlying_index))
+            .filter(i => util_1.isMainCurrency(i.underlying_index))
             .map((instrument) => {
             for (let option of options) {
-                readyOptions.push(Object.assign({}, option, instrument, { alias: 'swap' }));
+                readyOptions.push(Object.assign({}, option, instrument, { alias: "swap" }));
             }
         });
         logger_1.default.info(`[永续合约] - 获取candle数据需请求 ${readyOptions.length} 次 ...`);
