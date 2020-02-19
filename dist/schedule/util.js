@@ -19,20 +19,24 @@ function execJob(granularity) {
         // 获取所有合约信息
         const futuresInstruments = yield futures.initInstruments();
         const swapInstruments = yield swap.initInstruments();
-        const futureOptions = futuresInstruments.map(i => {
+        const futureOptions = futuresInstruments
+            .filter(i => util_1.isMainCurrency(i.underlying_index))
+            .map(i => {
             return Object.assign({}, i, {
-                start: util_1.getISOString((-200 * granularity) / 60, 'm'),
+                start: util_1.getISOString((-200 * granularity) / 60, "m"),
                 end: new Date().toISOString(),
                 granularity,
-                alias: util_1.getInstrumentAlias(i.instrument_id),
+                alias: util_1.getInstrumentAlias(i.instrument_id)
             });
         });
-        const swapOptions = swapInstruments.map(i => {
+        const swapOptions = swapInstruments
+            .filter(i => util_1.isMainCurrency(i.underlying_index))
+            .map(i => {
             return Object.assign({}, i, {
-                start: util_1.getISOString((-200 * granularity) / 60, 'm'),
+                start: util_1.getISOString((-200 * granularity) / 60, "m"),
                 end: new Date().toISOString(),
                 granularity,
-                alias: util_1.getInstrumentAlias(i.instrument_id),
+                alias: util_1.getInstrumentAlias(i.instrument_id)
             });
         });
         return yield common_1.getCandlesWithLimitedSpeed(futureOptions.concat(swapOptions));
