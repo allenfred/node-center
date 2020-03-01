@@ -48,12 +48,12 @@ function startSchedule() {
             logger_1.default.info("----执行 15分钟 K线定时任务----");
             yield util_1.execJob(60 * 15);
         }
-        if (util_1.isFiveMinutesScheduleTime(currentDate)) {
-            logger_1.default.info("----执行 5分钟 K线定时任务----");
-            yield util_1.execJob(60 * 5);
-        }
-        logger_1.default.info("----执行 1分钟 K线定时任务----");
-        yield util_1.execJob(60);
+        // if (isFiveMinutesScheduleTime(currentDate)) {
+        //   logger.info("----执行 5分钟 K线定时任务----");
+        //   await execJob(60 * 5);
+        // }
+        // logger.info("----执行 1分钟 K线定时任务----");
+        // await execJob(60);
     }));
     // every week.
     schedule.scheduleJob("0 0 * * 0", () => {

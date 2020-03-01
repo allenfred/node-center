@@ -59,13 +59,13 @@ export function startSchedule() {
       await execJob(60 * 15);
     }
 
-    if (isFiveMinutesScheduleTime(currentDate)) {
-      logger.info("----执行 5分钟 K线定时任务----");
-      await execJob(60 * 5);
-    }
+    // if (isFiveMinutesScheduleTime(currentDate)) {
+    //   logger.info("----执行 5分钟 K线定时任务----");
+    //   await execJob(60 * 5);
+    // }
 
-    logger.info("----执行 1分钟 K线定时任务----");
-    await execJob(60);
+    // logger.info("----执行 1分钟 K线定时任务----");
+    // await execJob(60);
   });
 
   // every week.
