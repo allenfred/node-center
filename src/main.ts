@@ -1,5 +1,5 @@
-import connectMongo from './database/connection';
-import { startSchedule } from './schedule';
+import connectMongo from "./database/connection";
+import { startSchedule } from "./schedule";
 
 (async function main() {
   //连接数据库
