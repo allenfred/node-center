@@ -18,18 +18,18 @@ const dao_1 = require("../dao");
 const util_1 = require("../util");
 const pClient = publicClient_1.default(config_1.httpHost, 10000);
 const candles = [
-    'candle60s',
-    'candle180s',
-    'candle300s',
-    'candle900s',
-    'candle1800s',
-    'candle3600s',
-    'candle7200s',
-    'candle14400s',
-    'candle21600s',
-    'candle43200s',
-    'candle86400s',
-    'candle604800s',
+    "candle60s",
+    "candle180s",
+    "candle300s",
+    "candle900s",
+    "candle1800s",
+    "candle3600s",
+    "candle7200s",
+    "candle14400s",
+    "candle21600s",
+    "candle43200s",
+    "candle86400s",
+    "candle604800s" // 1 week
 ];
 function getFuturesInstruments() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -44,10 +44,10 @@ function getSwapInstruments() {
 }
 exports.getSwapInstruments = getSwapInstruments;
 //获取合约K线数据
-function getCandles({ instrumentId, start, end, granularity, }) {
+function getCandles({ instrumentId, start, end, granularity }) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const data = instrumentId.includes('SWAP')
+            const data = instrumentId.includes("SWAP")
                 ? yield pClient
                     .swap()
                     .getCandles(instrumentId, { start, end, granularity })
@@ -116,7 +116,7 @@ function getCandlesByGroup(options) {
                 instrumentId: option.instrument_id,
                 start: option.start,
                 end: option.end,
-                granularity: option.granularity,
+                granularity: option.granularity
             });
             const readyCandles = data.map((candle) => {
                 return {
@@ -131,7 +131,7 @@ function getCandlesByGroup(options) {
                     volume: +candle[5],
                     currency_volume: +candle[6],
                     alias: option.alias,
-                    granularity: option.granularity,
+                    granularity: option.granularity
                 };
             });
             return yield dao_1.InstrumentCandleDao.upsert(readyCandles);

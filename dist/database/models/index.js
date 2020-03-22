@@ -18,4 +18,5 @@ __export(require("./ltcFutureCandle"));
 __export(require("./bchFutureCandle"));
 __export(require("./bsvFutureCandle"));
 __export(require("./eosFutureCandle"));
+__export(require("./btcUSDTCandle"));
 //# sourceMappingURL=index.js.map

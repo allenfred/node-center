@@ -10,6 +10,7 @@ import {
   isTwelveHoursScheduleTime,
   isDailyScheduleTime
 } from "./util";
+import { getBtcLatestCandles } from "../okex/currency";
 import logger from "../logger";
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
@@ -35,6 +36,7 @@ export function startSchedule() {
     if (isFourHoursScheduleTime(currentDate)) {
       logger.info("----执行 4小时 K线定时任务----");
       await execJob(60 * 240);
+      await getBtcLatestCandles();
     }
 
     if (isTwoHoursScheduleTime(currentDate)) {

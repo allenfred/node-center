@@ -1,25 +1,25 @@
-import PublicClient from './publicClient';
-import { httpHost } from '../config';
-import * as bluebird from 'bluebird';
-import logger from '../logger';
-import { Business, Instrument, Candle, InstrumentReqOptions } from '../types';
-import { InstrumentCandleDao } from '../dao';
-import { sleep, getISOString } from '../util';
+import PublicClient from "./publicClient";
+import { httpHost } from "../config";
+import * as bluebird from "bluebird";
+import logger from "../logger";
+import { Business, Instrument, Candle, InstrumentReqOptions } from "../types";
+import { InstrumentCandleDao } from "../dao";
+import { sleep, getISOString } from "../util";
 
 const pClient = PublicClient(httpHost, 10000);
 const candles = [
-  'candle60s', // 1 min
-  'candle180s', // 3 mins
-  'candle300s', // 5 mins
-  'candle900s', // 15 mins
-  'candle1800s', // 30 mins
-  'candle3600s', // 1 hour
-  'candle7200s', // 2 hours
-  'candle14400s', // 4 hours
-  'candle21600s', // 6 hours
-  'candle43200s', // 12 hours
-  'candle86400s', // 1 day
-  'candle604800s', // 1 week
+  "candle60s", // 1 min
+  "candle180s", // 3 mins
+  "candle300s", // 5 mins
+  "candle900s", // 15 mins
+  "candle1800s", // 30 mins
+  "candle3600s", // 1 hour
+  "candle7200s", // 2 hours
+  "candle14400s", // 4 hours
+  "candle21600s", // 6 hours
+  "candle43200s", // 12 hours
+  "candle86400s", // 1 day
+  "candle604800s" // 1 week
 ];
 
 async function getFuturesInstruments(): Promise<any> {
@@ -35,7 +35,7 @@ async function getCandles({
   instrumentId,
   start,
   end,
-  granularity,
+  granularity
 }: {
   instrumentId: string;
   start: string;
@@ -43,7 +43,7 @@ async function getCandles({
   granularity: number;
 }): Promise<Array<Candle>> {
   try {
-    const data = instrumentId.includes('SWAP')
+    const data = instrumentId.includes("SWAP")
       ? await pClient
           .swap()
           .getCandles(instrumentId, { start, end, granularity })
@@ -51,12 +51,12 @@ async function getCandles({
           .futures()
           .getCandles(instrumentId, { start, end, granularity });
     logger.info(
-      `获取 ${instrumentId}/${granularity} K线成功: 从${start}至${end}, 共 ${data.length} 条`,
+      `获取 ${instrumentId}/${granularity} K线成功: 从${start}至${end}, 共 ${data.length} 条`
     );
     return data;
   } catch (e) {
     logger.error(
-      `获取 ${instrumentId}/${granularity} K线失败: 从${start}至${end}`,
+      `获取 ${instrumentId}/${granularity} K线失败: 从${start}至${end}`
     );
     return [];
   }
@@ -73,7 +73,7 @@ function getFuturesSubCommands(instruments: Instrument[]): Array<string> {
 //指令格式:<business>/<channel>:<filter>
 function getBasicCommands(
   instruments: Instrument[],
-  business: Business,
+  business: Business
 ): Array<string> {
   //公共Ticker频道
   const tickerChannels = instruments.map((i: Instrument) => {
@@ -126,7 +126,7 @@ async function getCandlesByGroup(options: Array<InstrumentReqOptions>) {
         instrumentId: option.instrument_id,
         start: option.start,
         end: option.end,
-        granularity: option.granularity,
+        granularity: option.granularity
       });
 
       const readyCandles = data.map((candle: Candle) => {
@@ -142,18 +142,18 @@ async function getCandlesByGroup(options: Array<InstrumentReqOptions>) {
           volume: +candle[5],
           currency_volume: +candle[6],
           alias: option.alias,
-          granularity: option.granularity,
+          granularity: option.granularity
         };
       });
 
       return await InstrumentCandleDao.upsert(readyCandles);
     },
-    { concurrency: 5 },
+    { concurrency: 5 }
   );
 }
 
 async function getCandlesWithLimitedSpeed(
-  options: Array<InstrumentReqOptions>,
+  options: Array<InstrumentReqOptions>
 ) {
   //设置系统限速规则: 10次/2s (okex官方API 限速规则：20次/2s)
   const groupCount = Math.round(options.length / 10);
@@ -165,7 +165,7 @@ async function getCandlesWithLimitedSpeed(
       start += 10;
       return sleep(2);
     },
-    { concurrency: 1 },
+    { concurrency: 1 }
   );
 }
 
@@ -177,5 +177,5 @@ export {
   getCandlesByGroup,
   getBasicCommands,
   getSwapSubCommands,
-  getFuturesSubCommands,
+  getFuturesSubCommands
 };

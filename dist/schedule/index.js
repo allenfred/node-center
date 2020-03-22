@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 var schedule = require("node-schedule");
 const util_1 = require("./util");
+const currency_1 = require("../okex/currency");
 const logger_1 = require("../logger");
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 function startSchedule() {
@@ -31,6 +32,7 @@ function startSchedule() {
         if (util_1.isFourHoursScheduleTime(currentDate)) {
             logger_1.default.info("----执行 4小时 K线定时任务----");
             yield util_1.execJob(60 * 240);
+            yield currency_1.getBtcLatestCandles();
         }
         if (util_1.isTwoHoursScheduleTime(currentDate)) {
             logger_1.default.info("----执行 2小时 K线定时任务----");

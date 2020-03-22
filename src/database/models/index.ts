@@ -13,3 +13,4 @@ export * from "./ltcFutureCandle";
 export * from "./bchFutureCandle";
 export * from "./bsvFutureCandle";
 export * from "./eosFutureCandle";
+export * from "./btcUSDTCandle";
