@@ -13,6 +13,7 @@ const connection_1 = require("./database/connection");
 const schedule_1 = require("./schedule");
 (function main() {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log("-----crawler start-----");
         //连接数据库
         yield connection_1.default();
         // 开启定时任务获取历史K线
