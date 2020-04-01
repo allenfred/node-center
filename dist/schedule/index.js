@@ -16,6 +16,7 @@ const logger_1 = require("../logger");
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 function startSchedule() {
     return __awaiter(this, void 0, void 0, function* () {
+        // At every 15th minute.
         schedule.scheduleJob("*/15 * * * *", () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info("----Every15MinsJob Start Executing----");
             yield util_1.execJob(60 * 15);
@@ -25,27 +26,27 @@ function startSchedule() {
             logger_1.default.info("----执行 周线 K线定时任务----");
             util_1.execJob(60 * 1440 * 7);
         });
-        // every day
-        schedule.scheduleJob("0 0 * * *", () => __awaiter(this, void 0, void 0, function* () {
+        // every day - At 00:05.
+        schedule.scheduleJob("5 0 * * *", () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info("----EveryDayJob Start Executing----");
             yield util_1.execJob(60 * 1440);
         }));
-        // every 12 hours
-        schedule.scheduleJob("0 */12 * * *", () => __awaiter(this, void 0, void 0, function* () {
+        // every 12 hours - At 12:05.
+        schedule.scheduleJob("5 12 * * *", () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info("----Every12HoursJob Start Executing----");
             yield util_1.execJob(60 * 720);
         }));
-        // every 4 hours
-        schedule.scheduleJob("0 */4 * * *", () => __awaiter(this, void 0, void 0, function* () {
+        // every 4 hours - At minute 5 past every 4th hour.
+        schedule.scheduleJob("5 */4 * * *", () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info("----Every4HourJob Start Executing----");
             yield util_1.execJob(60 * 240);
         }));
-        // every 2 hours
-        schedule.scheduleJob("0 */2 * * *", () => __awaiter(this, void 0, void 0, function* () {
+        // every 2 hours - At minute 5 past every 2nd hour.
+        schedule.scheduleJob("5 */2 * * *", () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info("----Every2HoursJob Start Executing----");
             yield util_1.execJob(60 * 120);
         }));
-        // every hour
+        // every hour - At minute 5.
         schedule.scheduleJob("0 * * * *", () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info("----EveryHourJob Start Executing----");
             yield util_1.execJob(60 * 60);
