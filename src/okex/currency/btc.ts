@@ -35,7 +35,7 @@ async function getCandles({
     return data;
   } catch (e) {
     logger.error(
-      `获取 ${instrumentId}/${granularity} K线失败: 从${start}至${end}`
+      `获取 ${instrumentId}/${granularity} K线失败: 从${start}至${end} ${e}`
     );
     return [];
   }
@@ -76,6 +76,12 @@ async function getBtcMaxCandles() {
   const reqOptions = [];
   for (let i = 0; i < 10; i++) {
     reqOptions.push({
+      start: getISOString((i + 1) * -200, "h"),
+      end: getISOString(i * -200, "h"),
+      granularity: 3600 // 1h
+    });
+
+    reqOptions.push({
       start: getISOString((i + 1) * 4 * -200, "h"),
       end: getISOString(i * 4 * -200, "h"),
       granularity: 14400 // 4h
@@ -106,6 +112,12 @@ async function getBtcMaxCandles() {
 // 获取最近200条k线数据
 async function getBtcLatestCandles() {
   const reqOptions = [];
+
+  reqOptions.push({
+    start: getISOString(1 * -200, "h"),
+    end: getISOString(0, "h"),
+    granularity: 3600 // 1h
+  });
 
   reqOptions.push({
     start: getISOString(4 * -200, "h"),
