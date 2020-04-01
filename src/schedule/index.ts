@@ -15,59 +15,46 @@ import logger from "../logger";
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 export async function startSchedule() {
-  schedule.scheduleJob("*/5 * * * *", async () => {
-    const currentDate = new Date();
-
-    if (isDailyScheduleTime(currentDate)) {
-      logger.info("----执行 日线 K线定时任务----");
-      await execJob(60 * 1440);
-    }
-
-    if (isTwelveHoursScheduleTime(currentDate)) {
-      logger.info("----执行 12小时 K线定时任务----");
-      await execJob(60 * 720);
-    }
-
-    if (isSixHoursScheduleTime(currentDate)) {
-      logger.info("----执行 6小时 K线定时任务----");
-      await execJob(60 * 360);
-    }
-
-    if (isFourHoursScheduleTime(currentDate)) {
-      logger.info("----执行 4小时 K线定时任务----");
-      await execJob(60 * 240);
-    }
-
-    if (isTwoHoursScheduleTime(currentDate)) {
-      logger.info("----执行 2小时 K线定时任务----");
-      await execJob(60 * 120);
-    }
-
-    if (isHourlyScheduleTime(currentDate)) {
-      logger.info("----执行 1小时 K线定时任务----");
-      await execJob(60 * 60);
-    }
-
-    if (isHourlyScheduleTime(currentDate)) {
-      logger.info("----执行 1小时 K线定时任务: 获取最新BTC币币交易k线----");
-      await getBtcMaxCandles();
-      await getBtcLatestCandles();
-    }
-
-    if (isThirtyMinutesScheduleTime(currentDate)) {
-      logger.info("----执行 30分钟 K线定时任务----");
-      await execJob(60 * 30);
-    }
-
-    if (isFifteenMinutesScheduleTime(currentDate)) {
-      logger.info("----执行 15分钟 K线定时任务----");
-      await execJob(60 * 15);
-    }
+  schedule.scheduleJob("*/15 * * * *", async () => {
+    logger.info("----Every15MinsJob Start Executing----");
+    await execJob(60 * 15);
   });
 
   // every week.
   schedule.scheduleJob("0 0 * * 0", () => {
     logger.info("----执行 周线 K线定时任务----");
     execJob(60 * 1440 * 7);
+  });
+
+  // every day
+  schedule.scheduleJob("0 0 * * *", async () => {
+    logger.info("----EveryDayJob Start Executing----");
+    await execJob(60 * 1440);
+  });
+
+  // every 12 hours
+  schedule.scheduleJob("0 */12 * * *", async () => {
+    logger.info("----Every12HoursJob Start Executing----");
+    await execJob(60 * 720);
+  });
+
+  // every 4 hours
+  schedule.scheduleJob("0 */4 * * *", async () => {
+    logger.info("----Every4HourJob Start Executing----");
+    await execJob(60 * 240);
+  });
+
+  // every 2 hours
+  schedule.scheduleJob("0 */2 * * *", async () => {
+    logger.info("----Every2HoursJob Start Executing----");
+    await execJob(60 * 120);
+  });
+
+  // every hour
+  schedule.scheduleJob("0 * * * *", async () => {
+    logger.info("----EveryHourJob Start Executing----");
+    await execJob(60 * 60);
+    await getBtcMaxCandles();
+    await getBtcLatestCandles();
   });
 }
