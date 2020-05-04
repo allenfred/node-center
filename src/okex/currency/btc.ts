@@ -76,12 +76,6 @@ async function getBtcMaxCandles() {
   const reqOptions = [];
   for (let i = 0; i < 10; i++) {
     reqOptions.push({
-      start: getISOString((i + 1) * -200, "m"),
-      end: getISOString(i * -200, "m"),
-      granularity: 60, // 1m
-    });
-
-    reqOptions.push({
       start: getISOString((i + 1) * -200, "h"),
       end: getISOString(i * -200, "h"),
       granularity: 3600, // 1h
