@@ -203,16 +203,16 @@ function getBtcSwapMaxCandles() {
         const reqOptions = [];
         for (let i = 0; i < 10; i++) {
             swapInstruments.forEach((instrument) => {
-                reqOptions.push({
+                reqOptions.push(Object.assign({}, instrument, {
                     start: util_1.getISOString((i + 1) * -200, "m"),
                     end: util_1.getISOString(i * -200, "m"),
                     granularity: 60,
-                });
-                reqOptions.push({
+                }));
+                reqOptions.push(Object.assign({}, instrument, {
                     start: util_1.getISOString((i + 1) * 3 * -200, "m"),
                     end: util_1.getISOString(i * 3 * -200, "m"),
                     granularity: 180,
-                });
+                }));
                 reqOptions.push(Object.assign({}, instrument, {
                     start: util_1.getISOString((i + 1) * -200, "h"),
                     end: util_1.getISOString(i * -200, "h"),

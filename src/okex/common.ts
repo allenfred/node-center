@@ -243,17 +243,21 @@ async function getBtcSwapMaxCandles() {
   const reqOptions = [];
   for (let i = 0; i < 10; i++) {
     swapInstruments.forEach((instrument) => {
-      reqOptions.push({
-        start: getISOString((i + 1) * -200, "m"),
-        end: getISOString(i * -200, "m"),
-        granularity: 60, // 1m
-      });
+      reqOptions.push(
+        Object.assign({}, instrument, {
+          start: getISOString((i + 1) * -200, "m"),
+          end: getISOString(i * -200, "m"),
+          granularity: 60, // 1m
+        })
+      );
 
-      reqOptions.push({
-        start: getISOString((i + 1) * 3 * -200, "m"),
-        end: getISOString(i * 3 * -200, "m"),
-        granularity: 180, // 3m
-      });
+      reqOptions.push(
+        Object.assign({}, instrument, {
+          start: getISOString((i + 1) * 3 * -200, "m"),
+          end: getISOString(i * 3 * -200, "m"),
+          granularity: 180, // 3m
+        })
+      );
 
       reqOptions.push(
         Object.assign({}, instrument, {
