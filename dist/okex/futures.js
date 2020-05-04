@@ -32,7 +32,7 @@ function initCandle(instruments) {
         const readyOptions = [];
         //初始化所有合约candle请求参数
         instruments
-            .filter(i => util_1.isMainCurrency(i.underlying_index))
+            .filter((i) => util_1.isMainCurrency(i.underlying_index))
             .map((instrument) => {
             for (let option of options) {
                 readyOptions.push(Object.assign({}, option, instrument));
@@ -43,4 +43,39 @@ function initCandle(instruments) {
     });
 }
 exports.initCandle = initCandle;
+// 获取最多过去1440条k线数据
+function getMaxCandles() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const reqOptions = [];
+        for (let i = 0; i < 10; i++) {
+            reqOptions.push({
+                start: util_1.getISOString((i + 1) * -200, "h"),
+                end: util_1.getISOString(i * -200, "h"),
+                granularity: 3600,
+            });
+            reqOptions.push({
+                start: util_1.getISOString((i + 1) * 4 * -200, "h"),
+                end: util_1.getISOString(i * 4 * -200, "h"),
+                granularity: 14400,
+            });
+            reqOptions.push({
+                start: util_1.getISOString((i + 1) * 6 * -200, "h"),
+                end: util_1.getISOString(i * 6 * -200, "h"),
+                granularity: 21600,
+            });
+            reqOptions.push({
+                start: util_1.getISOString((i + 1) * 12 * -200, "h"),
+                end: util_1.getISOString(i * 12 * -200, "h"),
+                granularity: 43200,
+            });
+            reqOptions.push({
+                start: util_1.getISOString((i + 1) * 24 * -200, "h"),
+                end: util_1.getISOString(i * 24 * -200, "h"),
+                granularity: 86400,
+            });
+        }
+        return yield common_1.getCandlesWithLimitedSpeed(reqOptions);
+    });
+}
+exports.getMaxCandles = getMaxCandles;
 //# sourceMappingURL=futures.js.map

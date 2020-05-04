@@ -17,10 +17,10 @@ function upsert(candles) {
             //find unique candle by underlying_index & timestamp & alias & granularity
             const uniqueCondition = {
                 timestamp: new Date(candle.timestamp),
-                granularity: candle.granularity
+                granularity: candle.granularity,
             };
             const Model = getModel(candle);
-            const existedCandle = yield models_1.InstrumentCandle.findOne(uniqueCondition);
+            const existedCandle = yield Model.findOne(uniqueCondition);
             if (existedCandle) {
                 return yield Model.updateOne(uniqueCondition, candle);
             }
@@ -37,7 +37,7 @@ function getModel(candle) {
         EOS: models_1.EosSwapCandle,
         ETH: models_1.EthSwapCandle,
         BSV: models_1.BsvSwapCandle,
-        BCH: models_1.BchSwapCandle
+        BCH: models_1.BchSwapCandle,
     };
     const futureModels = {
         BTC: models_1.BtcFutureCandle,
@@ -45,7 +45,7 @@ function getModel(candle) {
         EOS: models_1.EosFutureCandle,
         ETH: models_1.EthFutureCandle,
         BSV: models_1.BsvFutureCandle,
-        BCH: models_1.BchFutureCandle
+        BCH: models_1.BchFutureCandle,
     };
     if (candle.instrument_id.includes("SWAP")) {
         return swapModels[candle.underlying_index];
@@ -55,7 +55,7 @@ function getModel(candle) {
     }
 }
 const InstrumentCandleDao = {
-    upsert
+    upsert,
 };
 exports.InstrumentCandleDao = InstrumentCandleDao;
 //# sourceMappingURL=instrumentCandle.js.map

@@ -6,7 +6,7 @@ import {
   Business,
   Instrument,
   Candle,
-  InstrumentReqOptions
+  InstrumentReqOptions,
 } from "../../types";
 import { BtcUSDTCandleDao } from "../../dao";
 import { getInstrumentAlias, getISOString, sleep } from "../../util";
@@ -18,7 +18,7 @@ async function getCandles({
   instrumentId,
   start,
   end,
-  granularity
+  granularity,
 }: {
   instrumentId: string;
   start: string;
@@ -49,7 +49,7 @@ async function getCandlesByGroup(options: Array<InstrumentReqOptions>) {
         instrumentId: "BTC-USDT",
         start: option.start,
         end: option.end,
-        granularity: option.granularity
+        granularity: option.granularity,
       });
 
       const readyCandles = data.map((candle: Candle) => {
@@ -61,7 +61,7 @@ async function getCandlesByGroup(options: Array<InstrumentReqOptions>) {
           low: +candle[3],
           close: +candle[4],
           volume: +candle[5],
-          granularity: option.granularity
+          granularity: option.granularity,
         };
       });
 
@@ -76,33 +76,39 @@ async function getBtcMaxCandles() {
   const reqOptions = [];
   for (let i = 0; i < 10; i++) {
     reqOptions.push({
+      start: getISOString((i + 1) * -200, "m"),
+      end: getISOString(i * -200, "m"),
+      granularity: 60, // 1m
+    });
+
+    reqOptions.push({
       start: getISOString((i + 1) * -200, "h"),
       end: getISOString(i * -200, "h"),
-      granularity: 3600 // 1h
+      granularity: 3600, // 1h
     });
 
     reqOptions.push({
       start: getISOString((i + 1) * 4 * -200, "h"),
       end: getISOString(i * 4 * -200, "h"),
-      granularity: 14400 // 4h
+      granularity: 14400, // 4h
     });
 
     reqOptions.push({
       start: getISOString((i + 1) * 6 * -200, "h"),
       end: getISOString(i * 6 * -200, "h"),
-      granularity: 21600 // 6h
+      granularity: 21600, // 6h
     });
 
     reqOptions.push({
       start: getISOString((i + 1) * 12 * -200, "h"),
       end: getISOString(i * 12 * -200, "h"),
-      granularity: 43200 // 12h
+      granularity: 43200, // 12h
     });
 
     reqOptions.push({
       start: getISOString((i + 1) * 24 * -200, "h"),
       end: getISOString(i * 24 * -200, "h"),
-      granularity: 86400 // 1d
+      granularity: 86400, // 1d
     });
   }
 
@@ -116,31 +122,31 @@ async function getBtcLatestCandles() {
   reqOptions.push({
     start: getISOString(1 * -200, "h"),
     end: getISOString(0, "h"),
-    granularity: 3600 // 1h
+    granularity: 3600, // 1h
   });
 
   reqOptions.push({
     start: getISOString(4 * -200, "h"),
     end: getISOString(0, "h"),
-    granularity: 14400 // 4h
+    granularity: 14400, // 4h
   });
 
   reqOptions.push({
     start: getISOString(6 * -200, "h"),
     end: getISOString(0, "h"),
-    granularity: 21600 // 6h
+    granularity: 21600, // 6h
   });
 
   reqOptions.push({
     start: getISOString(12 * -200, "h"),
     end: getISOString(0, "h"),
-    granularity: 43200 // 12h
+    granularity: 43200, // 12h
   });
 
   reqOptions.push({
     start: getISOString(24 * -200, "h"),
     end: getISOString(0, "h"),
-    granularity: 86400 // 1d
+    granularity: 86400, // 1d
   });
 
   return await getCandlesByGroup(reqOptions);

@@ -4,7 +4,14 @@ import * as bluebird from "bluebird";
 import logger from "../logger";
 import { Business, Instrument, Candle, InstrumentReqOptions } from "../types";
 import { InstrumentCandleDao } from "../dao";
-import { sleep, getISOString } from "../util";
+import {
+  sleep,
+  getISOString,
+  isMainCurrency,
+  getInstrumentAlias,
+} from "../util";
+import * as futures from "../okex/futures";
+import * as swap from "../okex/swap";
 
 const pClient = PublicClient(httpHost, 10000);
 const candles = [
@@ -19,7 +26,7 @@ const candles = [
   "candle21600s", // 6 hours
   "candle43200s", // 12 hours
   "candle86400s", // 1 day
-  "candle604800s" // 1 week
+  "candle604800s", // 1 week
 ];
 
 async function getFuturesInstruments(): Promise<any> {
@@ -35,7 +42,7 @@ async function getCandles({
   instrumentId,
   start,
   end,
-  granularity
+  granularity,
 }: {
   instrumentId: string;
   start: string;
@@ -83,7 +90,7 @@ function getBasicCommands(
   //公共-K线频道
   const candleChannels = [];
   instruments.map((i: Instrument) => {
-    candles.map(candle => {
+    candles.map((candle) => {
       candleChannels.push(`${business}/${candle}:${i.instrument_id}`);
     });
   });
@@ -126,7 +133,7 @@ async function getCandlesByGroup(options: Array<InstrumentReqOptions>) {
         instrumentId: option.instrument_id,
         start: option.start,
         end: option.end,
-        granularity: option.granularity
+        granularity: option.granularity,
       });
 
       const readyCandles = data.map((candle: Candle) => {
@@ -142,7 +149,7 @@ async function getCandlesByGroup(options: Array<InstrumentReqOptions>) {
           volume: +candle[5],
           currency_volume: +candle[6],
           alias: option.alias,
-          granularity: option.granularity
+          granularity: option.granularity,
         };
       });
 
@@ -169,6 +176,118 @@ async function getCandlesWithLimitedSpeed(
   );
 }
 
+// 获取最多过去1440条k线数据
+async function getBtcFutureMaxCandles() {
+  // 获取所有合约信息
+  let futuresInstruments = await futures.initInstruments();
+  futuresInstruments = futuresInstruments.filter((i) =>
+    isMainCurrency(i.underlying_index)
+  );
+
+  const reqOptions = [];
+  for (let i = 0; i < 10; i++) {
+    futuresInstruments.forEach((instrument) => {
+      reqOptions.push(
+        Object.assign({}, instrument, {
+          start: getISOString((i + 1) * -200, "h"),
+          end: getISOString(i * -200, "h"),
+          granularity: 3600, // 1h
+        })
+      );
+
+      reqOptions.push(
+        Object.assign({}, instrument, {
+          start: getISOString((i + 1) * 4 * -200, "h"),
+          end: getISOString(i * 4 * -200, "h"),
+          granularity: 14400, // 4h
+        })
+      );
+
+      reqOptions.push(
+        Object.assign({}, instrument, {
+          start: getISOString((i + 1) * 6 * -200, "h"),
+          end: getISOString(i * 6 * -200, "h"),
+          granularity: 21600, // 6h
+        })
+      );
+
+      reqOptions.push(
+        Object.assign({}, instrument, {
+          start: getISOString((i + 1) * 12 * -200, "h"),
+          end: getISOString(i * 12 * -200, "h"),
+          granularity: 43200, // 12h
+        })
+      );
+
+      reqOptions.push(
+        Object.assign({}, instrument, {
+          start: getISOString((i + 1) * 24 * -200, "h"),
+          end: getISOString(i * 24 * -200, "h"),
+          granularity: 86400, // 1d
+        })
+      );
+    });
+  }
+
+  return await getCandlesWithLimitedSpeed(reqOptions);
+}
+
+// 获取最多过去1440条k线数据
+async function getBtcSwapMaxCandles() {
+  // 获取所有合约信息
+  let swapInstruments = await swap.initInstruments();
+  swapInstruments = swapInstruments.filter((i) =>
+    isMainCurrency(i.underlying_index)
+  );
+
+  const reqOptions = [];
+  for (let i = 0; i < 10; i++) {
+    swapInstruments.forEach((instrument) => {
+      reqOptions.push(
+        Object.assign({}, instrument, {
+          start: getISOString((i + 1) * -200, "h"),
+          end: getISOString(i * -200, "h"),
+          granularity: 3600, // 1h
+        })
+      );
+
+      reqOptions.push(
+        Object.assign({}, instrument, {
+          start: getISOString((i + 1) * 4 * -200, "h"),
+          end: getISOString(i * 4 * -200, "h"),
+          granularity: 14400, // 4h
+        })
+      );
+
+      reqOptions.push(
+        Object.assign({}, instrument, {
+          start: getISOString((i + 1) * 6 * -200, "h"),
+          end: getISOString(i * 6 * -200, "h"),
+          granularity: 21600, // 6h
+        })
+      );
+
+      reqOptions.push(
+        Object.assign({}, instrument, {
+          start: getISOString((i + 1) * 12 * -200, "h"),
+          end: getISOString(i * 12 * -200, "h"),
+          granularity: 43200, // 12h
+        })
+      );
+
+      reqOptions.push(
+        Object.assign({}, instrument, {
+          start: getISOString((i + 1) * 24 * -200, "h"),
+          end: getISOString(i * 24 * -200, "h"),
+          granularity: 86400, // 1d
+        })
+      );
+    });
+  }
+
+  return await getCandlesWithLimitedSpeed(reqOptions);
+}
+
 export {
   getSwapInstruments,
   getFuturesInstruments,
@@ -177,5 +296,7 @@ export {
   getCandlesByGroup,
   getBasicCommands,
   getSwapSubCommands,
-  getFuturesSubCommands
+  getFuturesSubCommands,
+  getBtcFutureMaxCandles,
+  getBtcSwapMaxCandles,
 };

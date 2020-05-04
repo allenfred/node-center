@@ -2,11 +2,11 @@ import * as bluebird from "bluebird";
 import logger from "../logger";
 import { Instrument } from "../types";
 import { InstrumentInfoDao } from "../dao";
-import { getCandleRequestOptions, isMainCurrency } from "../util";
+import { getCandleRequestOptions, isMainCurrency, getISOString } from "../util";
 import {
   getCandles,
   getCandlesWithLimitedSpeed,
-  getSwapInstruments
+  getSwapInstruments,
 } from "./common";
 
 export async function initInstruments(): Promise<Instrument[]> {
@@ -34,7 +34,7 @@ export async function initCandle(instruments: Instrument[]): Promise<void> {
 
   //初始化所有合约candle请求参数
   instruments
-    .filter(i => isMainCurrency(i.underlying_index))
+    .filter((i) => isMainCurrency(i.underlying_index))
     .map((instrument: Instrument) => {
       for (let option of options) {
         readyOptions.push(
@@ -47,4 +47,42 @@ export async function initCandle(instruments: Instrument[]): Promise<void> {
     `[永续合约] - 获取candle数据需请求 ${readyOptions.length} 次 ...`
   );
   await getCandlesWithLimitedSpeed(readyOptions);
+}
+
+// 获取最多过去1440条k线数据
+export async function getMaxCandles() {
+  const reqOptions = [];
+  for (let i = 0; i < 10; i++) {
+    reqOptions.push({
+      start: getISOString((i + 1) * -200, "h"),
+      end: getISOString(i * -200, "h"),
+      granularity: 3600, // 1h
+    });
+
+    reqOptions.push({
+      start: getISOString((i + 1) * 4 * -200, "h"),
+      end: getISOString(i * 4 * -200, "h"),
+      granularity: 14400, // 4h
+    });
+
+    reqOptions.push({
+      start: getISOString((i + 1) * 6 * -200, "h"),
+      end: getISOString(i * 6 * -200, "h"),
+      granularity: 21600, // 6h
+    });
+
+    reqOptions.push({
+      start: getISOString((i + 1) * 12 * -200, "h"),
+      end: getISOString(i * 12 * -200, "h"),
+      granularity: 43200, // 12h
+    });
+
+    reqOptions.push({
+      start: getISOString((i + 1) * 24 * -200, "h"),
+      end: getISOString(i * 24 * -200, "h"),
+      granularity: 86400, // 1d
+    });
+  }
+
+  return await getCandlesWithLimitedSpeed(reqOptions);
 }

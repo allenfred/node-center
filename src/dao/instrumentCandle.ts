@@ -12,7 +12,7 @@ import {
   BchSwapCandle,
   BchFutureCandle,
   BsvSwapCandle,
-  BsvFutureCandle
+  BsvFutureCandle,
 } from "../database/models";
 import { InstrumentCandleSchema } from "../types";
 
@@ -21,12 +21,12 @@ async function upsert(candles: InstrumentCandleSchema[]) {
     //find unique candle by underlying_index & timestamp & alias & granularity
     const uniqueCondition = {
       timestamp: new Date(candle.timestamp),
-      granularity: candle.granularity
+      granularity: candle.granularity,
     };
 
     const Model = getModel(candle);
 
-    const existedCandle = await InstrumentCandle.findOne(uniqueCondition);
+    const existedCandle = await Model.findOne(uniqueCondition);
 
     if (existedCandle) {
       return await Model.updateOne(uniqueCondition, candle);
@@ -43,7 +43,7 @@ function getModel(candle) {
     EOS: EosSwapCandle,
     ETH: EthSwapCandle,
     BSV: BsvSwapCandle,
-    BCH: BchSwapCandle
+    BCH: BchSwapCandle,
   };
 
   const futureModels = {
@@ -52,7 +52,7 @@ function getModel(candle) {
     EOS: EosFutureCandle,
     ETH: EthFutureCandle,
     BSV: BsvFutureCandle,
-    BCH: BchFutureCandle
+    BCH: BchFutureCandle,
   };
 
   if (candle.instrument_id.includes("SWAP")) {
@@ -63,7 +63,7 @@ function getModel(candle) {
 }
 
 const InstrumentCandleDao = {
-  upsert
+  upsert,
 };
 
 export { InstrumentCandleDao };

@@ -12,69 +12,65 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const moment = require("moment");
 function sleep(seconds) {
     return __awaiter(this, void 0, void 0, function* () {
-        return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+        return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
     });
 }
 exports.sleep = sleep;
 function getInstrumentAlias(instrumentId) {
-    if (instrumentId.includes('SWAP')) {
-        return 'swap';
+    if (instrumentId.includes("SWAP")) {
+        return "swap";
     }
-    const thisWeek = moment()
-        .day(5)
-        .format('YYMMDD');
-    const nextWeek = moment()
-        .day(12)
-        .format('YYMMDD');
+    const thisWeek = moment().day(5).format("YYMMDD");
+    const nextWeek = moment().day(12).format("YYMMDD");
     if (instrumentId.includes(thisWeek)) {
-        return 'this_week';
+        return "this_week";
     }
     if (instrumentId.includes(nextWeek)) {
-        return 'next_week';
+        return "next_week";
     }
-    return 'quarter';
+    return "quarter";
 }
 exports.getInstrumentAlias = getInstrumentAlias;
 function getStartEndOptions(size) {
     return [
-        { start: getISOString(-200 * size, 'm'), end: getISOString() },
+        { start: getISOString(-200 * size, "m"), end: getISOString() },
         {
-            start: getISOString(-400 * size, 'm'),
-            end: getISOString(-200 * size, 'm'),
+            start: getISOString(-400 * size, "m"),
+            end: getISOString(-200 * size, "m"),
         },
         {
-            start: getISOString(-600 * size, 'm'),
-            end: getISOString(-400 * size, 'm'),
+            start: getISOString(-600 * size, "m"),
+            end: getISOString(-400 * size, "m"),
         },
         {
-            start: getISOString(-800 * size, 'm'),
-            end: getISOString(-600 * size, 'm'),
+            start: getISOString(-800 * size, "m"),
+            end: getISOString(-600 * size, "m"),
         },
         {
-            start: getISOString(-1000 * size, 'm'),
-            end: getISOString(-800 * size, 'm'),
+            start: getISOString(-1000 * size, "m"),
+            end: getISOString(-800 * size, "m"),
         },
         {
-            start: getISOString(-1200 * size, 'm'),
-            end: getISOString(-1000 * size, 'm'),
+            start: getISOString(-1200 * size, "m"),
+            end: getISOString(-1000 * size, "m"),
         },
         {
-            start: getISOString(-1400 * size, 'm'),
-            end: getISOString(-1200 * size, 'm'),
+            start: getISOString(-1400 * size, "m"),
+            end: getISOString(-1200 * size, "m"),
         },
         {
-            start: getISOString(-1600 * size, 'm'),
-            end: getISOString(-1400 * size, 'm'),
+            start: getISOString(-1600 * size, "m"),
+            end: getISOString(-1400 * size, "m"),
         },
         {
-            start: getISOString(-1800 * size, 'm'),
-            end: getISOString(-1600 * size, 'm'),
+            start: getISOString(-1800 * size, "m"),
+            end: getISOString(-1600 * size, "m"),
         },
         {
-            start: getISOString(-2000 * size, 'm'),
-            end: getISOString(-1800 * size, 'm'),
+            start: getISOString(-2000 * size, "m"),
+            end: getISOString(-1800 * size, "m"),
         },
-    ].map(option => {
+    ].map((option) => {
         return Object.assign({}, option, {
             granularity: 60 * size,
         });
@@ -105,22 +101,20 @@ function getCandleRequestOptions() {
         .concat(day);
 }
 exports.getCandleRequestOptions = getCandleRequestOptions;
-function getISOString(amount = 0, unit = 'm') {
-    return moment()
-        .add(amount, unit)
-        .toISOString();
+function getISOString(amount = 0, unit = "m") {
+    return moment().add(amount, unit).toISOString();
 }
 exports.getISOString = getISOString;
 function isValidMarketData(marketData) {
-    return !!('data' in marketData && marketData.data.length > 0);
+    return !!("data" in marketData && marketData.data.length > 0);
 }
 exports.isValidMarketData = isValidMarketData;
 function isCandleChannel(channel) {
-    return !!(channel && channel.includes('candle'));
+    return !!(channel && channel.includes("candle"));
 }
 exports.isCandleChannel = isCandleChannel;
 function isMainCurrency(name) {
-    return ['BTC', 'EOS', 'ETH', 'BCH', 'LTC', 'BSV'].includes(name);
+    return ["BTC", "EOS", "ETH"].includes(name);
 }
 exports.isMainCurrency = isMainCurrency;
 //更新实时盘口信息

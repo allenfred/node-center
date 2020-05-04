@@ -8,7 +8,7 @@ import {
   isFourHoursScheduleTime,
   isSixHoursScheduleTime,
   isTwelveHoursScheduleTime,
-  isDailyScheduleTime
+  isDailyScheduleTime,
 } from "./util";
 import { getBtcLatestCandles, getBtcMaxCandles } from "../okex/currency";
 import logger from "../logger";
@@ -55,7 +55,9 @@ export async function startSchedule() {
   schedule.scheduleJob("0 * * * *", async () => {
     logger.info("----EveryHourJob Start Executing----");
     await execJob(60 * 60);
+    // 获取最多过去1440条k线数据
     await getBtcMaxCandles();
+    // 获取最近200条k线数据
     await getBtcLatestCandles();
   });
 }

@@ -1,73 +1,69 @@
-import * as moment from 'moment';
-import { Channel, Ticker, PriceRange, MarkPrice, Depth, Trade } from './types';
+import * as moment from "moment";
+import { Channel, Ticker, PriceRange, MarkPrice, Depth, Trade } from "./types";
 
 export async function sleep(seconds: number) {
-  return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+  return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 }
 
 export function getInstrumentAlias(instrumentId: string): string {
-  if (instrumentId.includes('SWAP')) {
-    return 'swap';
+  if (instrumentId.includes("SWAP")) {
+    return "swap";
   }
 
-  const thisWeek = moment()
-    .day(5)
-    .format('YYMMDD');
-  const nextWeek = moment()
-    .day(12)
-    .format('YYMMDD');
+  const thisWeek = moment().day(5).format("YYMMDD");
+  const nextWeek = moment().day(12).format("YYMMDD");
 
   if (instrumentId.includes(thisWeek)) {
-    return 'this_week';
+    return "this_week";
   }
 
   if (instrumentId.includes(nextWeek)) {
-    return 'next_week';
+    return "next_week";
   }
 
-  return 'quarter';
+  return "quarter";
 }
 
 function getStartEndOptions(size: number) {
   return [
-    { start: getISOString(-200 * size, 'm'), end: getISOString() },
+    { start: getISOString(-200 * size, "m"), end: getISOString() },
     {
-      start: getISOString(-400 * size, 'm'),
-      end: getISOString(-200 * size, 'm'),
+      start: getISOString(-400 * size, "m"),
+      end: getISOString(-200 * size, "m"),
     },
     {
-      start: getISOString(-600 * size, 'm'),
-      end: getISOString(-400 * size, 'm'),
+      start: getISOString(-600 * size, "m"),
+      end: getISOString(-400 * size, "m"),
     },
     {
-      start: getISOString(-800 * size, 'm'),
-      end: getISOString(-600 * size, 'm'),
+      start: getISOString(-800 * size, "m"),
+      end: getISOString(-600 * size, "m"),
     },
     {
-      start: getISOString(-1000 * size, 'm'),
-      end: getISOString(-800 * size, 'm'),
+      start: getISOString(-1000 * size, "m"),
+      end: getISOString(-800 * size, "m"),
     },
     {
-      start: getISOString(-1200 * size, 'm'),
-      end: getISOString(-1000 * size, 'm'),
+      start: getISOString(-1200 * size, "m"),
+      end: getISOString(-1000 * size, "m"),
     },
     {
-      start: getISOString(-1400 * size, 'm'),
-      end: getISOString(-1200 * size, 'm'),
+      start: getISOString(-1400 * size, "m"),
+      end: getISOString(-1200 * size, "m"),
     },
     {
-      start: getISOString(-1600 * size, 'm'),
-      end: getISOString(-1400 * size, 'm'),
+      start: getISOString(-1600 * size, "m"),
+      end: getISOString(-1400 * size, "m"),
     },
     {
-      start: getISOString(-1800 * size, 'm'),
-      end: getISOString(-1600 * size, 'm'),
+      start: getISOString(-1800 * size, "m"),
+      end: getISOString(-1600 * size, "m"),
     },
     {
-      start: getISOString(-2000 * size, 'm'),
-      end: getISOString(-1800 * size, 'm'),
+      start: getISOString(-2000 * size, "m"),
+      end: getISOString(-1800 * size, "m"),
     },
-  ].map(option => {
+  ].map((option) => {
     return Object.assign({}, option, {
       granularity: 60 * size,
     });
@@ -102,29 +98,27 @@ export function getCandleRequestOptions() {
 
 export function getISOString(
   amount: number = 0,
-  unit: moment.DurationInputArg2 = 'm',
+  unit: moment.DurationInputArg2 = "m"
 ) {
-  return moment()
-    .add(amount, unit)
-    .toISOString();
+  return moment().add(amount, unit).toISOString();
 }
 
 export function isValidMarketData(marketData): Boolean {
-  return !!('data' in marketData && marketData.data.length > 0);
+  return !!("data" in marketData && marketData.data.length > 0);
 }
 
 export function isCandleChannel(channel: string): Boolean {
-  return !!(channel && channel.includes('candle'));
+  return !!(channel && channel.includes("candle"));
 }
 
 export function isMainCurrency(name: string) {
-  return ['BTC', 'EOS', 'ETH', 'BCH', 'LTC', 'BSV'].includes(name);
+  return ["BTC", "EOS", "ETH"].includes(name);
 }
 
 //更新实时盘口信息
 export function refreshTradeInfo(
   memoryData: Array<Ticker | PriceRange | MarkPrice | Depth | Trade>,
-  marketData,
+  marketData
 ) {
   const ticker = memoryData.find(({ instrument_id }) => {
     return instrument_id === marketData.data[0].instrument_id;

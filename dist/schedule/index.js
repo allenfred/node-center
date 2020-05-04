@@ -50,7 +50,9 @@ function startSchedule() {
         schedule.scheduleJob("0 * * * *", () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info("----EveryHourJob Start Executing----");
             yield util_1.execJob(60 * 60);
+            // 获取最多过去1440条k线数据
             yield currency_1.getBtcMaxCandles();
+            // 获取最近200条k线数据
             yield currency_1.getBtcLatestCandles();
         }));
     });

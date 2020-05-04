@@ -16,6 +16,8 @@ const logger_1 = require("../logger");
 const types_1 = require("../types");
 const dao_1 = require("../dao");
 const util_1 = require("../util");
+const futures = require("../okex/futures");
+const swap = require("../okex/swap");
 const pClient = publicClient_1.default(config_1.httpHost, 10000);
 const candles = [
     "candle60s",
@@ -29,7 +31,7 @@ const candles = [
     "candle21600s",
     "candle43200s",
     "candle86400s",
-    "candle604800s" // 1 week
+    "candle604800s",
 ];
 function getFuturesInstruments() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -44,7 +46,7 @@ function getSwapInstruments() {
 }
 exports.getSwapInstruments = getSwapInstruments;
 //获取合约K线数据
-function getCandles({ instrumentId, start, end, granularity }) {
+function getCandles({ instrumentId, start, end, granularity, }) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const data = instrumentId.includes("SWAP")
@@ -81,7 +83,7 @@ function getBasicCommands(instruments, business) {
     //公共-K线频道
     const candleChannels = [];
     instruments.map((i) => {
-        candles.map(candle => {
+        candles.map((candle) => {
             candleChannels.push(`${business}/${candle}:${i.instrument_id}`);
         });
     });
@@ -116,7 +118,7 @@ function getCandlesByGroup(options) {
                 instrumentId: option.instrument_id,
                 start: option.start,
                 end: option.end,
-                granularity: option.granularity
+                granularity: option.granularity,
             });
             const readyCandles = data.map((candle) => {
                 return {
@@ -131,7 +133,7 @@ function getCandlesByGroup(options) {
                     volume: +candle[5],
                     currency_volume: +candle[6],
                     alias: option.alias,
-                    granularity: option.granularity
+                    granularity: option.granularity,
                 };
             });
             return yield dao_1.InstrumentCandleDao.upsert(readyCandles);
@@ -152,4 +154,84 @@ function getCandlesWithLimitedSpeed(options) {
     });
 }
 exports.getCandlesWithLimitedSpeed = getCandlesWithLimitedSpeed;
+// 获取最多过去1440条k线数据
+function getBtcFutureMaxCandles() {
+    return __awaiter(this, void 0, void 0, function* () {
+        // 获取所有合约信息
+        let futuresInstruments = yield futures.initInstruments();
+        futuresInstruments = futuresInstruments.filter((i) => util_1.isMainCurrency(i.underlying_index));
+        const reqOptions = [];
+        for (let i = 0; i < 10; i++) {
+            futuresInstruments.forEach((instrument) => {
+                reqOptions.push(Object.assign({}, instrument, {
+                    start: util_1.getISOString((i + 1) * -200, "h"),
+                    end: util_1.getISOString(i * -200, "h"),
+                    granularity: 3600,
+                }));
+                reqOptions.push(Object.assign({}, instrument, {
+                    start: util_1.getISOString((i + 1) * 4 * -200, "h"),
+                    end: util_1.getISOString(i * 4 * -200, "h"),
+                    granularity: 14400,
+                }));
+                reqOptions.push(Object.assign({}, instrument, {
+                    start: util_1.getISOString((i + 1) * 6 * -200, "h"),
+                    end: util_1.getISOString(i * 6 * -200, "h"),
+                    granularity: 21600,
+                }));
+                reqOptions.push(Object.assign({}, instrument, {
+                    start: util_1.getISOString((i + 1) * 12 * -200, "h"),
+                    end: util_1.getISOString(i * 12 * -200, "h"),
+                    granularity: 43200,
+                }));
+                reqOptions.push(Object.assign({}, instrument, {
+                    start: util_1.getISOString((i + 1) * 24 * -200, "h"),
+                    end: util_1.getISOString(i * 24 * -200, "h"),
+                    granularity: 86400,
+                }));
+            });
+        }
+        return yield getCandlesWithLimitedSpeed(reqOptions);
+    });
+}
+exports.getBtcFutureMaxCandles = getBtcFutureMaxCandles;
+// 获取最多过去1440条k线数据
+function getBtcSwapMaxCandles() {
+    return __awaiter(this, void 0, void 0, function* () {
+        // 获取所有合约信息
+        let swapInstruments = yield swap.initInstruments();
+        swapInstruments = swapInstruments.filter((i) => util_1.isMainCurrency(i.underlying_index));
+        const reqOptions = [];
+        for (let i = 0; i < 10; i++) {
+            swapInstruments.forEach((instrument) => {
+                reqOptions.push(Object.assign({}, instrument, {
+                    start: util_1.getISOString((i + 1) * -200, "h"),
+                    end: util_1.getISOString(i * -200, "h"),
+                    granularity: 3600,
+                }));
+                reqOptions.push(Object.assign({}, instrument, {
+                    start: util_1.getISOString((i + 1) * 4 * -200, "h"),
+                    end: util_1.getISOString(i * 4 * -200, "h"),
+                    granularity: 14400,
+                }));
+                reqOptions.push(Object.assign({}, instrument, {
+                    start: util_1.getISOString((i + 1) * 6 * -200, "h"),
+                    end: util_1.getISOString(i * 6 * -200, "h"),
+                    granularity: 21600,
+                }));
+                reqOptions.push(Object.assign({}, instrument, {
+                    start: util_1.getISOString((i + 1) * 12 * -200, "h"),
+                    end: util_1.getISOString(i * 12 * -200, "h"),
+                    granularity: 43200,
+                }));
+                reqOptions.push(Object.assign({}, instrument, {
+                    start: util_1.getISOString((i + 1) * 24 * -200, "h"),
+                    end: util_1.getISOString(i * 24 * -200, "h"),
+                    granularity: 86400,
+                }));
+            });
+        }
+        return yield getCandlesWithLimitedSpeed(reqOptions);
+    });
+}
+exports.getBtcSwapMaxCandles = getBtcSwapMaxCandles;
 //# sourceMappingURL=common.js.map

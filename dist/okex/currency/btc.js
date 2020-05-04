@@ -17,7 +17,7 @@ const dao_1 = require("../../dao");
 const util_1 = require("../../util");
 const pClient = publicClient_1.default(config_1.httpHost, 10000);
 //获取合约K线数据
-function getCandles({ instrumentId, start, end, granularity }) {
+function getCandles({ instrumentId, start, end, granularity, }) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const data = yield pClient
@@ -39,7 +39,7 @@ function getCandlesByGroup(options) {
                 instrumentId: "BTC-USDT",
                 start: option.start,
                 end: option.end,
-                granularity: option.granularity
+                granularity: option.granularity,
             });
             const readyCandles = data.map((candle) => {
                 return {
@@ -50,7 +50,7 @@ function getCandlesByGroup(options) {
                     low: +candle[3],
                     close: +candle[4],
                     volume: +candle[5],
-                    granularity: option.granularity
+                    granularity: option.granularity,
                 };
             });
             return yield dao_1.BtcUSDTCandleDao.upsert(readyCandles);
@@ -63,29 +63,34 @@ function getBtcMaxCandles() {
         const reqOptions = [];
         for (let i = 0; i < 10; i++) {
             reqOptions.push({
+                start: util_1.getISOString((i + 1) * -200, "m"),
+                end: util_1.getISOString(i * -200, "m"),
+                granularity: 60,
+            });
+            reqOptions.push({
                 start: util_1.getISOString((i + 1) * -200, "h"),
                 end: util_1.getISOString(i * -200, "h"),
-                granularity: 3600 // 1h
+                granularity: 3600,
             });
             reqOptions.push({
                 start: util_1.getISOString((i + 1) * 4 * -200, "h"),
                 end: util_1.getISOString(i * 4 * -200, "h"),
-                granularity: 14400 // 4h
+                granularity: 14400,
             });
             reqOptions.push({
                 start: util_1.getISOString((i + 1) * 6 * -200, "h"),
                 end: util_1.getISOString(i * 6 * -200, "h"),
-                granularity: 21600 // 6h
+                granularity: 21600,
             });
             reqOptions.push({
                 start: util_1.getISOString((i + 1) * 12 * -200, "h"),
                 end: util_1.getISOString(i * 12 * -200, "h"),
-                granularity: 43200 // 12h
+                granularity: 43200,
             });
             reqOptions.push({
                 start: util_1.getISOString((i + 1) * 24 * -200, "h"),
                 end: util_1.getISOString(i * 24 * -200, "h"),
-                granularity: 86400 // 1d
+                granularity: 86400,
             });
         }
         return yield getCandlesByGroup(reqOptions);
@@ -99,27 +104,27 @@ function getBtcLatestCandles() {
         reqOptions.push({
             start: util_1.getISOString(1 * -200, "h"),
             end: util_1.getISOString(0, "h"),
-            granularity: 3600 // 1h
+            granularity: 3600,
         });
         reqOptions.push({
             start: util_1.getISOString(4 * -200, "h"),
             end: util_1.getISOString(0, "h"),
-            granularity: 14400 // 4h
+            granularity: 14400,
         });
         reqOptions.push({
             start: util_1.getISOString(6 * -200, "h"),
             end: util_1.getISOString(0, "h"),
-            granularity: 21600 // 6h
+            granularity: 21600,
         });
         reqOptions.push({
             start: util_1.getISOString(12 * -200, "h"),
             end: util_1.getISOString(0, "h"),
-            granularity: 43200 // 12h
+            granularity: 43200,
         });
         reqOptions.push({
             start: util_1.getISOString(24 * -200, "h"),
             end: util_1.getISOString(0, "h"),
-            granularity: 86400 // 1d
+            granularity: 86400,
         });
         return yield getCandlesByGroup(reqOptions);
     });
