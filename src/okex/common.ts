@@ -180,8 +180,10 @@ async function getCandlesWithLimitedSpeed(
 async function getBtcFutureMaxCandles() {
   // 获取所有合约信息
   let futuresInstruments = await futures.initInstruments();
-  futuresInstruments = futuresInstruments.filter((i) =>
-    isMainCurrency(i.underlying_index)
+  futuresInstruments = futuresInstruments.filter(
+    (i) =>
+      isMainCurrency(i.underlying_index) &&
+      isMainCurrency(i.settlement_currency)
   );
 
   const reqOptions = [];
@@ -234,71 +236,66 @@ async function getBtcFutureMaxCandles() {
 
 // 获取最多过去1440条k线数据
 async function getBtcSwapMaxCandles() {
-  // 获取所有合约信息
-  let swapInstruments = await swap.initInstruments();
-  swapInstruments = swapInstruments.filter((i) =>
-    isMainCurrency(i.underlying_index)
-  );
+  // 币本位合约
+  const instrument = { instrument_id: "BTC-USD-SWAP" };
 
   const reqOptions = [];
   for (let i = 0; i < 10; i++) {
-    swapInstruments.forEach((instrument) => {
-      reqOptions.push(
-        Object.assign({}, instrument, {
-          start: getISOString((i + 1) * -200, "m"),
-          end: getISOString(i * -200, "m"),
-          granularity: 60, // 1m
-        })
-      );
+    reqOptions.push(
+      Object.assign({}, instrument, {
+        start: getISOString((i + 1) * -200, "m"),
+        end: getISOString(i * -200, "m"),
+        granularity: 60, // 1m
+      })
+    );
 
-      reqOptions.push(
-        Object.assign({}, instrument, {
-          start: getISOString((i + 1) * 3 * -200, "m"),
-          end: getISOString(i * 3 * -200, "m"),
-          granularity: 180, // 3m
-        })
-      );
+    reqOptions.push(
+      Object.assign({}, instrument, {
+        start: getISOString((i + 1) * 3 * -200, "m"),
+        end: getISOString(i * 3 * -200, "m"),
+        granularity: 180, // 3m
+      })
+    );
 
-      reqOptions.push(
-        Object.assign({}, instrument, {
-          start: getISOString((i + 1) * -200, "h"),
-          end: getISOString(i * -200, "h"),
-          granularity: 3600, // 1h
-        })
-      );
+    reqOptions.push(
+      Object.assign({}, instrument, {
+        start: getISOString((i + 1) * -200, "h"),
+        end: getISOString(i * -200, "h"),
+        granularity: 3600, // 1h
+      })
+    );
 
-      reqOptions.push(
-        Object.assign({}, instrument, {
-          start: getISOString((i + 1) * 4 * -200, "h"),
-          end: getISOString(i * 4 * -200, "h"),
-          granularity: 14400, // 4h
-        })
-      );
+    reqOptions.push(
+      Object.assign({}, instrument, {
+        start: getISOString((i + 1) * 4 * -200, "h"),
+        end: getISOString(i * 4 * -200, "h"),
+        granularity: 14400, // 4h
+      })
+    );
 
-      reqOptions.push(
-        Object.assign({}, instrument, {
-          start: getISOString((i + 1) * 6 * -200, "h"),
-          end: getISOString(i * 6 * -200, "h"),
-          granularity: 21600, // 6h
-        })
-      );
+    reqOptions.push(
+      Object.assign({}, instrument, {
+        start: getISOString((i + 1) * 6 * -200, "h"),
+        end: getISOString(i * 6 * -200, "h"),
+        granularity: 21600, // 6h
+      })
+    );
 
-      reqOptions.push(
-        Object.assign({}, instrument, {
-          start: getISOString((i + 1) * 12 * -200, "h"),
-          end: getISOString(i * 12 * -200, "h"),
-          granularity: 43200, // 12h
-        })
-      );
+    reqOptions.push(
+      Object.assign({}, instrument, {
+        start: getISOString((i + 1) * 12 * -200, "h"),
+        end: getISOString(i * 12 * -200, "h"),
+        granularity: 43200, // 12h
+      })
+    );
 
-      reqOptions.push(
-        Object.assign({}, instrument, {
-          start: getISOString((i + 1) * 24 * -200, "h"),
-          end: getISOString(i * 24 * -200, "h"),
-          granularity: 86400, // 1d
-        })
-      );
-    });
+    reqOptions.push(
+      Object.assign({}, instrument, {
+        start: getISOString((i + 1) * 24 * -200, "h"),
+        end: getISOString(i * 24 * -200, "h"),
+        granularity: 86400, // 1d
+      })
+    );
   }
 
   return await getCandlesWithLimitedSpeed(reqOptions);
@@ -309,42 +306,49 @@ async function getBtcSwapLatestCandles() {
   const reqOptions = [];
 
   reqOptions.push({
+    instrument_id: "BTC-USD-SWAP",
     start: getISOString(1 * -200, "m"),
     end: getISOString(0, "m"),
     granularity: 60, // 1min
   });
 
   reqOptions.push({
+    instrument_id: "BTC-USD-SWAP",
     start: getISOString(3 * -200, "m"),
     end: getISOString(0, "m"),
     granularity: 180, // 3min
   });
 
   reqOptions.push({
+    instrument_id: "BTC-USD-SWAP",
     start: getISOString(1 * -200, "h"),
     end: getISOString(0, "h"),
     granularity: 3600, // 1h
   });
 
   reqOptions.push({
+    instrument_id: "BTC-USD-SWAP",
     start: getISOString(4 * -200, "h"),
     end: getISOString(0, "h"),
     granularity: 14400, // 4h
   });
 
   reqOptions.push({
+    instrument_id: "BTC-USD-SWAP",
     start: getISOString(6 * -200, "h"),
     end: getISOString(0, "h"),
     granularity: 21600, // 6h
   });
 
   reqOptions.push({
+    instrument_id: "BTC-USD-SWAP",
     start: getISOString(12 * -200, "h"),
     end: getISOString(0, "h"),
     granularity: 43200, // 12h
   });
 
   reqOptions.push({
+    instrument_id: "BTC-USD-SWAP",
     start: getISOString(24 * -200, "h"),
     end: getISOString(0, "h"),
     granularity: 86400, // 1d

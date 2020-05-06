@@ -9,6 +9,8 @@ export interface Instrument {
   trade_increment: string; // futures 下单数量精度
   size_increment: string; // swap 下单数量精度
   alias: string; // 本周 this_week 次周 next_week 季度 quarter 永续 swap
+  settlement_currency: string; // 盈亏结算和保证金币种，BTC
+  contract_val_currency: string; // 合约面值计价币种
 }
 
 export type timestamp = string;
@@ -53,7 +55,7 @@ export interface InstrumentReqOptions extends Instrument {
 
 export enum Business {
   FUTURES = "futures",
-  SWAP = "swap"
+  SWAP = "swap",
 }
 
 export enum Channel {
@@ -62,7 +64,7 @@ export enum Channel {
   FuturesTrade = "futures/trade",
   FuturesPriceRange = "futures/price_range",
   FuturesDepth = "futures/depth",
-  FuturesMarkPrice = "futures/mark_price"
+  FuturesMarkPrice = "futures/mark_price",
 }
 
 export interface Ticker {
