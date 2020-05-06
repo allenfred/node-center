@@ -31,6 +31,9 @@ function startSchedule() {
         schedule.scheduleJob("5 0 * * *", () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info("----EveryDayJob Start Executing----");
             yield util_1.execJob(60 * 1440);
+            // 获取最多过去1440条k线数据
+            yield currencyAPI.getBtcMaxCandles();
+            yield commonAPI.getBtcSwapMaxCandles();
         }));
         // every 12 hours - At 12:05.
         schedule.scheduleJob("5 12 * * *", () => __awaiter(this, void 0, void 0, function* () {
@@ -51,9 +54,6 @@ function startSchedule() {
         schedule.scheduleJob("0 * * * *", () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info("----EveryHourJob Start Executing----");
             yield util_1.execJob(60 * 60);
-            // 获取最多过去1440条k线数据
-            yield currencyAPI.getBtcMaxCandles();
-            yield commonAPI.getBtcSwapMaxCandles();
             // 获取最近200条k线数据
             yield currencyAPI.getBtcLatestCandles();
             yield commonAPI.getBtcSwapLatestCandles();

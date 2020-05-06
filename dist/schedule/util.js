@@ -20,67 +20,27 @@ function execJob(granularity) {
         const futuresInstruments = yield futures.initInstruments();
         const swapInstruments = yield swap.initInstruments();
         const futureOptions = futuresInstruments
-            .filter(i => util_1.isMainCurrency(i.underlying_index))
-            .map(i => {
+            .filter((i) => ["EOS", "ETH"].includes(i.underlying_index))
+            .map((i) => {
             return Object.assign({}, i, {
                 start: util_1.getISOString((-200 * granularity) / 60, "m"),
                 end: new Date().toISOString(),
                 granularity,
-                alias: util_1.getInstrumentAlias(i.instrument_id)
+                alias: util_1.getInstrumentAlias(i.instrument_id),
             });
         });
         const swapOptions = swapInstruments
-            .filter(i => util_1.isMainCurrency(i.underlying_index))
-            .map(i => {
+            .filter((i) => ["EOS", "ETH"].includes(i.underlying_index))
+            .map((i) => {
             return Object.assign({}, i, {
                 start: util_1.getISOString((-200 * granularity) / 60, "m"),
                 end: new Date().toISOString(),
                 granularity,
-                alias: util_1.getInstrumentAlias(i.instrument_id)
+                alias: util_1.getInstrumentAlias(i.instrument_id),
             });
         });
         return yield common_1.getCandlesWithLimitedSpeed(futureOptions.concat(swapOptions));
     });
 }
 exports.execJob = execJob;
-function isDailyScheduleTime(date) {
-    return +date.getHours() % 24 && +date.getMinutes() === 0 ? true : false;
-}
-exports.isDailyScheduleTime = isDailyScheduleTime;
-function isTwelveHoursScheduleTime(date) {
-    return +date.getHours() % 12 && +date.getMinutes() === 0 ? true : false;
-}
-exports.isTwelveHoursScheduleTime = isTwelveHoursScheduleTime;
-function isSixHoursScheduleTime(date) {
-    return +date.getHours() % 6 && +date.getMinutes() === 0 ? true : false;
-}
-exports.isSixHoursScheduleTime = isSixHoursScheduleTime;
-function isFourHoursScheduleTime(date) {
-    return +date.getHours() % 4 && +date.getMinutes() === 0 ? true : false;
-}
-exports.isFourHoursScheduleTime = isFourHoursScheduleTime;
-function isTwoHoursScheduleTime(date) {
-    return +date.getHours() % 2 && +date.getMinutes() === 0 ? true : false;
-}
-exports.isTwoHoursScheduleTime = isTwoHoursScheduleTime;
-function isHourlyScheduleTime(date) {
-    return +date.getMinutes() === 0 ? true : false;
-}
-exports.isHourlyScheduleTime = isHourlyScheduleTime;
-function isThirtyMinutesScheduleTime(date) {
-    return +date.getMinutes() % 30 === 0 ? true : false;
-}
-exports.isThirtyMinutesScheduleTime = isThirtyMinutesScheduleTime;
-function isFifteenMinutesScheduleTime(date) {
-    return +date.getMinutes() % 15 === 0 ? true : false;
-}
-exports.isFifteenMinutesScheduleTime = isFifteenMinutesScheduleTime;
-function isFiveMinutesScheduleTime(date) {
-    return +date.getMinutes() % 5 === 0 ? true : false;
-}
-exports.isFiveMinutesScheduleTime = isFiveMinutesScheduleTime;
-function isThreeMinutesScheduleTime(date) {
-    return +date.getMinutes() % 3 === 0 ? true : false;
-}
-exports.isThreeMinutesScheduleTime = isThreeMinutesScheduleTime;
 //# sourceMappingURL=util.js.map

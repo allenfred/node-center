@@ -22,6 +22,10 @@ export async function startSchedule() {
   schedule.scheduleJob("5 0 * * *", async () => {
     logger.info("----EveryDayJob Start Executing----");
     await execJob(60 * 1440);
+
+    // 获取最多过去1440条k线数据
+    await currencyAPI.getBtcMaxCandles();
+    await commonAPI.getBtcSwapMaxCandles();
   });
 
   // every 12 hours - At 12:05.
@@ -46,9 +50,6 @@ export async function startSchedule() {
   schedule.scheduleJob("0 * * * *", async () => {
     logger.info("----EveryHourJob Start Executing----");
     await execJob(60 * 60);
-    // 获取最多过去1440条k线数据
-    await currencyAPI.getBtcMaxCandles();
-    await commonAPI.getBtcSwapMaxCandles();
 
     // 获取最近200条k线数据
     await currencyAPI.getBtcLatestCandles();
