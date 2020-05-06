@@ -17,6 +17,7 @@ const types_1 = require("../types");
 const dao_1 = require("../dao");
 const util_1 = require("../util");
 const futures = require("../okex/futures");
+const swap = require("../okex/swap");
 const pClient = publicClient_1.default(config_1.httpHost, 10000);
 const candles = [
     "candle60s",
@@ -198,7 +199,8 @@ exports.getBtcFutureMaxCandles = getBtcFutureMaxCandles;
 function getBtcSwapMaxCandles() {
     return __awaiter(this, void 0, void 0, function* () {
         // 币本位合约
-        const instrument = { instrument_id: "BTC-USD-SWAP" };
+        let instruments = yield swap.initInstruments();
+        const instrument = instruments.find((i) => i.instrument_id === "BTC-USD-SWAP");
         const reqOptions = [];
         for (let i = 0; i < 10; i++) {
             reqOptions.push(Object.assign({}, instrument, {
@@ -244,49 +246,52 @@ exports.getBtcSwapMaxCandles = getBtcSwapMaxCandles;
 // 获取最近200条k线数据
 function getBtcSwapLatestCandles() {
     return __awaiter(this, void 0, void 0, function* () {
+        // 币本位合约
+        let instruments = yield swap.initInstruments();
+        const instrument = instruments.find((i) => i.instrument_id === "BTC-USD-SWAP");
         const reqOptions = [];
-        reqOptions.push({
+        reqOptions.push(Object.assign({}, instrument, {
             instrument_id: "BTC-USD-SWAP",
             start: util_1.getISOString(1 * -200, "m"),
             end: util_1.getISOString(0, "m"),
             granularity: 60,
-        });
-        reqOptions.push({
+        }));
+        reqOptions.push(Object.assign({}, instrument, {
             instrument_id: "BTC-USD-SWAP",
             start: util_1.getISOString(3 * -200, "m"),
             end: util_1.getISOString(0, "m"),
             granularity: 180,
-        });
-        reqOptions.push({
+        }));
+        reqOptions.push(Object.assign({}, instrument, {
             instrument_id: "BTC-USD-SWAP",
             start: util_1.getISOString(1 * -200, "h"),
             end: util_1.getISOString(0, "h"),
             granularity: 3600,
-        });
-        reqOptions.push({
+        }));
+        reqOptions.push(Object.assign({}, instrument, {
             instrument_id: "BTC-USD-SWAP",
             start: util_1.getISOString(4 * -200, "h"),
             end: util_1.getISOString(0, "h"),
             granularity: 14400,
-        });
-        reqOptions.push({
+        }));
+        reqOptions.push(Object.assign({}, instrument, {
             instrument_id: "BTC-USD-SWAP",
             start: util_1.getISOString(6 * -200, "h"),
             end: util_1.getISOString(0, "h"),
             granularity: 21600,
-        });
-        reqOptions.push({
+        }));
+        reqOptions.push(Object.assign({}, instrument, {
             instrument_id: "BTC-USD-SWAP",
             start: util_1.getISOString(12 * -200, "h"),
             end: util_1.getISOString(0, "h"),
             granularity: 43200,
-        });
-        reqOptions.push({
+        }));
+        reqOptions.push(Object.assign({}, instrument, {
             instrument_id: "BTC-USD-SWAP",
             start: util_1.getISOString(24 * -200, "h"),
             end: util_1.getISOString(0, "h"),
             granularity: 86400,
-        });
+        }));
         return yield getCandlesByGroup(reqOptions);
     });
 }

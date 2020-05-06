@@ -1,18 +1,11 @@
 import * as bluebird from "bluebird";
 import {
-  InstrumentCandle,
   BtcSwapCandle,
   BtcFutureCandle,
   EthSwapCandle,
   EthFutureCandle,
   EosSwapCandle,
   EosFutureCandle,
-  LtcSwapCandle,
-  LtcFutureCandle,
-  BchSwapCandle,
-  BchFutureCandle,
-  BsvSwapCandle,
-  BsvFutureCandle,
 } from "../database/models";
 import { InstrumentCandleSchema } from "../types";
 
@@ -39,20 +32,14 @@ async function upsert(candles: InstrumentCandleSchema[]) {
 function getModel(candle) {
   const swapModels = {
     BTC: BtcSwapCandle,
-    LTC: LtcSwapCandle,
     EOS: EosSwapCandle,
     ETH: EthSwapCandle,
-    BSV: BsvSwapCandle,
-    BCH: BchSwapCandle,
   };
 
   const futureModels = {
     BTC: BtcFutureCandle,
-    LTC: LtcFutureCandle,
     EOS: EosFutureCandle,
     ETH: EthFutureCandle,
-    BSV: BsvFutureCandle,
-    BCH: BchFutureCandle,
   };
 
   if (candle.instrument_id.includes("SWAP")) {

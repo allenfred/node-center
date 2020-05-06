@@ -33,19 +33,13 @@ function upsert(candles) {
 function getModel(candle) {
     const swapModels = {
         BTC: models_1.BtcSwapCandle,
-        LTC: models_1.LtcSwapCandle,
         EOS: models_1.EosSwapCandle,
         ETH: models_1.EthSwapCandle,
-        BSV: models_1.BsvSwapCandle,
-        BCH: models_1.BchSwapCandle,
     };
     const futureModels = {
         BTC: models_1.BtcFutureCandle,
-        LTC: models_1.LtcFutureCandle,
         EOS: models_1.EosFutureCandle,
         ETH: models_1.EthFutureCandle,
-        BSV: models_1.BsvFutureCandle,
-        BCH: models_1.BchFutureCandle,
     };
     if (candle.instrument_id.includes("SWAP")) {
         return swapModels[candle.underlying_index];
