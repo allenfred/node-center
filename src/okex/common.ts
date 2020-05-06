@@ -304,6 +304,55 @@ async function getBtcSwapMaxCandles() {
   return await getCandlesWithLimitedSpeed(reqOptions);
 }
 
+// 获取最近200条k线数据
+async function getBtcSwapLatestCandles() {
+  const reqOptions = [];
+
+  reqOptions.push({
+    start: getISOString(1 * -200, "m"),
+    end: getISOString(0, "m"),
+    granularity: 60, // 1min
+  });
+
+  reqOptions.push({
+    start: getISOString(3 * -200, "m"),
+    end: getISOString(0, "m"),
+    granularity: 180, // 3min
+  });
+
+  reqOptions.push({
+    start: getISOString(1 * -200, "h"),
+    end: getISOString(0, "h"),
+    granularity: 3600, // 1h
+  });
+
+  reqOptions.push({
+    start: getISOString(4 * -200, "h"),
+    end: getISOString(0, "h"),
+    granularity: 14400, // 4h
+  });
+
+  reqOptions.push({
+    start: getISOString(6 * -200, "h"),
+    end: getISOString(0, "h"),
+    granularity: 21600, // 6h
+  });
+
+  reqOptions.push({
+    start: getISOString(12 * -200, "h"),
+    end: getISOString(0, "h"),
+    granularity: 43200, // 12h
+  });
+
+  reqOptions.push({
+    start: getISOString(24 * -200, "h"),
+    end: getISOString(0, "h"),
+    granularity: 86400, // 1d
+  });
+
+  return await getCandlesByGroup(reqOptions);
+}
+
 export {
   getSwapInstruments,
   getFuturesInstruments,
@@ -315,4 +364,5 @@ export {
   getFuturesSubCommands,
   getBtcFutureMaxCandles,
   getBtcSwapMaxCandles,
+  getBtcSwapLatestCandles,
 };

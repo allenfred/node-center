@@ -244,4 +244,47 @@ function getBtcSwapMaxCandles() {
     });
 }
 exports.getBtcSwapMaxCandles = getBtcSwapMaxCandles;
+// 获取最近200条k线数据
+function getBtcSwapLatestCandles() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const reqOptions = [];
+        reqOptions.push({
+            start: util_1.getISOString(1 * -200, "m"),
+            end: util_1.getISOString(0, "m"),
+            granularity: 60,
+        });
+        reqOptions.push({
+            start: util_1.getISOString(3 * -200, "m"),
+            end: util_1.getISOString(0, "m"),
+            granularity: 180,
+        });
+        reqOptions.push({
+            start: util_1.getISOString(1 * -200, "h"),
+            end: util_1.getISOString(0, "h"),
+            granularity: 3600,
+        });
+        reqOptions.push({
+            start: util_1.getISOString(4 * -200, "h"),
+            end: util_1.getISOString(0, "h"),
+            granularity: 14400,
+        });
+        reqOptions.push({
+            start: util_1.getISOString(6 * -200, "h"),
+            end: util_1.getISOString(0, "h"),
+            granularity: 21600,
+        });
+        reqOptions.push({
+            start: util_1.getISOString(12 * -200, "h"),
+            end: util_1.getISOString(0, "h"),
+            granularity: 43200,
+        });
+        reqOptions.push({
+            start: util_1.getISOString(24 * -200, "h"),
+            end: util_1.getISOString(0, "h"),
+            granularity: 86400,
+        });
+        return yield getCandlesByGroup(reqOptions);
+    });
+}
+exports.getBtcSwapLatestCandles = getBtcSwapLatestCandles;
 //# sourceMappingURL=common.js.map

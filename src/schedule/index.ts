@@ -1,16 +1,7 @@
 var schedule = require("node-schedule");
-import {
-  execJob,
-  isFifteenMinutesScheduleTime,
-  isThirtyMinutesScheduleTime,
-  isHourlyScheduleTime,
-  isTwoHoursScheduleTime,
-  isFourHoursScheduleTime,
-  isSixHoursScheduleTime,
-  isTwelveHoursScheduleTime,
-  isDailyScheduleTime,
-} from "./util";
-import { getBtcLatestCandles, getBtcMaxCandles } from "../okex/currency";
+import { execJob } from "./util";
+import * as currencyAPI from "../okex/currency";
+import * as commonAPI from "../okex/common";
 import logger from "../logger";
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
@@ -56,8 +47,11 @@ export async function startSchedule() {
     logger.info("----EveryHourJob Start Executing----");
     await execJob(60 * 60);
     // 获取最多过去1440条k线数据
-    await getBtcMaxCandles();
+    await currencyAPI.getBtcMaxCandles();
+    await commonAPI.getBtcSwapMaxCandles();
+
     // 获取最近200条k线数据
-    await getBtcLatestCandles();
+    await currencyAPI.getBtcLatestCandles();
+    await commonAPI.getBtcSwapLatestCandles();
   });
 }

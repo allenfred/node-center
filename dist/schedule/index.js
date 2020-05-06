@@ -11,7 +11,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 var schedule = require("node-schedule");
 const util_1 = require("./util");
-const currency_1 = require("../okex/currency");
+const currencyAPI = require("../okex/currency");
+const commonAPI = require("../okex/common");
 const logger_1 = require("../logger");
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 function startSchedule() {
@@ -51,9 +52,11 @@ function startSchedule() {
             logger_1.default.info("----EveryHourJob Start Executing----");
             yield util_1.execJob(60 * 60);
             // 获取最多过去1440条k线数据
-            yield currency_1.getBtcMaxCandles();
+            yield currencyAPI.getBtcMaxCandles();
+            yield commonAPI.getBtcSwapMaxCandles();
             // 获取最近200条k线数据
-            yield currency_1.getBtcLatestCandles();
+            yield currencyAPI.getBtcLatestCandles();
+            yield commonAPI.getBtcSwapLatestCandles();
         }));
     });
 }
