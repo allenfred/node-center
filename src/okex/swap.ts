@@ -60,6 +60,12 @@ export async function getMaxCandles() {
     });
 
     reqOptions.push({
+      start: getISOString((i + 1) * 2 * -200, "h"),
+      end: getISOString(i * 2 * -200, "h"),
+      granularity: 7200, // 2h
+    });
+
+    reqOptions.push({
       start: getISOString((i + 1) * 4 * -200, "h"),
       end: getISOString(i * 4 * -200, "h"),
       granularity: 14400, // 4h

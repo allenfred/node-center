@@ -82,6 +82,12 @@ async function getBtcMaxCandles() {
     });
 
     reqOptions.push({
+      start: getISOString((i + 1) * 2 * -200, "h"),
+      end: getISOString(i * 2 * -200, "h"),
+      granularity: 7200, // 2h
+    });
+
+    reqOptions.push({
       start: getISOString((i + 1) * 4 * -200, "h"),
       end: getISOString(i * 4 * -200, "h"),
       granularity: 14400, // 4h
@@ -117,6 +123,12 @@ async function getBtcLatestCandles() {
     start: getISOString(1 * -200, "h"),
     end: getISOString(0, "h"),
     granularity: 3600, // 1h
+  });
+
+  reqOptions.push({
+    start: getISOString(2 * -200, "h"),
+    end: getISOString(0, "h"),
+    granularity: 7200, // 2h
   });
 
   reqOptions.push({

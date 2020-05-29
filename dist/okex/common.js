@@ -170,6 +170,11 @@ function getBtcFutureMaxCandles() {
                     granularity: 3600,
                 }));
                 reqOptions.push(Object.assign({}, instrument, {
+                    start: util_1.getISOString((i + 1) * 2 * -200, "h"),
+                    end: util_1.getISOString(i * 2 * -200, "h"),
+                    granularity: 7200,
+                }));
+                reqOptions.push(Object.assign({}, instrument, {
                     start: util_1.getISOString((i + 1) * 4 * -200, "h"),
                     end: util_1.getISOString(i * 4 * -200, "h"),
                     granularity: 14400,
@@ -217,6 +222,11 @@ function getBtcSwapMaxCandles() {
                 start: util_1.getISOString((i + 1) * -200, "h"),
                 end: util_1.getISOString(i * -200, "h"),
                 granularity: 3600,
+            }));
+            reqOptions.push(Object.assign({}, instrument, {
+                start: util_1.getISOString((i + 1) * 2 * -200, "h"),
+                end: util_1.getISOString(i * 2 * -200, "h"),
+                granularity: 7200,
             }));
             reqOptions.push(Object.assign({}, instrument, {
                 start: util_1.getISOString((i + 1) * 4 * -200, "h"),
@@ -267,6 +277,12 @@ function getBtcSwapLatestCandles() {
             start: util_1.getISOString(1 * -200, "h"),
             end: util_1.getISOString(0, "h"),
             granularity: 3600,
+        }));
+        reqOptions.push(Object.assign({}, instrument, {
+            instrument_id: "BTC-USD-SWAP",
+            start: util_1.getISOString(2 * -200, "h"),
+            end: util_1.getISOString(0, "h"),
+            granularity: 7200,
         }));
         reqOptions.push(Object.assign({}, instrument, {
             instrument_id: "BTC-USD-SWAP",

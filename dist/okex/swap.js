@@ -54,6 +54,11 @@ function getMaxCandles() {
                 granularity: 3600,
             });
             reqOptions.push({
+                start: util_1.getISOString((i + 1) * 2 * -200, "h"),
+                end: util_1.getISOString(i * 2 * -200, "h"),
+                granularity: 7200,
+            });
+            reqOptions.push({
                 start: util_1.getISOString((i + 1) * 4 * -200, "h"),
                 end: util_1.getISOString(i * 4 * -200, "h"),
                 granularity: 14400,
