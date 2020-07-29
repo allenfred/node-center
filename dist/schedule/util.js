@@ -20,20 +20,20 @@ function execJob(granularity) {
         const futuresInstruments = yield futures.initInstruments();
         const swapInstruments = yield swap.initInstruments();
         const futureOptions = futuresInstruments
-            .filter((i) => ["EOS", "ETH"].includes(i.underlying_index))
+            .filter((i) => ['EOS', 'ETH', 'LTC', 'BCH'].includes(i.underlying_index))
             .map((i) => {
             return Object.assign({}, i, {
-                start: util_1.getISOString((-200 * granularity) / 60, "m"),
+                start: util_1.getISOString((-200 * granularity) / 60, 'm'),
                 end: new Date().toISOString(),
                 granularity,
                 alias: util_1.getInstrumentAlias(i.instrument_id),
             });
         });
         const swapOptions = swapInstruments
-            .filter((i) => ["EOS", "ETH"].includes(i.underlying_index))
+            .filter((i) => ['EOS', 'ETH', 'LTC', 'BCH'].includes(i.underlying_index))
             .map((i) => {
             return Object.assign({}, i, {
-                start: util_1.getISOString((-200 * granularity) / 60, "m"),
+                start: util_1.getISOString((-200 * granularity) / 60, 'm'),
                 end: new Date().toISOString(),
                 granularity,
                 alias: util_1.getInstrumentAlias(i.instrument_id),
