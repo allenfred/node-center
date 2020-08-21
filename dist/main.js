@@ -12,9 +12,18 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const connection_1 = require("./database/connection");
 const schedule_1 = require("./schedule");
 const logger_1 = require("./logger");
+const http = require("http");
+const server = http.createServer((req, res) => {
+    res.writeHead(200, { 'Content-Type': 'text/plain' });
+    res.end('ok');
+});
+server.on('clientError', (err, socket) => {
+    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+});
+server.listen(8000);
 (function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        logger_1.default.info("-----crawler start-----");
+        logger_1.default.info('-----crawler start-----');
         //连接数据库
         yield connection_1.default();
         // 开启定时任务获取历史K线
