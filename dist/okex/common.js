@@ -150,7 +150,7 @@ function getCandlesWithLimitedSpeed(options) {
     });
 }
 exports.getCandlesWithLimitedSpeed = getCandlesWithLimitedSpeed;
-// 获取最多过去1440条k线数据
+// 获取最多过去1440条k线数据 (1h 2h 4h 6h 12h 1d)
 function getBtcFutureMaxCandles() {
     return __awaiter(this, void 0, void 0, function* () {
         // 获取所有合约信息
@@ -195,7 +195,7 @@ function getBtcFutureMaxCandles() {
     });
 }
 exports.getBtcFutureMaxCandles = getBtcFutureMaxCandles;
-// 获取最多过去1440条k线数据
+// 获取最多过去1440条k线数据 (15min 1h 2h 4h 6h 12h 1d)
 function getBtcSwapMaxCandles() {
     return __awaiter(this, void 0, void 0, function* () {
         // 币本位合约
@@ -243,7 +243,7 @@ function getBtcSwapMaxCandles() {
     });
 }
 exports.getBtcSwapMaxCandles = getBtcSwapMaxCandles;
-// 获取最近200条k线数据
+// 获取最近200条k线数据 (15min 1h 2h 4h 6h 12h 1d)
 function getBtcSwapLatestCandles() {
     return __awaiter(this, void 0, void 0, function* () {
         // 币本位合约

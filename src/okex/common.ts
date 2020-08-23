@@ -148,7 +148,7 @@ async function getCandlesWithLimitedSpeed(options: Array<InstrumentReqOptions>) 
   );
 }
 
-// 获取最多过去1440条k线数据
+// 获取最多过去1440条k线数据 (1h 2h 4h 6h 12h 1d)
 async function getBtcFutureMaxCandles() {
   // 获取所有合约信息
   let futuresInstruments = await futures.initInstruments();
@@ -210,7 +210,7 @@ async function getBtcFutureMaxCandles() {
   return await getCandlesWithLimitedSpeed(reqOptions);
 }
 
-// 获取最多过去1440条k线数据
+// 获取最多过去1440条k线数据 (15min 1h 2h 4h 6h 12h 1d)
 async function getBtcSwapMaxCandles() {
   // 币本位合约
   let instruments = await swap.initInstruments();
@@ -278,7 +278,7 @@ async function getBtcSwapMaxCandles() {
   return await getCandlesWithLimitedSpeed(reqOptions);
 }
 
-// 获取最近200条k线数据
+// 获取最近200条k线数据 (15min 1h 2h 4h 6h 12h 1d)
 async function getBtcSwapLatestCandles() {
   // 币本位合约
   let instruments = await swap.initInstruments();
