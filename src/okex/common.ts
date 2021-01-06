@@ -135,7 +135,9 @@ async function getCandlesByGroup(options: Array<InstrumentReqOptions>) {
 
 async function getCandlesWithLimitedSpeed(options: Array<InstrumentReqOptions>) {
   //设置系统限速规则: 10次/2s (okex官方API 限速规则：20次/2s)
-  const groupCount = Math.round(options.length / 10);
+  let groupCount = Math.round(options.length / 10);
+  groupCount = groupCount > 0 ? groupCount : 1;
+
   let start = 0;
   await bluebird.map(
     new Array(groupCount).fill(null),

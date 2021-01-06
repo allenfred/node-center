@@ -1,13 +1,6 @@
-import * as bluebird from "bluebird";
-import {
-  BtcSwapCandle,
-  BtcFutureCandle,
-  EthSwapCandle,
-  EthFutureCandle,
-  EosSwapCandle,
-  EosFutureCandle,
-} from "../database/models";
-import { InstrumentCandleSchema } from "../types";
+import * as bluebird from 'bluebird';
+import { BtcSwapCandle, BtcFutureCandle, EthSwapCandle, EthFutureCandle, EosSwapCandle, EosFutureCandle } from '../database/models';
+import { InstrumentCandleSchema } from '../types';
 
 async function upsert(candles: InstrumentCandleSchema[]) {
   return bluebird.map(candles, async (candle: InstrumentCandleSchema) => {
@@ -20,7 +13,6 @@ async function upsert(candles: InstrumentCandleSchema[]) {
     const Model = getModel(candle);
 
     const existedCandle = await Model.findOne(uniqueCondition);
-
     if (existedCandle) {
       return await Model.updateOne(uniqueCondition, candle);
     } else {
@@ -42,7 +34,7 @@ function getModel(candle) {
     ETH: EthFutureCandle,
   };
 
-  if (candle.instrument_id.includes("SWAP")) {
+  if (candle.instrument_id.includes('SWAP')) {
     return swapModels[candle.underlying_index];
   } else {
     return futureModels[candle.underlying_index];

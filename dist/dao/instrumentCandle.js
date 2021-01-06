@@ -25,6 +25,7 @@ function upsert(candles) {
                 return yield Model.updateOne(uniqueCondition, candle);
             }
             else {
+                console.log('create....');
                 return yield Model.create(candle);
             }
         }));
@@ -41,7 +42,7 @@ function getModel(candle) {
         EOS: models_1.EosFutureCandle,
         ETH: models_1.EthFutureCandle,
     };
-    if (candle.instrument_id.includes("SWAP")) {
+    if (candle.instrument_id.includes('SWAP')) {
         return swapModels[candle.underlying_index];
     }
     else {

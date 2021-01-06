@@ -10,18 +10,7 @@ export async function startSchedule() {
   schedule.scheduleJob('*/5 * * * *', async () => {
     logger.info('----Every5MinsJob Start Executing----');
     await execJob(60 * 5);
-  });
-
-  // At every 15 minute.
-  schedule.scheduleJob('*/15 * * * *', async () => {
-    logger.info('----Every15MinsJob Start Executing----');
     await execJob(60 * 15);
-  });
-
-  // every week.
-  schedule.scheduleJob('0 0 * * 0', () => {
-    logger.info('----执行 周线 K线定时任务----');
-    execJob(60 * 1440 * 7);
   });
 
   // every day - At 00:05.
@@ -32,12 +21,6 @@ export async function startSchedule() {
     // 获取最多过去1440条k线数据
     await currencyAPI.getBtcMaxCandles();
     await commonAPI.getBtcSwapMaxCandles();
-  });
-
-  // every 12 hours - At 12:05.
-  schedule.scheduleJob('5 12 * * *', async () => {
-    logger.info('----Every12HoursJob Start Executing----');
-    await execJob(60 * 720);
   });
 
   // every 4 hours - At minute 5 past every 4th hour.
