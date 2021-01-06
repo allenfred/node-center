@@ -281,72 +281,201 @@ async function getBtcSwapMaxCandles() {
 // 获取最近200条k线数据 (15min 1h 2h 4h 6h 12h 1d)
 async function getBtcSwapLatestCandles() {
   // 币本位合约
-  let instruments = await swap.initInstruments();
-  const instrument = instruments.find((i) => i.instrument_id === 'BTC-USD-SWAP');
+  // let instruments = await swap.initInstruments();
+  // const instrument = instruments.find((i) => i.instrument_id === 'BTC-USD-SWAP');
 
   const reqOptions = [];
 
   reqOptions.push(
-    Object.assign({}, instrument, {
-      instrument_id: 'BTC-USD-SWAP',
-      start: getISOString(15 * -200, 'm'),
-      end: getISOString(0, 'm'),
-      granularity: 900, // 15min
-    })
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USD-SWAP',
+        start: getISOString(5 * -200, 'm'),
+        end: getISOString(0, 'm'),
+        granularity: 300, // 5min
+      }
+    )
   );
 
   reqOptions.push(
-    Object.assign({}, instrument, {
-      instrument_id: 'BTC-USD-SWAP',
-      start: getISOString(1 * -200, 'h'),
-      end: getISOString(0, 'h'),
-      granularity: 3600, // 1h
-    })
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USD-SWAP',
+        start: getISOString(15 * -200, 'm'),
+        end: getISOString(0, 'm'),
+        granularity: 900, // 15min
+      }
+    )
   );
 
   reqOptions.push(
-    Object.assign({}, instrument, {
-      instrument_id: 'BTC-USD-SWAP',
-      start: getISOString(2 * -200, 'h'),
-      end: getISOString(0, 'h'),
-      granularity: 7200, // 2h
-    })
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USD-SWAP',
+        start: getISOString(1 * -200, 'h'),
+        end: getISOString(0, 'h'),
+        granularity: 3600, // 1h
+      }
+    )
   );
 
   reqOptions.push(
-    Object.assign({}, instrument, {
-      instrument_id: 'BTC-USD-SWAP',
-      start: getISOString(4 * -200, 'h'),
-      end: getISOString(0, 'h'),
-      granularity: 14400, // 4h
-    })
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USD-SWAP',
+        start: getISOString(2 * -200, 'h'),
+        end: getISOString(0, 'h'),
+        granularity: 7200, // 2h
+      }
+    )
   );
 
   reqOptions.push(
-    Object.assign({}, instrument, {
-      instrument_id: 'BTC-USD-SWAP',
-      start: getISOString(6 * -200, 'h'),
-      end: getISOString(0, 'h'),
-      granularity: 21600, // 6h
-    })
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USD-SWAP',
+        start: getISOString(4 * -200, 'h'),
+        end: getISOString(0, 'h'),
+        granularity: 14400, // 4h
+      }
+    )
   );
 
   reqOptions.push(
-    Object.assign({}, instrument, {
-      instrument_id: 'BTC-USD-SWAP',
-      start: getISOString(12 * -200, 'h'),
-      end: getISOString(0, 'h'),
-      granularity: 43200, // 12h
-    })
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USD-SWAP',
+        start: getISOString(6 * -200, 'h'),
+        end: getISOString(0, 'h'),
+        granularity: 21600, // 6h
+      }
+    )
   );
 
   reqOptions.push(
-    Object.assign({}, instrument, {
-      instrument_id: 'BTC-USD-SWAP',
-      start: getISOString(24 * -200, 'h'),
-      end: getISOString(0, 'h'),
-      granularity: 86400, // 1d
-    })
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USD-SWAP',
+        start: getISOString(12 * -200, 'h'),
+        end: getISOString(0, 'h'),
+        granularity: 43200, // 12h
+      }
+    )
+  );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USD-SWAP',
+        start: getISOString(24 * -200, 'h'),
+        end: getISOString(0, 'h'),
+        granularity: 86400, // 1d
+      }
+    )
+  );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USDT-SWAP',
+        start: getISOString(5 * -200, 'm'),
+        end: getISOString(0, 'm'),
+        granularity: 300, // 5min
+      }
+    )
+  );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USDT-SWAP',
+        start: getISOString(15 * -200, 'm'),
+        end: getISOString(0, 'm'),
+        granularity: 900, // 15min
+      }
+    )
+  );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USDT-SWAP',
+        start: getISOString(1 * -200, 'h'),
+        end: getISOString(0, 'h'),
+        granularity: 3600, // 1h
+      }
+    )
+  );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USDT-SWAP',
+        start: getISOString(2 * -200, 'h'),
+        end: getISOString(0, 'h'),
+        granularity: 7200, // 2h
+      }
+    )
+  );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USDT-SWAP',
+        start: getISOString(4 * -200, 'h'),
+        end: getISOString(0, 'h'),
+        granularity: 14400, // 4h
+      }
+    )
+  );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USDT-SWAP',
+        start: getISOString(6 * -200, 'h'),
+        end: getISOString(0, 'h'),
+        granularity: 21600, // 6h
+      }
+    )
+  );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USDT-SWAP',
+        start: getISOString(12 * -200, 'h'),
+        end: getISOString(0, 'h'),
+        granularity: 43200, // 12h
+      }
+    )
+  );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USDT-SWAP',
+        start: getISOString(24 * -200, 'h'),
+        end: getISOString(0, 'h'),
+        granularity: 86400, // 1d
+      }
+    )
   );
 
   return await getCandlesByGroup(reqOptions);

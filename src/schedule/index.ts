@@ -6,7 +6,13 @@ import logger from '../logger';
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 export async function startSchedule() {
-  // At every 15th minute.
+  // At every 5 minute.
+  schedule.scheduleJob('*/5 * * * *', async () => {
+    logger.info('----Every5MinsJob Start Executing----');
+    await execJob(60 * 5);
+  });
+
+  // At every 15 minute.
   schedule.scheduleJob('*/15 * * * *', async () => {
     logger.info('----Every15MinsJob Start Executing----');
     await execJob(60 * 15);

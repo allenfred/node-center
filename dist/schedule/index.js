@@ -17,7 +17,12 @@ const logger_1 = require("../logger");
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 function startSchedule() {
     return __awaiter(this, void 0, void 0, function* () {
-        // At every 15th minute.
+        // At every 5 minute.
+        schedule.scheduleJob('*/5 * * * *', () => __awaiter(this, void 0, void 0, function* () {
+            logger_1.default.info('----Every5MinsJob Start Executing----');
+            yield util_1.execJob(60 * 5);
+        }));
+        // At every 15 minute.
         schedule.scheduleJob('*/15 * * * *', () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info('----Every15MinsJob Start Executing----');
             yield util_1.execJob(60 * 15);
