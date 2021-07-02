@@ -1,27 +1,27 @@
-import * as bluebird from "bluebird";
-import { InstrumentCandle } from "../database/models";
-import { InstrumentCandleSchema } from "../types";
-import { getInstrumentAlias } from "../util";
+import * as bluebird from 'bluebird';
+import { BtcSwapCandle } from '../database/models';
+import { InstrumentCandleSchema } from '../types';
 
 async function upsert(candles: InstrumentCandleSchema[]) {
   return bluebird.map(candles, async (candle: InstrumentCandleSchema) => {
     //find unique candle by underlying_index & timestamp & alias & granularity
     const uniqueCondition = {
+      instrument_id: candle.instrument_id,
       timestamp: new Date(candle.timestamp),
-      granularity: candle.granularity
+      granularity: candle.granularity,
     };
-    const existedCandle = await InstrumentCandle.findOne(uniqueCondition);
+    const existedCandle = await BtcSwapCandle.findOne(uniqueCondition);
 
     if (existedCandle) {
-      return await InstrumentCandle.updateOne(uniqueCondition, candle);
+      return await BtcSwapCandle.updateOne(uniqueCondition, candle);
     } else {
-      return await InstrumentCandle.create(candle);
+      return await BtcSwapCandle.create(candle);
     }
   });
 }
 
 const InstrumentCandleDao = {
-  upsert
+  upsert,
 };
 
 export { InstrumentCandleDao };

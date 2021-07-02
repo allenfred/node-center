@@ -16,7 +16,6 @@ const logger_1 = require("../logger");
 const types_1 = require("../types");
 const dao_1 = require("../dao");
 const util_1 = require("../util");
-const futures = require("../okex/futures");
 const swap = require("../okex/swap");
 const pClient = publicClient_1.default(config_1.httpHost, 10000);
 const candles = [
@@ -33,12 +32,6 @@ const candles = [
     'candle86400s',
     'candle604800s',
 ];
-function getFuturesInstruments() {
-    return __awaiter(this, void 0, void 0, function* () {
-        return pClient.futures().getInstruments();
-    });
-}
-exports.getFuturesInstruments = getFuturesInstruments;
 function getSwapInstruments() {
     return __awaiter(this, void 0, void 0, function* () {
         return pClient.swap().getInstruments();
@@ -66,10 +59,6 @@ function getSwapSubCommands(instruments) {
     return getBasicCommands(instruments, types_1.Business.SWAP);
 }
 exports.getSwapSubCommands = getSwapSubCommands;
-function getFuturesSubCommands(instruments) {
-    return getBasicCommands(instruments, types_1.Business.FUTURES);
-}
-exports.getFuturesSubCommands = getFuturesSubCommands;
 //指令格式:<business>/<channel>:<filter>
 function getBasicCommands(instruments, business) {
     //公共Ticker频道
@@ -144,60 +133,17 @@ function getCandlesWithLimitedSpeed(options) {
         groupCount = groupCount > 0 ? groupCount : 1;
         let start = 0;
         yield bluebird.map(new Array(groupCount).fill(null), () => __awaiter(this, void 0, void 0, function* () {
-            yield getCandlesByGroup(options.slice(start, start + 10));
+            yield getCandlesByGroup(options.slice(start, start + 10)).catch((err) => {
+                logger_1.default.error(`getCandlesByGroup Error: `, err);
+            });
             start += 10;
             return util_1.sleep(2);
         }), { concurrency: 1 });
     });
 }
 exports.getCandlesWithLimitedSpeed = getCandlesWithLimitedSpeed;
-// 获取最多过去1440条k线数据 (1h 2h 4h 6h 12h 1d)
-function getBtcFutureMaxCandles() {
-    return __awaiter(this, void 0, void 0, function* () {
-        // 获取所有合约信息
-        let futuresInstruments = yield futures.initInstruments();
-        futuresInstruments = futuresInstruments.filter((i) => util_1.isMainCurrency(i.underlying_index) && util_1.isMainCurrency(i.settlement_currency));
-        const reqOptions = [];
-        for (let i = 0; i < 10; i++) {
-            futuresInstruments.forEach((instrument) => {
-                reqOptions.push(Object.assign({}, instrument, {
-                    start: util_1.getISOString((i + 1) * -200, 'h'),
-                    end: util_1.getISOString(i * -200, 'h'),
-                    granularity: 3600,
-                }));
-                reqOptions.push(Object.assign({}, instrument, {
-                    start: util_1.getISOString((i + 1) * 2 * -200, 'h'),
-                    end: util_1.getISOString(i * 2 * -200, 'h'),
-                    granularity: 7200,
-                }));
-                reqOptions.push(Object.assign({}, instrument, {
-                    start: util_1.getISOString((i + 1) * 4 * -200, 'h'),
-                    end: util_1.getISOString(i * 4 * -200, 'h'),
-                    granularity: 14400,
-                }));
-                reqOptions.push(Object.assign({}, instrument, {
-                    start: util_1.getISOString((i + 1) * 6 * -200, 'h'),
-                    end: util_1.getISOString(i * 6 * -200, 'h'),
-                    granularity: 21600,
-                }));
-                reqOptions.push(Object.assign({}, instrument, {
-                    start: util_1.getISOString((i + 1) * 12 * -200, 'h'),
-                    end: util_1.getISOString(i * 12 * -200, 'h'),
-                    granularity: 43200,
-                }));
-                reqOptions.push(Object.assign({}, instrument, {
-                    start: util_1.getISOString((i + 1) * 24 * -200, 'h'),
-                    end: util_1.getISOString(i * 24 * -200, 'h'),
-                    granularity: 86400,
-                }));
-            });
-        }
-        return yield getCandlesWithLimitedSpeed(reqOptions);
-    });
-}
-exports.getBtcFutureMaxCandles = getBtcFutureMaxCandles;
 // 获取最多过去1440条k线数据 (15min 1h 2h 4h 6h 12h 1d)
-function getBtcSwapMaxCandles() {
+function getBtcUsdSwapMaxCandles() {
     return __awaiter(this, void 0, void 0, function* () {
         // 币本位合约
         let instruments = yield swap.initInstruments();
@@ -243,13 +189,58 @@ function getBtcSwapMaxCandles() {
         return yield getCandlesWithLimitedSpeed(reqOptions);
     });
 }
-exports.getBtcSwapMaxCandles = getBtcSwapMaxCandles;
-// 获取最近200条k线数据 (15min 1h 2h 4h 6h 12h 1d)
-function getBtcSwapLatestCandles() {
+exports.getBtcUsdSwapMaxCandles = getBtcUsdSwapMaxCandles;
+// 获取最多过去1440条k线数据 (15min 1h 2h 4h 6h 12h 1d)
+function getBtcUsdtSwapMaxCandles() {
     return __awaiter(this, void 0, void 0, function* () {
         // 币本位合约
-        // let instruments = await swap.initInstruments();
-        // const instrument = instruments.find((i) => i.instrument_id === 'BTC-USD-SWAP');
+        let instruments = yield swap.initInstruments();
+        const instrument = instruments.find((i) => i.instrument_id === 'BTC-USDT-SWAP');
+        const reqOptions = [];
+        for (let i = 0; i < 10; i++) {
+            reqOptions.push(Object.assign({}, instrument, {
+                start: util_1.getISOString((i + 1) * 15 * -200, 'm'),
+                end: util_1.getISOString(i * 15 * -200, 'm'),
+                granularity: 900,
+            }));
+            reqOptions.push(Object.assign({}, instrument, {
+                start: util_1.getISOString((i + 1) * -200, 'h'),
+                end: util_1.getISOString(i * -200, 'h'),
+                granularity: 3600,
+            }));
+            reqOptions.push(Object.assign({}, instrument, {
+                start: util_1.getISOString((i + 1) * 2 * -200, 'h'),
+                end: util_1.getISOString(i * 2 * -200, 'h'),
+                granularity: 7200,
+            }));
+            reqOptions.push(Object.assign({}, instrument, {
+                start: util_1.getISOString((i + 1) * 4 * -200, 'h'),
+                end: util_1.getISOString(i * 4 * -200, 'h'),
+                granularity: 14400,
+            }));
+            reqOptions.push(Object.assign({}, instrument, {
+                start: util_1.getISOString((i + 1) * 6 * -200, 'h'),
+                end: util_1.getISOString(i * 6 * -200, 'h'),
+                granularity: 21600,
+            }));
+            reqOptions.push(Object.assign({}, instrument, {
+                start: util_1.getISOString((i + 1) * 12 * -200, 'h'),
+                end: util_1.getISOString(i * 12 * -200, 'h'),
+                granularity: 43200,
+            }));
+            reqOptions.push(Object.assign({}, instrument, {
+                start: util_1.getISOString((i + 1) * 24 * -200, 'h'),
+                end: util_1.getISOString(i * 24 * -200, 'h'),
+                granularity: 86400,
+            }));
+        }
+        return yield getCandlesWithLimitedSpeed(reqOptions);
+    });
+}
+exports.getBtcUsdtSwapMaxCandles = getBtcUsdtSwapMaxCandles;
+// 币本位 获取最近200条k线数据 (15min 1h 2h 4h 6h 12h 1d)
+function getBtcUsdSwapLatestCandles() {
+    return __awaiter(this, void 0, void 0, function* () {
         const reqOptions = [];
         reqOptions.push(Object.assign({}, {
             instrument_id: 'BTC-USD-SWAP',
@@ -299,6 +290,14 @@ function getBtcSwapLatestCandles() {
             end: util_1.getISOString(0, 'h'),
             granularity: 86400,
         }));
+        return yield getCandlesByGroup(reqOptions);
+    });
+}
+exports.getBtcUsdSwapLatestCandles = getBtcUsdSwapLatestCandles;
+// 法币本位 获取最近200条k线数据 (15min 1h 2h 4h 6h 12h 1d)
+function getBtcUsdtSwapLatestCandles() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const reqOptions = [];
         reqOptions.push(Object.assign({}, {
             instrument_id: 'BTC-USDT-SWAP',
             start: util_1.getISOString(5 * -200, 'm'),
@@ -350,5 +349,5 @@ function getBtcSwapLatestCandles() {
         return yield getCandlesByGroup(reqOptions);
     });
 }
-exports.getBtcSwapLatestCandles = getBtcSwapLatestCandles;
+exports.getBtcUsdtSwapLatestCandles = getBtcUsdtSwapLatestCandles;
 //# sourceMappingURL=common.js.map

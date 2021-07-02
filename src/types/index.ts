@@ -21,15 +21,7 @@ export type close = string;
 export type volume = string;
 export type currency_volume = string;
 
-export type Candle = [
-  timestamp,
-  open,
-  high,
-  low,
-  close,
-  volume,
-  currency_volume
-];
+export type Candle = [timestamp, open, high, low, close, volume, currency_volume];
 
 export interface InstrumentCandleSchema {
   instrument_id: string; // 	合约ID (如果是交割合约：BTC-USDT-190322)
@@ -54,17 +46,17 @@ export interface InstrumentReqOptions extends Instrument {
 }
 
 export enum Business {
-  FUTURES = "futures",
-  SWAP = "swap",
+  FUTURES = 'futures',
+  SWAP = 'swap',
 }
 
 export enum Channel {
-  FuturesInstrument = "futures/instruments",
-  FuturesTicker = "futures/ticker",
-  FuturesTrade = "futures/trade",
-  FuturesPriceRange = "futures/price_range",
-  FuturesDepth = "futures/depth",
-  FuturesMarkPrice = "futures/mark_price",
+  FuturesInstrument = 'futures/instruments',
+  FuturesTicker = 'futures/ticker',
+  FuturesTrade = 'futures/trade',
+  FuturesPriceRange = 'futures/price_range',
+  FuturesDepth = 'futures/depth',
+  FuturesMarkPrice = 'futures/mark_price',
 }
 
 export interface Ticker {

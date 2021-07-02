@@ -12,23 +12,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const common_1 = require("../okex/common");
 const swap = require("../okex/swap");
 const util_1 = require("../util");
+const Job_Granularity = {
+    FiveMins: 60 * 5,
+    FifteenMins: 60 * 15,
+    HalfHour: 60 * 30,
+    OneHour: 60 * 60,
+    TwoHour: 60 * 120,
+    FourHour: 60 * 240,
+    OneDay: 60 * 1440,
+};
+exports.Job_Granularity = Job_Granularity;
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 function execJob(granularity) {
     return __awaiter(this, void 0, void 0, function* () {
         // 获取所有合约信息
-        // const futuresInstruments = await futures.initInstruments();
         const swapInstruments = yield swap.initInstruments();
-        // const futureOptions = futuresInstruments
-        //   // .filter((i) => ['BTC', 'ETH', 'LTC'].includes(i.underlying_index))
-        //   .filter((i) => ['BTC'].includes(i.underlying_index))
-        //   .map((i) => {
-        //     return Object.assign({}, i, {
-        //       start: getISOString((-200 * granularity) / 60, 'm'),
-        //       end: new Date().toISOString(),
-        //       granularity,
-        //       alias: getInstrumentAlias(i.instrument_id),
-        //     });
-        //   });
         const swapOptions = swapInstruments
             // .filter((i) => ['BTC', 'ETH', 'LTC'].includes(i.underlying_index))
             .filter((i) => ['BTC'].includes(i.underlying_index))
@@ -40,7 +38,6 @@ function execJob(granularity) {
                 alias: util_1.getInstrumentAlias(i.instrument_id),
             });
         });
-        // return await getCandlesWithLimitedSpeed(futureOptions.concat(swapOptions));
         return yield common_1.getCandlesWithLimitedSpeed(swapOptions);
     });
 }

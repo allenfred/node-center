@@ -1,11 +1,13 @@
 import * as bluebird from 'bluebird';
-import { BtcSwapCandle, BtcFutureCandle, EthSwapCandle, EthFutureCandle, EosSwapCandle, EosFutureCandle } from '../database/models';
+import { BtcSwapCandle } from '../database/models';
 import { InstrumentCandleSchema } from '../types';
+import logger from '../logger';
 
 async function upsert(candles: InstrumentCandleSchema[]) {
   return bluebird.map(candles, async (candle: InstrumentCandleSchema) => {
     //find unique candle by underlying_index & timestamp & alias & granularity
     const uniqueCondition = {
+      instrument_id: candle.instrument_id,
       timestamp: new Date(candle.timestamp),
       granularity: candle.granularity,
     };
@@ -14,9 +16,13 @@ async function upsert(candles: InstrumentCandleSchema[]) {
 
     const existedCandle = await Model.findOne(uniqueCondition);
     if (existedCandle) {
-      return await Model.updateOne(uniqueCondition, candle);
+      return await Model.updateOne(uniqueCondition, candle).catch((err) => {
+        logger.error(`update candle: ${candle}`, err);
+      });
     } else {
-      return await Model.create(candle);
+      return await Model.create(candle).catch((err) => {
+        logger.error(`create candle: ${candle}`, err);
+      });
     }
   });
 }
@@ -24,20 +30,10 @@ async function upsert(candles: InstrumentCandleSchema[]) {
 function getModel(candle) {
   const swapModels = {
     BTC: BtcSwapCandle,
-    EOS: EosSwapCandle,
-    ETH: EthSwapCandle,
-  };
-
-  const futureModels = {
-    BTC: BtcFutureCandle,
-    EOS: EosFutureCandle,
-    ETH: EthFutureCandle,
   };
 
   if (candle.instrument_id.includes('SWAP')) {
     return swapModels[candle.underlying_index];
-  } else {
-    return futureModels[candle.underlying_index];
   }
 }
 

@@ -17,38 +17,36 @@ const logger_1 = require("../logger");
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 function startSchedule() {
     return __awaiter(this, void 0, void 0, function* () {
-        yield util_1.execJob(60 * 5);
+        yield commonAPI.getBtcUsdSwapMaxCandles();
+        yield commonAPI.getBtcUsdtSwapMaxCandles();
         // At every 5 minute.
         schedule.scheduleJob('*/5 * * * *', () => __awaiter(this, void 0, void 0, function* () {
-            logger_1.default.info('----Every5MinsJob Start Executing----');
-            yield util_1.execJob(60 * 5);
-            yield util_1.execJob(60 * 15);
+            logger_1.default.info('----Every 5Mins Job Start Executing----');
+            yield util_1.execJob(util_1.Job_Granularity.FiveMins);
+            yield util_1.execJob(util_1.Job_Granularity.FifteenMins);
         }));
         // every day - At 00:05.
         schedule.scheduleJob('5 0 * * *', () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info('----EveryDayJob Start Executing----');
-            yield util_1.execJob(60 * 1440);
-            // 获取最多过去1440条k线数据
+            yield util_1.execJob(util_1.Job_Granularity.OneDay);
             yield currencyAPI.getBtcMaxCandles();
-            yield commonAPI.getBtcSwapMaxCandles();
+            yield commonAPI.getBtcUsdSwapMaxCandles();
+            yield commonAPI.getBtcUsdtSwapMaxCandles();
         }));
         // every 4 hours - At minute 5 past every 4th hour.
         schedule.scheduleJob('5 */4 * * *', () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info('----Every4HourJob Start Executing----');
-            yield util_1.execJob(60 * 240);
+            yield util_1.execJob(util_1.Job_Granularity.FourHour);
         }));
         // every 2 hours - At minute 5 past every 2nd hour.
         schedule.scheduleJob('5 */2 * * *', () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info('----Every2HoursJob Start Executing----');
-            yield util_1.execJob(60 * 120);
+            yield util_1.execJob(util_1.Job_Granularity.TwoHour);
         }));
         // every hour - At minute 5.
         schedule.scheduleJob('0 * * * *', () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info('----EveryHourJob Start Executing----');
-            yield util_1.execJob(60 * 60);
-            // 获取最近200条k线数据
-            yield currencyAPI.getBtcLatestCandles();
-            yield commonAPI.getBtcSwapLatestCandles();
+            yield util_1.execJob(util_1.Job_Granularity.OneHour);
         }));
     });
 }

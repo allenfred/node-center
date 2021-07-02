@@ -11,22 +11,27 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const bluebird = require("bluebird");
 const models_1 = require("../database/models");
+const logger_1 = require("../logger");
 function upsert(candles) {
     return __awaiter(this, void 0, void 0, function* () {
         return bluebird.map(candles, (candle) => __awaiter(this, void 0, void 0, function* () {
             //find unique candle by underlying_index & timestamp & alias & granularity
             const uniqueCondition = {
+                instrument_id: candle.instrument_id,
                 timestamp: new Date(candle.timestamp),
                 granularity: candle.granularity,
             };
             const Model = getModel(candle);
             const existedCandle = yield Model.findOne(uniqueCondition);
             if (existedCandle) {
-                return yield Model.updateOne(uniqueCondition, candle);
+                return yield Model.updateOne(uniqueCondition, candle).catch((err) => {
+                    logger_1.default.error(`update candle: ${candle}`, err);
+                });
             }
             else {
-                console.log('create....');
-                return yield Model.create(candle);
+                return yield Model.create(candle).catch((err) => {
+                    logger_1.default.error(`create candle: ${candle}`, err);
+                });
             }
         }));
     });
@@ -34,19 +39,9 @@ function upsert(candles) {
 function getModel(candle) {
     const swapModels = {
         BTC: models_1.BtcSwapCandle,
-        EOS: models_1.EosSwapCandle,
-        ETH: models_1.EthSwapCandle,
-    };
-    const futureModels = {
-        BTC: models_1.BtcFutureCandle,
-        EOS: models_1.EosFutureCandle,
-        ETH: models_1.EthFutureCandle,
     };
     if (candle.instrument_id.includes('SWAP')) {
         return swapModels[candle.underlying_index];
-    }
-    else {
-        return futureModels[candle.underlying_index];
     }
 }
 const InstrumentCandleDao = {

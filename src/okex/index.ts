@@ -1,6 +1,3 @@
-import * as futures from './futures';
-import * as swap from './swap';
-import * as common from './common';
 import { startSchedule } from '../schedule';
 
 export async function initOkexMarketMonitor() {
