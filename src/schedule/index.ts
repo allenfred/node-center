@@ -12,6 +12,7 @@ export async function startSchedule() {
   // At every 5 minute.
   schedule.scheduleJob('*/5 * * * *', async () => {
     logger.info('----Every 5Mins Job Start Executing----');
+    const min = new Date().getMinutes();
     await execJob(Job_Granularity.FiveMins);
     await execJob(Job_Granularity.FifteenMins);
   });
