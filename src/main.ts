@@ -19,8 +19,9 @@ server.listen(3002);
   logger.info('----- crypto-server start -----');
   //连接数据库
   await connectMongo();
+
   setupWsserver();
 
   // 开启定时任务获取历史K线
-  // startSchedule();
+  startSchedule();
 })();
