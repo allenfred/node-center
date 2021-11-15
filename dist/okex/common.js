@@ -17,7 +17,7 @@ const types_1 = require("../types");
 const dao_1 = require("../dao");
 const util_1 = require("../util");
 const swap = require("../okex/swap");
-const pClient = publicClient_1.default(config_1.httpHost, 10000);
+const pClient = publicClient_1.default(config_1.OKEX_HTTP_HOST, 10000);
 const candles = [
     'candle60s',
     'candle180s',
@@ -128,15 +128,15 @@ function getCandlesByGroup(options) {
 exports.getCandlesByGroup = getCandlesByGroup;
 function getCandlesWithLimitedSpeed(options) {
     return __awaiter(this, void 0, void 0, function* () {
-        //设置系统限速规则: 10次/2s (okex官方API 限速规则：20次/2s)
-        let groupCount = Math.round(options.length / 10);
+        //设置系统限速规则: 5次/2s (okex官方API 限速规则：20次/2s)
+        let groupCount = Math.round(options.length / 5);
         groupCount = groupCount > 0 ? groupCount : 1;
         let start = 0;
         yield bluebird.map(new Array(groupCount).fill(null), () => __awaiter(this, void 0, void 0, function* () {
-            yield getCandlesByGroup(options.slice(start, start + 10)).catch((err) => {
+            yield getCandlesByGroup(options.slice(start, start + 5)).catch((err) => {
                 logger_1.default.error(`getCandlesByGroup Error: `, err);
             });
-            start += 10;
+            start += 5;
             return util_1.sleep(2);
         }), { concurrency: 1 });
     });

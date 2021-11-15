@@ -1,12 +1,12 @@
 import PublicClient from './../publicClient';
-import { httpHost } from '../../config';
+import { OKEX_HTTP_HOST } from '../../config';
 import * as bluebird from 'bluebird';
 import logger from '../../logger';
 import { Candle, InstrumentReqOptions } from '../../types';
 import { BtcUSDTCandleDao } from '../../dao';
 import { getISOString } from '../../util';
 
-const pClient = PublicClient(httpHost, 10000);
+const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
 
 //获取合约K线数据
 async function getCandles({ instrumentId, start, end, granularity }: { instrumentId: string; start: string; end: string; granularity: number }): Promise<Array<Candle>> {

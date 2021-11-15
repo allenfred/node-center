@@ -10,6 +10,7 @@ async function upsert(candles: InstrumentCandleSchema[]) {
       timestamp: new Date(candle.timestamp),
       granularity: candle.granularity,
     };
+
     const existedCandle = await BtcSwapCandle.findOne(uniqueCondition);
 
     if (existedCandle) {
@@ -20,8 +21,8 @@ async function upsert(candles: InstrumentCandleSchema[]) {
   });
 }
 
-const InstrumentCandleDao = {
+const BtcSwapCandleDao = {
   upsert,
 };
 
-export { InstrumentCandleDao };
+export { BtcSwapCandleDao };

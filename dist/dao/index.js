@@ -7,4 +7,5 @@ __export(require("./instrumentInfo"));
 __export(require("./instrumentCandle"));
 __export(require("./instrumentTicker"));
 __export(require("./btcUSDTCandle"));
+__export(require("./btcSwapCandle"));
 //# sourceMappingURL=index.js.map

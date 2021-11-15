@@ -22,6 +22,7 @@ function startSchedule() {
         // At every 5 minute.
         schedule.scheduleJob('*/5 * * * *', () => __awaiter(this, void 0, void 0, function* () {
             logger_1.default.info('----Every 5Mins Job Start Executing----');
+            const min = new Date().getMinutes();
             yield util_1.execJob(util_1.Job_Granularity.FiveMins);
             yield util_1.execJob(util_1.Job_Granularity.FifteenMins);
         }));

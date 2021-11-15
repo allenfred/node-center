@@ -10,9 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const connection_1 = require("./database/connection");
-const schedule_1 = require("./schedule");
 const logger_1 = require("./logger");
 const http = require("http");
+const server_1 = require("./wsserver/server");
 const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('ok');
@@ -26,8 +26,9 @@ server.listen(8000);
         logger_1.default.info('-----crawler start-----');
         //连接数据库
         yield connection_1.default();
+        server_1.setupWsserver();
         // 开启定时任务获取历史K线
-        schedule_1.startSchedule();
+        // startSchedule();
     });
 })();
 //# sourceMappingURL=main.js.map

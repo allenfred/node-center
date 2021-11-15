@@ -128,3 +128,7 @@ export function refreshTradeInfo(memoryData: Array<Ticker | PriceRange | MarkPri
     memoryData.push(data);
   }
 }
+
+export function getNumber(str: string) {
+  return str.match(/\d+/)[0];
+}

@@ -15,7 +15,7 @@ const bluebird = require("bluebird");
 const logger_1 = require("../../logger");
 const dao_1 = require("../../dao");
 const util_1 = require("../../util");
-const pClient = publicClient_1.default(config_1.httpHost, 10000);
+const pClient = publicClient_1.default(config_1.OKEX_HTTP_HOST, 10000);
 //获取合约K线数据
 function getCandles({ instrumentId, start, end, granularity }) {
     return __awaiter(this, void 0, void 0, function* () {

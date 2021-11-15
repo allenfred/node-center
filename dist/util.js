@@ -135,4 +135,8 @@ function refreshTradeInfo(memoryData, marketData) {
     }
 }
 exports.refreshTradeInfo = refreshTradeInfo;
+function getNumber(str) {
+    return str.match(/\d+/)[0];
+}
+exports.getNumber = getNumber;
 //# sourceMappingURL=util.js.map

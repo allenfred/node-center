@@ -16,10 +16,12 @@ const password = 'qazwsx123';
 const host = '8.210.170.98';
 const port = '27017';
 const db = 'okex';
+mongoose.set('useCreateIndex', true);
 function connect() {
     return __awaiter(this, void 0, void 0, function* () {
         yield mongoose.connect(`mongodb://${username}:${password}@${host}:${port}/${db}`, {
             useNewUrlParser: true,
+            useUnifiedTopology: true,
         });
     });
 }
