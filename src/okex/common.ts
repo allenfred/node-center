@@ -143,7 +143,7 @@ async function getCandlesWithLimitedSpeed(options: Array<InstrumentReqOptions>) 
   );
 }
 
-// 获取最多过去1440条k线数据 (15min 1h 2h 4h 6h 12h 1d)
+// 获取最多过去1440条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
 async function getBtcUsdSwapMaxCandles() {
   // 币本位合约
   let instruments = await swap.initInstruments();
@@ -161,6 +161,14 @@ async function getBtcUsdSwapMaxCandles() {
 
     reqOptions.push(
       Object.assign({}, instrument, {
+        start: getISOString((i + 1) * 30 * -200, 'm'),
+        end: getISOString(i * 30 * -200, 'm'),
+        granularity: 1800, // 30m
+      })
+    );
+
+    reqOptions.push(
+      Object.assign({}, instrument, {
         start: getISOString((i + 1) * -200, 'h'),
         end: getISOString(i * -200, 'h'),
         granularity: 3600, // 1h
@@ -211,7 +219,7 @@ async function getBtcUsdSwapMaxCandles() {
   return await getCandlesWithLimitedSpeed(reqOptions);
 }
 
-// 获取最多过去1440条k线数据 (15min 1h 2h 4h 6h 12h 1d)
+// 获取最多过去1440条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
 async function getBtcUsdtSwapMaxCandles() {
   // 币本位合约
   let instruments = await swap.initInstruments();
@@ -229,6 +237,14 @@ async function getBtcUsdtSwapMaxCandles() {
 
     reqOptions.push(
       Object.assign({}, instrument, {
+        start: getISOString((i + 1) * 30 * -200, 'm'),
+        end: getISOString(i * 30 * -200, 'm'),
+        granularity: 1800, // 30m
+      })
+    );
+
+    reqOptions.push(
+      Object.assign({}, instrument, {
         start: getISOString((i + 1) * -200, 'h'),
         end: getISOString(i * -200, 'h'),
         granularity: 3600, // 1h
@@ -279,7 +295,7 @@ async function getBtcUsdtSwapMaxCandles() {
   return await getCandlesWithLimitedSpeed(reqOptions);
 }
 
-// 币本位 获取最近200条k线数据 (15min 1h 2h 4h 6h 12h 1d)
+// 币本位 获取最近200条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
 async function getBtcUsdSwapLatestCandles() {
   const reqOptions = [];
 
@@ -303,6 +319,18 @@ async function getBtcUsdSwapLatestCandles() {
         start: getISOString(15 * -200, 'm'),
         end: getISOString(0, 'm'),
         granularity: 900, // 15min
+      }
+    )
+  );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USD-SWAP',
+        start: getISOString(30 * -200, 'm'),
+        end: getISOString(0, 'm'),
+        granularity: 1800, // 30min
       }
     )
   );
@@ -382,7 +410,7 @@ async function getBtcUsdSwapLatestCandles() {
   return await getCandlesByGroup(reqOptions);
 }
 
-// 法币本位 获取最近200条k线数据 (15min 1h 2h 4h 6h 12h 1d)
+// 法币本位 获取最近200条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
 async function getBtcUsdtSwapLatestCandles() {
   const reqOptions = [];
 
@@ -406,6 +434,18 @@ async function getBtcUsdtSwapLatestCandles() {
         start: getISOString(15 * -200, 'm'),
         end: getISOString(0, 'm'),
         granularity: 900, // 15min
+      }
+    )
+  );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: 'BTC-USDT-SWAP',
+        start: getISOString(30 * -200, 'm'),
+        end: getISOString(0, 'm'),
+        granularity: 1800, // 30min
       }
     )
   );
