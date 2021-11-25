@@ -20,7 +20,7 @@ async function execJob(granularity: number) {
 
   const swapOptions = swapInstruments
     // .filter((i) => ['BTC', 'ETH', 'LTC'].includes(i.underlying_index))
-    .filter((i) => ['BTC'].includes(i.underlying_index))
+    // .filter((i) => ['BTC'].includes(i.underlying_index))
     .map((i) => {
       return Object.assign({}, i, {
         start: getISOString((-200 * granularity) / 60, 'm'),
