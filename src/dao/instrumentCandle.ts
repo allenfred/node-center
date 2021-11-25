@@ -1,5 +1,5 @@
 import * as bluebird from 'bluebird';
-import { BtcSwapCandle } from '../database/models';
+import { BtcSwapCandle, SwapUSDTCandle } from '../database/models';
 import { InstrumentCandleSchema } from '../types';
 import logger from '../logger';
 
@@ -28,12 +28,10 @@ async function upsert(candles: InstrumentCandleSchema[]) {
 }
 
 function getModel(candle) {
-  const swapModels = {
-    BTC: BtcSwapCandle,
-  };
-
-  if (candle.instrument_id.includes('SWAP')) {
-    return swapModels[candle.underlying_index];
+  if (candle.instrument_id.includes('BTC')) {
+    return BtcSwapCandle;
+  } else {
+    return SwapUSDTCandle;
   }
 }
 
