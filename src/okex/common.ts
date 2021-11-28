@@ -1,12 +1,14 @@
 import PublicClient from './publicClient';
+import PublicClientV5 from './publicClientV5';
 import { OKEX_HTTP_HOST } from '../config';
 import * as bluebird from 'bluebird';
 import logger from '../logger';
 import { Business, Instrument, Candle, InstrumentReqOptions } from '../types';
 import { InstrumentCandleDao } from '../dao';
-import { sleep, getISOString, isMainCurrency, getInstrumentAlias } from '../util';
+import { getISOString } from '../util';
 
 const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
+const pClientV5 = PublicClientV5(OKEX_HTTP_HOST, 10000);
 const candles = [
   'candle60s', // 1 min
   'candle180s', // 3 mins
@@ -34,6 +36,19 @@ const candleChannels = [
   // 'candle1W', // 1 week
 ];
 
+const Bar_Type = {
+  300: '5m',
+  900: '15m',
+  1800: '30m',
+  3600: '1H',
+  7200: '2H',
+  14400: '4H',
+  21600: '6H',
+  43200: '12H',
+  86400: '1D',
+  604800: '1W',
+};
+
 interface SimpleIntrument {
   instrument_id: string;
 }
@@ -42,16 +57,26 @@ async function getSwapInstruments(): Promise<any> {
   return pClient.swap().getInstruments();
 }
 
-//获取合约K线数据
+// V3 获取合约K线数据
+// async function getCandles({ instrumentId, start, end, granularity }: { instrumentId: string; start: string; end: string; granularity: number }): Promise<Array<Candle>> {
+//   try {
+//     const data = await pClient.swap().getCandles(instrumentId, { start, end, granularity });
+//     logger.info(`获取 ${instrumentId}/${granularity} K线成功: 从${start}至${end}, 共 ${data.length} 条`);
+//     return data;
+//   } catch (e) {
+//     logger.error(`获取 ${instrumentId}/${granularity} K线失败: 从${start}至${end}`);
+//     return [];
+//   }
+// }
+
+// V5 获取合约K线数据
 async function getCandles({ instrumentId, start, end, granularity }: { instrumentId: string; start: string; end: string; granularity: number }): Promise<Array<Candle>> {
   try {
-    const data = instrumentId.includes('SWAP')
-      ? await pClient.swap().getCandles(instrumentId, { start, end, granularity })
-      : await pClient.futures().getCandles(instrumentId, { start, end, granularity });
-    logger.info(`获取 ${instrumentId}/${granularity} K线成功: 从${start}至${end}, 共 ${data.length} 条`);
-    return data;
+    const data = await pClientV5.swap().getCandles({ instId: instrumentId, before: new Date(start).valueOf(), after: new Date(end).valueOf(), bar: Bar_Type[+granularity] });
+    logger.info(`获取 ${instrumentId}/${Bar_Type[+granularity]} K线成功: 从${start}至${end}, 共 ${data.data.length} 条`);
+    return data.data;
   } catch (e) {
-    logger.error(`获取 ${instrumentId}/${granularity} K线失败: 从${start}至${end}`);
+    logger.error(`获取 ${instrumentId}/${Bar_Type[+granularity]} K线失败: 从${start}至${end}`);
     return [];
   }
 }
@@ -126,7 +151,7 @@ async function getCandlesWithLimitedSpeed(options: Array<InstrumentReqOptions>) 
               instrument_id: option.instrument_id,
               underlying_index: option.underlying_index,
               quote_currency: option.quote_currency,
-              timestamp: new Date(candle[0]),
+              timestamp: new Date(+candle[0]),
               open: +candle[1],
               high: +candle[2],
               low: +candle[3],
@@ -140,7 +165,7 @@ async function getCandlesWithLimitedSpeed(options: Array<InstrumentReqOptions>) 
           return InstrumentCandleDao.upsert(readyCandles);
         });
     },
-    { concurrency: 5 }
+    { concurrency: 3 }
   );
 }
 

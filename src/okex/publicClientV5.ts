@@ -2,7 +2,7 @@ const axios = require('axios');
 const querystring = require('querystring');
 import logger from '../logger';
 
-export default function PublicClient(apiUri = 'https://www.okex.me', timeout = 3000, axiosConfig = {}) {
+export default function PublicClient(apiUri = 'https://www.okex.com', timeout = 3000, axiosConfig = {}) {
   const axiosInstance = axios.default.create(Object.assign({ baseURL: apiUri, timeout }, axiosConfig));
   async function get(url, params?) {
     try {
@@ -50,8 +50,8 @@ export default function PublicClient(apiUri = 'https://www.okex.me', timeout = 3
         async getTrades(instrument_id, params) {
           return get(`/api/swap/v3/instruments/${instrument_id}/trades${params ? `?${querystring.stringify(params)}` : ''}`);
         },
-        async getCandles(instrument_id, params) {
-          return get(`/api/swap/v3/instruments/${instrument_id}/candles${params ? `?${querystring.stringify(params)}` : ''}`);
+        async getCandles(params: any) {
+          return get(`/api/v5/market/candles${params ? `?${querystring.stringify(params)}` : ''}`);
         },
         async getIndex(instrument_id) {
           return get(`/api/swap/v3/instruments/${instrument_id}/index`);
