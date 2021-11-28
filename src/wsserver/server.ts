@@ -2,9 +2,9 @@ import { EventEmitter } from 'events';
 import { V3WebsocketClient } from '@okfe/okex-node';
 import { OKEX_WS_HOST } from '../config';
 import logger from '../logger';
-import { Channel, MarketData } from '../types';
-import * as swap from './okex/swap';
-import * as common from './okex/common';
+import { Channel, OkexWsMessage, Instrument, CandleChannel } from '../types';
+import * as swap from '../okex/swap';
+import * as common from '../okex/common';
 import { handleMessage } from './handler';
 
 const WebSocket = require('ws');
@@ -14,28 +14,30 @@ const clients = [];
 let wsClient: any;
 const event = new EventEmitter();
 
+interface Msg {
+  event?: string;
+  arg: any;
+  data: any[];
+}
+
 // websocket 返回消息
 function onMessage(data: any) {
   try {
     // logger.info(`!!! websocket message =${data}`);
-    var obj = JSON.parse(data);
+    var obj: Msg = JSON.parse(data);
     var eventType = obj.event;
 
-    if (eventType == 'login') {
-      //登录消息
-      if (obj.success == true) {
-        event.emit('login');
-      }
+    // if (eventType == 'login') {
+    //   //登录消息
+    //   if (obj?.success == true) {
+    //     event.emit('login');
+    //   }
 
-      return;
-    }
+    //   return;
+    // }
 
-    // 订阅channels消息
+    // channels 订阅消息
     if (eventType == undefined) {
-      if (obj && obj.table === undefined) {
-        logger.error('!!!marketData table is undefined.');
-      }
-
       handleMessage(obj);
       broadCastMessage(obj);
     }
@@ -49,30 +51,26 @@ async function subChannels() {
   // wsClient.login(apikey, secret, passphrase);
 
   // 获取永续所有合约信息
-  // const swapInstruments = await swap.initInstruments();
+  const swapInstruments: Instrument[] = await swap.initInstruments();
+  // 指定BTC合约 及 其他USDT本位合约
+  const subInstruments: Instrument[] = swapInstruments.filter((i) => i.underlying_index === 'BTC' || i.quote_currency === 'USDT');
 
   // 订阅永续频道信息
-  // wsClient.subscribe(...common.getSwapSubCommands(swapInstruments));
-
-  // 订阅 BTC-USDT-SWAP 1h candle
-  wsClient.subscribe(
-    ...common.getSwapSubCommands([
-      {
-        instrument_id: 'BTC-USDT-SWAP',
-      },
-    ])
-  );
-  // wsClient.subscribe('swap/candle3600s:BTC-USDT-SWAP');
+  wsClient.subscribe(...common.getSwapSubCommands(subInstruments));
 }
 
-function broadCastMessage(marketData: MarketData) {
+function getChannelIndex(arg: any) {
+  return `candle${CandleChannel[arg.channel]}:${arg.instId}`;
+}
+
+function broadCastMessage(msg: OkexWsMessage) {
   if (!clients.length) {
     return;
   }
 
   clients.map((client: any) => {
-    if (client.channels.includes(`${marketData.table}:${marketData.data[0].instrument_id}`)) {
-      client.send(JSON.stringify(marketData));
+    if (client.channels.includes(getChannelIndex(msg.arg))) {
+      client.send(JSON.stringify({ channel: getChannelIndex(msg.arg), data: msg.data }));
     }
   });
 }

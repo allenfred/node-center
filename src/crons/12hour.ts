@@ -3,11 +3,11 @@ import connectMongo from '../database/connection';
 import logger from '../logger';
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
-// */15 * * * * At every 15 minute.
+// 10 */12 * * *  At minute 10 past every 12th hour.
 const startJob = async () => {
-  logger.info('---- 15Mins Job Start Executing ----');
+  logger.info('---- 12hourJob Start Executing ----');
   await connectMongo();
-  await execJob(Job_Granularity.FifteenMins);
+  await execJob(Job_Granularity.TwelveHour);
   logger.info('----- Job End -----');
   process.exit(0);
 };

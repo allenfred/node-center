@@ -16,3 +16,25 @@ export async function initInstruments(): Promise<Instrument[]> {
 
   return instruments;
 }
+
+export async function initCandle(instruments: Instrument[]): Promise<void> {
+  //获取所有时间粒度请求参数 如[60/180/300 900/1800/3600/7200/14400/21600/43200/86400]
+  const options: Array<{
+    start: string;
+    end: string;
+    granularity: number;
+  }> = getCandleRequestOptions();
+  const readyOptions = [];
+
+  //初始化所有合约candle请求参数
+  instruments
+    // .filter(i => isMainCurrency(i.underlying_index))
+    .map((instrument: Instrument) => {
+      for (let option of options) {
+        readyOptions.push(Object.assign({}, option, instrument, { alias: 'swap' }));
+      }
+    });
+
+  logger.info(`[永续合约] - 获取candle数据需请求 ${readyOptions.length} 次 ...`);
+  await getCandlesWithLimitedSpeed(readyOptions);
+}

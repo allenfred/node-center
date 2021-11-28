@@ -42,7 +42,7 @@ export interface InstrumentReqOptions extends Instrument {
   start: string;
   end: string;
   granularity: number;
-  alias: string; // 本周 this_week 次周 next_week 季度 quarter 永续 swap
+  instrument_id: string;
 }
 
 export enum Business {
@@ -103,7 +103,19 @@ export interface MarkPrice {
   timestamp: string; //系统时间 ISO_8601
 }
 
-export interface MarketData {
-  table: Channel;
+export interface OkexWsMessage {
+  arg: any;
   data: Ticker[] | Trade[] | PriceRange[] | Depth[] | MarkPrice[];
+}
+
+export enum CandleChannel {
+  candle1W = 604800,
+  candle1D = 86400,
+  candle12H = 43200,
+  candle6H = 21600,
+  candle4H = 14400,
+  candle2H = 7200,
+  candle1H = 3600,
+  candle30m = 1800,
+  candle15m = 900,
 }

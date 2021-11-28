@@ -1,43 +1,93 @@
-import { V3WebsocketClient } from '@okfe/okex-node';
-import * as common from '../okex/common';
 import { BtcSwapCandleDao, InstrumentTickerDao } from '../dao';
-import { Instrument, Ticker, Candle, InstrumentCandleSchema } from '../types';
-import { getInstrumentAlias, getNumber } from '../util';
-import { BtcSwapCandle } from '../database/models/btcSwapCandle';
+import { Ticker, Candle, InstrumentCandleSchema } from '../types';
+import { getInstrumentAlias } from '../util';
 
+/* V5 API 
+{
+  "arg": {
+    "channel": "candle1D",
+    "instId": "BTC-USDT-SWAP"
+  },
+  "data": [
+    [
+      "1629993600000",
+      "42500",
+      "48199.9",
+      "41006.1",
+      "41006.1",
+      "3587.41204591",
+      "166741046.22583129"
+    ]
+  ]
+} 
+*/
 interface OkexMessage {
-  table: string; // swap/candle14400s
-  data: Array<{ candle: Candle; instrument_id: string }>;
+  arg: any;
+  data: Array<Candle>;
+}
+
+const candles = [
+  'candle60s', // 1 min
+  'candle180s', // 3 mins
+  'candle300s', // 5 mins
+  'candle900s', // 15 mins
+  'candle1800s', // 30 mins
+  'candle3600s', // 1 hour
+  'candle7200s', // 2 hours
+  'candle14400s', // 4 hours
+  'candle21600s', // 6 hours
+  'candle43200s', // 12 hours
+  'candle86400s', // 1 day
+  'candle604800s', // 1 week
+];
+
+enum CandleChannel {
+  candle1W = 604800,
+  candle1D = 86400,
+  candle12H = 43200,
+  candle6H = 21600,
+  candle4H = 14400,
+  candle2H = 7200,
+  candle1H = 3600,
+  candle30m = 1800,
+  candle15m = 900,
 }
 
 export async function handleTicker(data: Ticker[]) {
   await InstrumentTickerDao.upsert(data);
 }
 
-export async function handleBtcSwapCandles(message: { table: string; data: Array<{ instrument_id: string; candle: Candle }> }) {
-  const timePeriod = getNumber(message.table);
-  const candles: InstrumentCandleSchema[] = message.data.map((item: { instrument_id: string; candle: Candle }) => {
+export async function handleBtcSwapCandles(message: { arg: any; data: Array<Candle> }) {
+  const granularity = CandleChannel[message.arg.channel];
+  const instrumentId = message.arg.instId;
+  const candles: InstrumentCandleSchema[] = message.data.map((candle: Candle) => {
     return {
-      instrument_id: item.instrument_id,
-      underlying_index: item.instrument_id.split('-')[0],
-      quote_currency: item.instrument_id.split('-')[1],
-      timestamp: new Date(item.candle[0]),
-      open: +item.candle[1],
-      high: +item.candle[2],
-      low: +item.candle[3],
-      close: +item.candle[4],
-      volume: +item.candle[5],
-      currency_volume: +item.candle[6],
-      alias: getInstrumentAlias(item.instrument_id),
-      granularity: +timePeriod,
+      instrument_id: instrumentId,
+      underlying_index: instrumentId.split('-')[0],
+      quote_currency: instrumentId.split('-')[1],
+      timestamp: new Date(+candle[0]),
+      open: +candle[1],
+      high: +candle[2],
+      low: +candle[3],
+      close: +candle[4],
+      volume: +candle[5],
+      currency_volume: +candle[6],
+      granularity: +granularity,
     };
   });
 
   await BtcSwapCandleDao.upsert(candles);
 }
 
+function isCandleChannelMsg(message: any) {
+  if (message && message.arg && message.arg.channel.indexOf('candle') !== -1) {
+    return true;
+  }
+  return false;
+}
+
 export async function handleMessage(message: OkexMessage) {
-  if (message && message.table && message.table.indexOf('swap/candle') !== -1) {
-    if (message.data && message.data[0].instrument_id === 'BTC-USDT-SWAP') handleBtcSwapCandles(message);
+  if (isCandleChannelMsg(message)) {
+    if (message.arg.instId.indexOf('BTC') !== -1) handleBtcSwapCandles(message);
   }
 }

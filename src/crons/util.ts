@@ -1,6 +1,7 @@
 import { getCandlesWithLimitedSpeed } from '../okex/common';
-import * as swap from '../okex/swap';
-import { getInstrumentAlias, getISOString, isMainCurrency } from '../util';
+import { getISOString } from '../util';
+import { InstrumentInfo } from '../database/models';
+import { Instrument, InstrumentReqOptions } from '../types';
 
 const Job_Granularity = {
   FiveMins: 60 * 5,
@@ -9,26 +10,35 @@ const Job_Granularity = {
   OneHour: 60 * 60,
   TwoHour: 60 * 120,
   FourHour: 60 * 240,
-  Sixour: 60 * 360,
+  SixHour: 60 * 360,
+  TwelveHour: 60 * 7200,
   OneDay: 60 * 1440,
+  Weekly: 60 * 1440 * 7,
 };
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 async function execJob(granularity: number) {
   // 获取所有合约信息
-  const swapInstruments = await swap.initInstruments();
+  // const swapInstruments = await swap.initInstruments();
+  const swapInstruments: Instrument[] = await InstrumentInfo.find({});
 
-  const swapOptions = swapInstruments
-    // .filter((i) => ['BTC', 'ETH', 'LTC'].includes(i.underlying_index))
-    // .filter((i) => ['BTC'].includes(i.underlying_index))
-    .map((i) => {
-      return Object.assign({}, i, {
-        start: getISOString((-200 * granularity) / 60, 'm'),
-        end: new Date().toISOString(),
-        granularity,
-        alias: getInstrumentAlias(i.instrument_id),
-      });
-    });
+  const customFilter = (i: Instrument) => {
+    if (granularity === 300) {
+      return i.underlying_index === 'BTC';
+    } else {
+      return i.underlying_index === 'BTC' || i.quote_currency === 'USDT';
+    }
+  };
+
+  const swapOptions: InstrumentReqOptions[] = swapInstruments.filter(customFilter).map((i: Instrument) => {
+    return {
+      // 最近 5 条K线数据
+      start: getISOString((-5 * granularity) / 60, 'm'),
+      end: new Date().toISOString(),
+      granularity,
+      instrument_id: i.instrument_id,
+    } as InstrumentReqOptions;
+  });
 
   return await getCandlesWithLimitedSpeed(swapOptions);
 }

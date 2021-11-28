@@ -19,7 +19,7 @@ jobs:
       - name: Delete old process and recreate
         run: |
           cd /usr/local/workspace/crypto-server
-          pm2 startOrRestart startup.json
+          pm2 startOrRestart ecosystem.config.js
       - name: Alright
         if: ${{ failure() }}
         run: |

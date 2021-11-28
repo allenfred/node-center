@@ -1,8 +1,8 @@
 import connectMongo from './database/connection';
-import { startSchedule } from './schedule';
 import logger from './logger';
 import * as http from 'http';
 import { setupWsserver } from './wsserver/server';
+import { startJob } from './crons/5min';
 
 const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -19,9 +19,5 @@ server.listen(3002);
   logger.info('----- crypto-server start -----');
   //连接数据库
   await connectMongo();
-
   setupWsserver();
-
-  // 开启定时任务获取历史K线
-  startSchedule();
 })();
