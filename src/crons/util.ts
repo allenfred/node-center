@@ -32,8 +32,8 @@ async function execJob(granularity: number) {
 
   const swapOptions: InstrumentReqOptions[] = swapInstruments.filter(customFilter).map((i: Instrument) => {
     return {
-      // 最近 5 条K线数据
-      start: getISOString((-5 * granularity) / 60, 'm'),
+      // 最近 10 条K线数据
+      start: getISOString((-10 * granularity) / 60, 'm'),
       end: new Date().toISOString(),
       granularity,
       instrument_id: i.instrument_id,
