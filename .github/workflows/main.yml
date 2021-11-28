@@ -13,7 +13,7 @@ jobs:
       - name: Enter workspace
         run: |
           cd /usr/local/workspace/crypto-server
-          rm package-lock.json
+          rm -rf package-lock.json
           git pull
           npm install
           npm run build
