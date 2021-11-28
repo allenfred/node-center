@@ -5,7 +5,7 @@ module.exports = {
       script: 'dist/main.js',
     },
     {
-      name: '5mins',
+      name: 'crypto-cron-5mins',
       script: 'dist/crons/5min.js',
       instances: 1,
       exec_mode: 'fork',
@@ -14,7 +14,7 @@ module.exports = {
       autorestart: false,
     },
     {
-      name: '15mins',
+      name: 'crypto-cron-15mins',
       script: 'dist/crons/15min.js',
       instances: 1,
       exec_mode: 'fork',
@@ -23,7 +23,7 @@ module.exports = {
       autorestart: false,
     },
     {
-      name: '30mins',
+      name: 'crypto-cron-30mins',
       script: 'dist/crons/30min.js',
       instances: 1,
       exec_mode: 'fork',
@@ -32,7 +32,7 @@ module.exports = {
       autorestart: false,
     },
     {
-      name: 'hourly',
+      name: 'crypto-cron-hourly',
       script: 'dist/crons/1hour.js',
       instances: 1,
       exec_mode: 'fork',
@@ -41,7 +41,7 @@ module.exports = {
       autorestart: false,
     },
     {
-      name: '2hourly',
+      name: 'crypto-cron-2hourly',
       script: 'dist/crons/2hour.js',
       instances: 1,
       exec_mode: 'fork',
@@ -50,7 +50,7 @@ module.exports = {
       autorestart: false,
     },
     {
-      name: '4hourly',
+      name: 'crypto-cron-4hourly',
       script: 'dist/crons/4hour.js',
       instances: 1,
       exec_mode: 'fork',
@@ -59,7 +59,7 @@ module.exports = {
       autorestart: false,
     },
     {
-      name: '6hourly',
+      name: 'crypto-cron-6hourly',
       script: 'dist/crons/6hour.js',
       instances: 1,
       exec_mode: 'fork',
@@ -68,7 +68,7 @@ module.exports = {
       autorestart: false,
     },
     {
-      name: '12hourly',
+      name: 'crypto-cron-12hourly',
       script: 'dist/crons/12hour.js',
       instances: 1,
       exec_mode: 'fork',
@@ -77,7 +77,7 @@ module.exports = {
       autorestart: false,
     },
     {
-      name: '1day',
+      name: 'crypto-cron-1day',
       script: 'dist/crons/1day.js',
       instances: 1,
       exec_mode: 'fork',
@@ -86,7 +86,7 @@ module.exports = {
       autorestart: false,
     },
     {
-      name: 'weekly',
+      name: 'crypto-cron-weekly',
       script: 'dist/crons/weekly.js',
       instances: 1,
       exec_mode: 'fork',
