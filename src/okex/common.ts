@@ -170,7 +170,7 @@ async function getCandlesWithLimitedSpeed(options: Array<InstrumentReqOptions>) 
           return InstrumentCandleDao.upsert(readyCandles);
         });
     },
-    { concurrency: 3 }
+    { concurrency: 5 }
   );
 }
 

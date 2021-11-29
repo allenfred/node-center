@@ -13,18 +13,6 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true
   },
-  "files": [
-    "src/main.ts",
-    "src/crons/5min.ts",
-    "src/crons/15min.ts",
-    "src/crons/30min.ts",
-    "src/crons/1hour.ts",
-    "src/crons/2hour.ts",
-    "src/crons/4hour.ts",
-    "src/crons/6hour.ts",
-    "src/crons/12hour.ts",
-    "src/crons/1day.ts",
-    "src/crons/weekly.ts"
-  ],
+  "files": ["src/main.ts", "src/crons/5min.ts"],
   "exclude": ["node_modules"]
 }
