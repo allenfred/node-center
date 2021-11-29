@@ -72,11 +72,16 @@ async function getSwapInstruments(): Promise<any> {
 // V5 获取合约K线数据
 async function getCandles({ instrumentId, start, end, granularity }: { instrumentId: string; start: string; end: string; granularity: number }): Promise<Array<Candle>> {
   try {
-    const data = await pClientV5.swap().getCandles({ instId: instrumentId, before: new Date(start).valueOf(), after: new Date(end).valueOf(), bar: Bar_Type[+granularity] });
-    logger.info(`获取 ${instrumentId}/${Bar_Type[+granularity]} K线成功: 从${start}至${end}, 共 ${data.data.length} 条`);
-    return data.data;
+    const data = await pClientV5.swap().getCandles({ instId: instrumentId, before: new Date(start).valueOf(), bar: Bar_Type[+granularity] });
+    if (+data.code === 0) {
+      logger.info(`获取 ${instrumentId}/${Bar_Type[+granularity]} K线成功: 共 ${data.data.length} 条`);
+      return data.data;
+    } else {
+      logger.error(`获取 ${instrumentId}/${Bar_Type[+granularity]} K线失败: ${data.msg}`);
+      return [];
+    }
   } catch (e) {
-    logger.error(`获取 ${instrumentId}/${Bar_Type[+granularity]} K线失败: 从${start}至${end}`);
+    logger.error(`获取 ${instrumentId}/${Bar_Type[+granularity]} Catch Error: ${e}`);
     return [];
   }
 }
