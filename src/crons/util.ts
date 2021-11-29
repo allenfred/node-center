@@ -11,7 +11,7 @@ const Job_Granularity = {
   TwoHour: 60 * 120,
   FourHour: 60 * 240,
   SixHour: 60 * 360,
-  TwelveHour: 60 * 7200,
+  TwelveHour: 60 * 720,
   OneDay: 60 * 1440,
   Weekly: 60 * 1440 * 7,
 };
@@ -31,9 +31,14 @@ async function execJob(granularity: number) {
   };
 
   const swapOptions: InstrumentReqOptions[] = swapInstruments.filter(customFilter).map((i: Instrument) => {
+    let candleCount = 10;
+
+    if (granularity > Job_Granularity.TwoHour) {
+      candleCount = 4;
+    }
     return {
       // 最近 10 条K线数据
-      start: getISOString((-10 * granularity) / 60, 'm'),
+      start: getISOString((-candleCount * granularity) / 60, 'm'),
       end: new Date().toISOString(),
       granularity,
       instrument_id: i.instrument_id,
