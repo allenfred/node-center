@@ -51,10 +51,18 @@ export const startJob = async () => {
     await execJob(Job_Granularity.TwelveHour);
   }
 
+  // At 00:05.
+  if (hourNow === 0 && minuteNow === 5) {
+    await execJob(Job_Granularity.OneDay);
+  }
+
+  // At 00:10.
+  if (hourNow === 0 && minuteNow === 10) {
+    await currencyAPI.getBtcMaxCandles();
+  }
+
   // At 00:15.
   if (hourNow === 0 && minuteNow === 15) {
-    await execJob(Job_Granularity.OneDay);
-    await currencyAPI.getBtcMaxCandles();
     await commonAPI.getMaxCandles('BTC-USD-SWAP');
     await commonAPI.getMaxCandles('BTC-USDT-SWAP');
   }
