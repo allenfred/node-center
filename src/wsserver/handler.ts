@@ -1,6 +1,5 @@
 import { BtcSwapCandleDao, InstrumentTickerDao } from '../dao';
-import { Ticker, Candle, InstrumentCandleSchema } from '../types';
-import { getInstrumentAlias } from '../util';
+import { Ticker, Candle, InstrumentCandleSchema, CandleChannel } from '../types';
 
 /* V5 API 
 {
@@ -24,34 +23,6 @@ import { getInstrumentAlias } from '../util';
 interface OkexMessage {
   arg: any;
   data: Array<Candle>;
-}
-
-const candles = [
-  'candle60s', // 1 min
-  'candle180s', // 3 mins
-  'candle300s', // 5 mins
-  'candle900s', // 15 mins
-  'candle1800s', // 30 mins
-  'candle3600s', // 1 hour
-  'candle7200s', // 2 hours
-  'candle14400s', // 4 hours
-  'candle21600s', // 6 hours
-  'candle43200s', // 12 hours
-  'candle86400s', // 1 day
-  'candle604800s', // 1 week
-];
-
-enum CandleChannel {
-  candle1W = 604800,
-  candle1D = 86400,
-  candle12H = 43200,
-  candle6H = 21600,
-  candle4H = 14400,
-  candle2H = 7200,
-  candle1H = 3600,
-  candle30m = 1800,
-  candle15m = 900,
-  candle5m = 300,
 }
 
 export async function handleTicker(data: Ticker[]) {

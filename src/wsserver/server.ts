@@ -60,7 +60,7 @@ async function subChannels() {
 }
 
 function getChannelIndex(arg: any) {
-  return `candle${CandleChannel[arg.channel]}:${arg.instId}`;
+  return `candle${[arg.channel]}:${arg.instId}`;
 }
 
 function broadCastMessage(msg: OkexWsMessage) {

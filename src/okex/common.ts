@@ -9,18 +9,6 @@ import { getISOString } from '../util';
 
 const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
 const pClientV5 = PublicClientV5(OKEX_HTTP_HOST, 10000);
-const candles = [
-  'candle300s', // 5 mins
-  'candle900s', // 15 mins
-  'candle1800s', // 30 mins
-  'candle3600s', // 1 hour
-  'candle7200s', // 2 hours
-  'candle14400s', // 4 hours
-  'candle21600s', // 6 hours
-  'candle43200s', // 12 hours
-  'candle86400s', // 1 day
-  'candle604800s', // 1 week
-];
 
 const candleChannels = [
   'candle5m', // 5 mins

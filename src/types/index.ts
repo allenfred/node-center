@@ -120,3 +120,18 @@ export enum CandleChannel {
   candle15m = 900,
   candle5m = 300,
 }
+
+export const V3CandleChannels = [
+  'candle60s', // 1 min
+  'candle180s', // 3 mins
+  'candle300s', // 5 mins
+  'candle900s', // 15 mins
+  'candle1800s', // 30 mins
+  'candle3600s', // 1 hour
+  'candle7200s', // 2 hours
+  'candle14400s', // 4 hours
+  'candle21600s', // 6 hours
+  'candle43200s', // 12 hours
+  'candle86400s', // 1 day
+  'candle604800s', // 1 week
+];
