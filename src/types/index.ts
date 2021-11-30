@@ -118,4 +118,5 @@ export enum CandleChannel {
   candle1H = 3600,
   candle30m = 1800,
   candle15m = 900,
+  candle5m = 300,
 }
