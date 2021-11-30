@@ -10,8 +10,6 @@ import { getISOString } from '../util';
 const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
 const pClientV5 = PublicClientV5(OKEX_HTTP_HOST, 10000);
 const candles = [
-  'candle60s', // 1 min
-  'candle180s', // 3 mins
   'candle300s', // 5 mins
   'candle900s', // 15 mins
   'candle1800s', // 30 mins
@@ -25,6 +23,7 @@ const candles = [
 ];
 
 const candleChannels = [
+  'candle5m', // 5 mins
   'candle15m', // 15 mins
   'candle30m', // 30 mins
   'candle1H', // 1 hour
@@ -96,7 +95,13 @@ function getBasicCommands(instruments: Instrument[], business: Business): Array<
   const channels = [];
   instruments.map((i: Instrument | SimpleIntrument) => {
     candleChannels.map((candleChannel) => {
-      channels.push({ channel: candleChannel, instId: i.instrument_id });
+      if (candleChannel === 'candle5m') {
+        if (i.instrument_id.indexOf('BTC') > -1) {
+          channels.push({ channel: candleChannel, instId: i.instrument_id });
+        }
+      } else {
+        channels.push({ channel: candleChannel, instId: i.instrument_id });
+      }
     });
   });
 
