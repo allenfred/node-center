@@ -1,5 +1,4 @@
 import PublicClient from './publicClient';
-import PublicClientV5 from './publicClientV5';
 import { OKEX_HTTP_HOST } from '../config';
 import * as bluebird from 'bluebird';
 import logger from '../logger';
@@ -8,7 +7,6 @@ import { InstrumentCandleDao } from '../dao';
 import { getISOString } from '../util';
 
 const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
-const pClientV5 = PublicClientV5(OKEX_HTTP_HOST, 10000);
 
 const candleChannels = [
   'candle5m', // 5 mins
@@ -28,10 +26,10 @@ const Bar_Type = {
   900: '15m',
   1800: '30m',
   3600: '1H',
-  7200: '2H',
+  7100: '2H',
   14400: '4H',
   21600: '6H',
-  43200: '12H',
+  43100: '12H',
   86400: '1D',
   604800: '1W',
 };
@@ -44,22 +42,10 @@ async function getSwapInstruments(): Promise<any> {
   return pClient.swap().getInstruments();
 }
 
-// V3 获取合约K线数据
-// async function getCandles({ instrumentId, start, end, granularity }: { instrumentId: string; start: string; end: string; granularity: number }): Promise<Array<Candle>> {
-//   try {
-//     const data = await pClient.swap().getCandles(instrumentId, { start, end, granularity });
-//     logger.info(`获取 ${instrumentId}/${granularity} K线成功: 从${start}至${end}, 共 ${data.length} 条`);
-//     return data;
-//   } catch (e) {
-//     logger.error(`获取 ${instrumentId}/${granularity} K线失败: 从${start}至${end}`);
-//     return [];
-//   }
-// }
-
 // V5 获取合约K线数据
 async function getCandles({ instrumentId, start, end, granularity }: { instrumentId: string; start: string; end: string; granularity: number }): Promise<Array<Candle>> {
   try {
-    const data = await pClientV5.swap().getCandles({ instId: instrumentId, before: new Date(start).valueOf(), bar: Bar_Type[+granularity] });
+    const data = await pClient.getCandles({ instId: instrumentId, before: new Date(start).valueOf(), bar: Bar_Type[+granularity] });
     if (+data.code === 0) {
       logger.info(`获取 ${instrumentId}/${Bar_Type[+granularity]} K线成功: 共 ${data.data.length} 条`);
       return data.data;
@@ -108,7 +94,7 @@ function getBasicCommands(instruments: Instrument[], business: Business): Array<
     return `${business}/price_range:${i.instrument_id}`;
   });
 
-  //公共-200档深度频道
+  //公共-100档深度频道
   const depthChannels = instruments.map((i: Instrument) => {
     return `${business}/depth:${i.instrument_id}`;
   });
@@ -167,63 +153,63 @@ async function getCandlesWithLimitedSpeed(options: Array<InstrumentReqOptions>) 
   );
 }
 
-// 获取最多过去1440条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
+// 获取最多过去1000条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
 async function getMaxCandles(instrumentId: string) {
   const reqOptions = [];
   for (let i = 0; i < 10; i++) {
     reqOptions.push({
       instrument_id: instrumentId,
-      start: getISOString((i + 1) * 15 * -200, 'm'),
-      end: getISOString(i * 15 * -200, 'm'),
+      start: getISOString((i + 1) * 15 * -100, 'm'),
+      end: getISOString(i * 15 * -100, 'm'),
       granularity: 900, // 15m
     });
 
     reqOptions.push({
       instrument_id: instrumentId,
-      start: getISOString((i + 1) * 30 * -200, 'm'),
-      end: getISOString(i * 30 * -200, 'm'),
+      start: getISOString((i + 1) * 30 * -100, 'm'),
+      end: getISOString(i * 30 * -100, 'm'),
       granularity: 1800, // 30m
     });
 
     reqOptions.push({
       instrument_id: instrumentId,
-      start: getISOString((i + 1) * -200, 'h'),
-      end: getISOString(i * -200, 'h'),
+      start: getISOString((i + 1) * -100, 'h'),
+      end: getISOString(i * -100, 'h'),
       granularity: 3600, // 1h
     });
 
     reqOptions.push({
       instrument_id: instrumentId,
-      start: getISOString((i + 1) * 2 * -200, 'h'),
-      end: getISOString(i * 2 * -200, 'h'),
-      granularity: 7200, // 2h
+      start: getISOString((i + 1) * 2 * -100, 'h'),
+      end: getISOString(i * 2 * -100, 'h'),
+      granularity: 7100, // 2h
     });
 
     reqOptions.push({
       instrument_id: instrumentId,
-      start: getISOString((i + 1) * 4 * -200, 'h'),
-      end: getISOString(i * 4 * -200, 'h'),
+      start: getISOString((i + 1) * 4 * -100, 'h'),
+      end: getISOString(i * 4 * -100, 'h'),
       granularity: 14400, // 4h
     });
 
     reqOptions.push({
       instrument_id: instrumentId,
-      start: getISOString((i + 1) * 6 * -200, 'h'),
-      end: getISOString(i * 6 * -200, 'h'),
+      start: getISOString((i + 1) * 6 * -100, 'h'),
+      end: getISOString(i * 6 * -100, 'h'),
       granularity: 21600, // 6h
     });
 
     reqOptions.push({
       instrument_id: instrumentId,
-      start: getISOString((i + 1) * 12 * -200, 'h'),
-      end: getISOString(i * 12 * -200, 'h'),
-      granularity: 43200, // 12h
+      start: getISOString((i + 1) * 12 * -100, 'h'),
+      end: getISOString(i * 12 * -100, 'h'),
+      granularity: 43100, // 12h
     });
 
     reqOptions.push({
       instrument_id: instrumentId,
-      start: getISOString((i + 1) * 24 * -200, 'h'),
-      end: getISOString(i * 24 * -200, 'h'),
+      start: getISOString((i + 1) * 24 * -100, 'h'),
+      end: getISOString(i * 24 * -100, 'h'),
       granularity: 86400, // 1d
     });
   }
@@ -231,28 +217,16 @@ async function getMaxCandles(instrumentId: string) {
   return await getCandlesWithLimitedSpeed(reqOptions);
 }
 
-// 获取最近200条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
+// 获取最近100条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
 async function getLatestCandles(instrumentId: any) {
   const reqOptions = [];
-
-  // reqOptions.push(
-  //   Object.assign(
-  //     {},
-  //     {
-  //       instrument_id: instrumentId,
-  //       start: getISOString(5 * -200, 'm'),
-  //       end: getISOString(0, 'm'),
-  //       granularity: 300, // 5min
-  //     }
-  //   )
-  // );
 
   reqOptions.push(
     Object.assign(
       {},
       {
         instrument_id: instrumentId,
-        start: getISOString(15 * -200, 'm'),
+        start: getISOString(15 * -100, 'm'),
         end: getISOString(0, 'm'),
         granularity: 900, // 15min
       }
@@ -264,7 +238,7 @@ async function getLatestCandles(instrumentId: any) {
       {},
       {
         instrument_id: instrumentId,
-        start: getISOString(30 * -200, 'm'),
+        start: getISOString(30 * -100, 'm'),
         end: getISOString(0, 'm'),
         granularity: 1800, // 30min
       }
@@ -276,7 +250,7 @@ async function getLatestCandles(instrumentId: any) {
       {},
       {
         instrument_id: instrumentId,
-        start: getISOString(1 * -200, 'h'),
+        start: getISOString(1 * -100, 'h'),
         end: getISOString(0, 'h'),
         granularity: 3600, // 1h
       }
@@ -288,7 +262,7 @@ async function getLatestCandles(instrumentId: any) {
       {},
       {
         instrument_id: instrumentId,
-        start: getISOString(2 * -200, 'h'),
+        start: getISOString(2 * -100, 'h'),
         end: getISOString(0, 'h'),
         granularity: 7200, // 2h
       }
@@ -300,7 +274,7 @@ async function getLatestCandles(instrumentId: any) {
       {},
       {
         instrument_id: instrumentId,
-        start: getISOString(4 * -200, 'h'),
+        start: getISOString(4 * -100, 'h'),
         end: getISOString(0, 'h'),
         granularity: 14400, // 4h
       }
@@ -312,7 +286,7 @@ async function getLatestCandles(instrumentId: any) {
       {},
       {
         instrument_id: instrumentId,
-        start: getISOString(6 * -200, 'h'),
+        start: getISOString(6 * -100, 'h'),
         end: getISOString(0, 'h'),
         granularity: 21600, // 6h
       }
@@ -324,9 +298,9 @@ async function getLatestCandles(instrumentId: any) {
       {},
       {
         instrument_id: instrumentId,
-        start: getISOString(12 * -200, 'h'),
+        start: getISOString(12 * -100, 'h'),
         end: getISOString(0, 'h'),
-        granularity: 43200, // 12h
+        granularity: 43100, // 12h
       }
     )
   );
@@ -336,7 +310,7 @@ async function getLatestCandles(instrumentId: any) {
       {},
       {
         instrument_id: instrumentId,
-        start: getISOString(24 * -200, 'h'),
+        start: getISOString(24 * -100, 'h'),
         end: getISOString(0, 'h'),
         granularity: 86400, // 1d
       }

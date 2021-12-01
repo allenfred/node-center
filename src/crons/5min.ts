@@ -58,13 +58,13 @@ export const startJob = async () => {
 
   // At 00:10.
   if (hourNow === 0 && minuteNow === 10) {
-    await currencyAPI.getBtcMaxCandles();
+    await currencyAPI.getBtcLatestCandles();
   }
 
   // At 00:15.
   if (hourNow === 0 && minuteNow === 15) {
-    await commonAPI.getMaxCandles('BTC-USD-SWAP');
-    await commonAPI.getMaxCandles('BTC-USDT-SWAP');
+    await commonAPI.getLatestCandles('BTC-USD-SWAP');
+    await commonAPI.getLatestCandles('BTC-USDT-SWAP');
   }
 
   // At minute 15 on Monday.
