@@ -42,7 +42,7 @@ export default function PublicClient(apiUri = 'https://www.okex.com', timeout = 
     swap() {
       return {
         async getInstruments() {
-          return get('/api/v5/market/tickers?instType=SWAP');
+          return get('/api/v5/public/instruments?instType=SWAP');
         },
         async getDepth(instrument_id, size) {
           return get(`/api/swap/v3/instruments/${instrument_id}/depth${size ? `?size=${size}` : ''}`);

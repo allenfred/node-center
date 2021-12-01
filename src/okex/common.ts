@@ -38,8 +38,54 @@ interface SimpleIntrument {
   instrument_id: string;
 }
 
-async function getSwapInstruments(): Promise<any> {
-  return pClient.swap().getInstruments();
+interface OkexInstrumentType {
+  instType: string;
+  instId: string;
+  uly: string;
+  category: string;
+  baseCcy: string;
+  quoteCcy: string;
+  settleCcy: string;
+  ctVal: string;
+  ctMult: string;
+  ctValCcy: string;
+  optType: string;
+  stk: string;
+  listTime: string;
+  expTime: string;
+  lever: string;
+  tickSz: string;
+  lotSz: string;
+  minSz: string;
+  ctType: string;
+  alias: string;
+  state: string;
+}
+
+async function getSwapInstruments(): Promise<Array<Instrument>> {
+  const data: { code: string; data: Array<OkexInstrumentType> } = await pClient.swap().getInstruments();
+  if (+data.code === 0) {
+    return data.data
+      .filter((i) => i.state === 'live')
+      .map((i) => {
+        return {
+          instrument_id: i.instId, // 合约ID，如BTC-USD-190322
+          underlying_index: i.ctValCcy, // 交易货币币种，如：BTC-USD-190322中的BTC
+          quote_currency: i.settleCcy, // 计价货币币种，如：BTC-USD-190322中的USD
+          tick_size: i.tickSz, // 下单价格精度 0.01
+          contract_val: i.ctVal, // 合约面值 100
+          listing: i.listTime, // 创建时间 '2019-09-06'
+          delivery: i.expTime, // 结算时间 '2019-09-20'
+          trade_increment: i.lotSz, // futures 下单数量精度
+          size_increment: i.lotSz, // swap 下单数量精度
+          alias: i.alias, // 本周 this_week 次周 next_week 季度 quarter 永续 swap
+          settlement_currency: i.settleCcy, // 盈亏结算和保证金币种，BTC
+          contract_val_currency: i.ctValCcy, // 合约面值计价币种
+        };
+      });
+  } else {
+    return [];
+  }
 }
 
 // V5 获取合约K线数据
