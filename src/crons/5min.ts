@@ -73,7 +73,7 @@ export const startJob = async () => {
   }
 
   const endTime = new Date().getTime();
-  const usedTime = parseInt(`${(endTime - startTime) / 1000}`);
+  const usedTime = ((endTime - startTime) / 1000).toFixed(1);
 
   logger.info(`----- Job End Time Used: ${usedTime}s -----`);
 
