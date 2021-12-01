@@ -20,7 +20,7 @@ async function getBtcLatestCandles() {
   reqOptions.push({
     start: getISOString(2 * -100, 'h'),
     end: getISOString(0, 'h'),
-    granularity: 7100, // 2h
+    granularity: 7200, // 2h
   });
 
   reqOptions.push({
@@ -38,7 +38,7 @@ async function getBtcLatestCandles() {
   reqOptions.push({
     start: getISOString(12 * -100, 'h'),
     end: getISOString(0, 'h'),
-    granularity: 43100, // 12h
+    granularity: 43200, // 12h
   });
 
   reqOptions.push({

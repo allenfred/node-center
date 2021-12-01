@@ -1,14 +1,12 @@
-import connectMongo from "./database/connection";
-import { getBtcMaxCandles } from "./okex/currency/btc";
-import { InstrumentCandle } from "./database/models";
-import { getBtcFutureMaxCandles, getBtcSwapMaxCandles } from "./okex/common";
+import connectMongo from './database/connection';
+import { SwapUSDTCandle, BtcSwapCandle } from './database/models';
+import { getMaxCandles } from './okex/common';
 
 (async function main() {
   //连接数据库
   await connectMongo();
-  // currency
-  // await getBtcMaxCandles();
-  await getBtcSwapMaxCandles();
+  await getMaxCandles('BTC-USD-SWAP');
+  await getMaxCandles('BTC-USDT-SWAP');
   // await InstrumentCandle.aggregate([
   //   {
   //     $match: {
