@@ -18,7 +18,8 @@ export default function PublicClient(apiUri = 'https://www.okex.com', timeout = 
   }
   return {
     async getCandles(params: any) {
-      return get(`/api/v5/market/candles${params ? `?${querystring.stringify(params)}` : ''}`);
+      // return get(`/api/v5/market/candles${params ? `?${querystring.stringify(params)}` : ''}`);
+      return get(`/api/v5/market/history-candles${params ? `?${querystring.stringify(params)}` : ''}`);
     },
     spot() {
       return {

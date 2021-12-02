@@ -5,6 +5,7 @@ import logger from '../logger';
 import { Business, Instrument, Candle, InstrumentReqOptions } from '../types';
 import { InstrumentCandleDao } from '../dao';
 import { getISOString } from '../util';
+import * as moment from 'moment';
 
 const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
 
@@ -91,9 +92,9 @@ async function getSwapInstruments(): Promise<Array<Instrument>> {
 // V5 获取合约K线数据
 async function getCandles({ instrumentId, start, end, granularity }: { instrumentId: string; start: string; end: string; granularity: number }): Promise<Array<Candle>> {
   try {
-    const data = await pClient.getCandles({ instId: instrumentId, before: new Date(start).valueOf(), bar: Bar_Type[+granularity] });
+    const data = await pClient.getCandles({ instId: instrumentId, before: new Date(start).valueOf(), after: new Date(end).valueOf(), bar: Bar_Type[+granularity] });
     if (+data.code === 0) {
-      logger.info(`获取 ${instrumentId}/${Bar_Type[+granularity]} K线成功: 共 ${data.data.length} 条`);
+      logger.info(`获取 ${instrumentId}/${Bar_Type[+granularity]} K线成功: 从${moment(start).format('YYYY-MM-DD HH:mm:ss')}至${moment(end).format('YYYY-MM-DD HH:mm:ss')}, 共 ${data.data.length} 条`);
       return data.data;
     } else {
       logger.error(`获取 ${instrumentId}/${Bar_Type[+granularity]} K线失败: ${data.msg}`);
@@ -263,6 +264,21 @@ async function getMaxCandles(instrumentId: string) {
   return await getCandlesWithLimitedSpeed(reqOptions);
 }
 
+// 获取过去2000条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
+async function getMaxCandlesWithGranularity(instrumentId: string, granularity: number): Promise<any> {
+  const reqOptions = [];
+  for (let i = 0; i < 20; i++) {
+    reqOptions.push({
+      instrument_id: instrumentId,
+      start: getISOString((i + 1) * granularity * -100, 's'),
+      end: getISOString(i * granularity * -100, 's'),
+      granularity,
+    });
+  }
+
+  return await getCandlesWithLimitedSpeed(reqOptions);
+}
+
 // 获取最近100条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
 async function getLatestCandles(instrumentId: any) {
   const reqOptions = [];
@@ -366,4 +382,4 @@ async function getLatestCandles(instrumentId: any) {
   return await getCandlesWithLimitedSpeed(reqOptions);
 }
 
-export { getSwapInstruments, getCandles, getCandlesWithLimitedSpeed, getBasicCommands, getSwapSubCommands, getMaxCandles, getLatestCandles };
+export { getSwapInstruments, getCandles, getCandlesWithLimitedSpeed, getBasicCommands, getSwapSubCommands, getMaxCandles, getMaxCandlesWithGranularity, getLatestCandles };
