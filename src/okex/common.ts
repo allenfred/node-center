@@ -19,7 +19,7 @@ const candleChannels = [
   'candle6H', // 6 hours
   'candle12H', // 12 hours
   'candle1D', // 1 day
-  // 'candle1W', // 1 week
+  'candle1W', // 1 week
 ];
 
 const Bar_Type = {
