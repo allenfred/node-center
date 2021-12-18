@@ -6,6 +6,7 @@ import { Channel, OkexWsMessage, Instrument, CandleChannel } from '../types';
 import * as swap from '../okex/swap';
 import * as common from '../okex/common';
 import { handleMessage } from './handler';
+import { InstrumentInfoDao } from '../dao';
 
 const WebSocket = require('ws');
 let wsServer: any;
@@ -49,14 +50,19 @@ function onMessage(data: any) {
 async function subChannels() {
   logger.info('----- 与okex wsserver建立连接成功 -----');
   // wsClient.login(apikey, secret, passphrase);
+  let instruments: Instrument[];
 
-  // 获取永续所有合约信息
-  const swapInstruments: Instrument[] = await swap.initInstruments();
-  // 指定BTC合约 及 其他USDT本位合约
-  const subInstruments: Instrument[] = swapInstruments.filter((i) => i.underlying_index === 'BTC' || i.quote_currency === 'USDT');
+  if (new Date().getDay() === 1) {
+    // 获取永续所有合约信息
+    instruments = await swap.initInstruments();
+    // 指定BTC合约 及 其他USDT本位合约
+    instruments = instruments.filter((i) => i.underlying_index === 'BTC' || i.quote_currency === 'USDT');
+  } else {
+    instruments = await InstrumentInfoDao.findAll();
+  }
 
   // 订阅永续频道信息
-  wsClient.subscribe(...common.getSwapSubCommands(subInstruments));
+  wsClient.subscribe(...common.getSwapSubCommands(instruments));
 }
 
 function getChannelIndex(arg: any) {

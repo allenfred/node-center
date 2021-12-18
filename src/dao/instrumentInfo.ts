@@ -23,8 +23,13 @@ async function upsert(instruments: Instrument[]): Promise<any> {
   });
 }
 
+async function findAll(): Promise<any> {
+  return await InstrumentInfo.find({});
+}
+
 const InstrumentInfoDao = {
   upsert,
+  findAll,
 };
 
 export { InstrumentInfoDao };

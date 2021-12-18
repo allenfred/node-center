@@ -13,17 +13,20 @@ async function upsert(candles: InstrumentCandleSchema[]) {
     };
 
     const Model = getModel(candle);
-
     const existedCandle = await Model.findOne(uniqueCondition);
 
     if (existedCandle) {
       await Model.updateOne(uniqueCondition, candle).catch((err: any) => {
-        logger.error(`update candle: ${candle}`, err);
+        logger.error(`update candle `, err);
       });
     } else {
-      await Model.create(candle).catch((err) => {
-        logger.error(`create candle: ${candle}`, err);
-      });
+      await Model.create(candle)
+        .then((res: any) => {
+          logger.info(`Create ${candle.instrument_id} ${candle.granularity}`);
+        })
+        .catch((err) => {
+          logger.error(`create candle `, err);
+        });
     }
   });
 }

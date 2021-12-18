@@ -68,6 +68,10 @@ function isCandleChannelMsg(message: any) {
 }
 
 export async function handleMessage(message: OkexMessage) {
+  if (!(new Date().getSeconds() === 0 || new Date().getSeconds() === 30)) {
+    return;
+  }
+
   if (isCandleChannelMsg(message)) {
     handleCandles(message);
   }
