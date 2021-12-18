@@ -7,7 +7,8 @@ import { getCandles, getCandlesWithLimitedSpeed, getSwapInstruments } from './co
 
 export async function initInstruments(): Promise<Instrument[]> {
   //获取全量永续合约信息
-  const instruments: Array<Instrument> = await getSwapInstruments();
+  let instruments: Array<Instrument> = await getSwapInstruments();
+  instruments = instruments.filter((i) => i.quote_currency === 'USDT' || i.quote_currency === 'BTC' || i.underlying_index === 'BTC');
   logger.info(`[永续合约] - 获取公共合约全量信息成功，共: ${instruments.length} 条 ...`);
 
   //更新永续合约信息

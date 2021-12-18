@@ -107,7 +107,7 @@ async function getCandles({ instrumentId, start, end, granularity }: { instrumen
 }
 
 function getSwapSubCommands(instruments: Instrument[]): Array<string> {
-  return getBasicCommands(instruments, Business.SWAP);
+  return getBasicCommands([instruments[0]], Business.SWAP);
 }
 
 //指令格式:<business>/<channel>:<filter>
@@ -180,8 +180,10 @@ async function getCandlesWithLimitedSpeed(options: Array<InstrumentReqOptions>) 
           const readyCandles = data.map((candle: Candle) => {
             return {
               instrument_id: option.instrument_id,
-              underlying_index: option.underlying_index,
-              quote_currency: option.quote_currency,
+              // underlying_index: option.underlying_index,
+              // quote_currency: option.quote_currency,
+              underlying_index: option.instrument_id.split('-')[0],
+              quote_currency: option.instrument_id.split('-')[1],
               timestamp: new Date(+candle[0]),
               open: +candle[1],
               high: +candle[2],

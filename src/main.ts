@@ -3,6 +3,7 @@ import logger from './logger';
 import * as http from 'http';
 import { setupWsserver } from './wsserver/server';
 import { startJob } from './crons/5min';
+import * as swap from './okex/swap';
 
 const server = http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain' });

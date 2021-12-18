@@ -7,7 +7,8 @@ import { getMaxCandles, getMaxCandlesWithGranularity } from './okex/common';
   await connectMongo();
   // await getMaxCandles('BTC-USD-SWAP');
   // await getMaxCandles('BTC-USDT-SWAP');
-  await getMaxCandlesWithGranularity('BTC-USDT', 604800);
+  await getMaxCandlesWithGranularity('ETH-USDT-SWAP', 86400);
+  process.exit();
   // await BtcSwapCandle.remove({ granularity: 43100 });
   // await InstrumentCandle.aggregate([
   //   {

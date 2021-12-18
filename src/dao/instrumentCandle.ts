@@ -15,12 +15,13 @@ async function upsert(candles: InstrumentCandleSchema[]) {
     const Model = getModel(candle);
 
     const existedCandle = await Model.findOne(uniqueCondition);
+
     if (existedCandle) {
-      return await Model.updateOne(uniqueCondition, candle).catch((err) => {
+      await Model.updateOne(uniqueCondition, candle).catch((err: any) => {
         logger.error(`update candle: ${candle}`, err);
       });
     } else {
-      return await Model.create(candle).catch((err) => {
+      await Model.create(candle).catch((err) => {
         logger.error(`create candle: ${candle}`, err);
       });
     }

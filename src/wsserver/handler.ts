@@ -1,4 +1,4 @@
-import { BtcSwapCandleDao, InstrumentTickerDao } from '../dao';
+import { InstrumentCandleDao, InstrumentTickerDao } from '../dao';
 import { Ticker, Candle, InstrumentCandleSchema, CandleChannel } from '../types';
 
 /* V5 API 
@@ -29,9 +29,10 @@ export async function handleTicker(data: Ticker[]) {
   await InstrumentTickerDao.upsert(data);
 }
 
-export async function handleBtcSwapCandles(message: { arg: any; data: Array<Candle> }) {
+export async function handleCandles(message: { arg: any; data: Array<Candle> }) {
   const granularity = CandleChannel[message.arg.channel];
   const instrumentId = message.arg.instId;
+
   const candles: InstrumentCandleSchema[] = message.data.map((candle: Candle) => {
     return {
       instrument_id: instrumentId,
@@ -48,7 +49,15 @@ export async function handleBtcSwapCandles(message: { arg: any; data: Array<Cand
     };
   });
 
-  await BtcSwapCandleDao.upsert(candles);
+  await InstrumentCandleDao.upsert(candles);
+}
+
+function isBtcSwapCandle(instId: string) {
+  return instId.indexOf('BTC') !== -1 && instId.indexOf('SWAP') !== -1;
+}
+
+function isUsdtSwapCandle(instId: string) {
+  return instId.indexOf('USDT') !== -1 && instId.indexOf('SWAP') !== -1;
 }
 
 function isCandleChannelMsg(message: any) {
@@ -60,6 +69,6 @@ function isCandleChannelMsg(message: any) {
 
 export async function handleMessage(message: OkexMessage) {
   if (isCandleChannelMsg(message)) {
-    if (message.arg.instId.indexOf('BTC') !== -1) handleBtcSwapCandles(message);
+    handleCandles(message);
   }
 }

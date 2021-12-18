@@ -15,9 +15,6 @@ const schema = new Schema({
   alias: String, // 本周 this_week 次周 next_week 季度 quarter 永续 swap
 });
 
-schema.index(
-  { underlying_index: 1, quote_currency: 1, alias: 1 },
-  { unique: true },
-);
+schema.index({ instrument_id: 1 }, { unique: true });
 
 export const InstrumentInfo = mongoose.model('instrument_infos', schema);
