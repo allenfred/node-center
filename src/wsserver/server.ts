@@ -45,7 +45,7 @@ async function setupServer() {
 }
 
 export async function setupWsserver() {
-  setupOkexWsClient();
+  setupOkexWsClient(clients);
   // setupBianceWsClient();
   setupServer();
 }
