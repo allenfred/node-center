@@ -1,5 +1,5 @@
-import { InstrumentCandleDao, InstrumentTickerDao } from '../../dao';
-import { Ticker, Candle, InstrumentCandleSchema, CandleChannel } from '../../types';
+import { InstrumentKlineDao, InstrumentTickerDao } from '../../dao';
+import { Exchange, Ticker, OkexKline, InstrumentKlineSchema, KlineChannel } from '../../types';
 
 /* V5 API 
 {
@@ -22,18 +22,18 @@ import { Ticker, Candle, InstrumentCandleSchema, CandleChannel } from '../../typ
 */
 interface OkexMessage {
   arg: any;
-  data: Array<Candle>;
+  data: Array<OkexKline>;
 }
 
 export async function handleTicker(data: Ticker[]) {
   await InstrumentTickerDao.upsert(data);
 }
 
-export async function handleCandles(message: { arg: any; data: Array<Candle> }) {
-  const granularity = CandleChannel[message.arg.channel];
+export async function handleCandles(message: { arg: any; data: Array<OkexKline> }) {
+  const granularity = KlineChannel[message.arg.channel];
   const instrumentId = message.arg.instId;
 
-  const candles: InstrumentCandleSchema[] = message.data.map((candle: Candle) => {
+  const candles: InstrumentKlineSchema[] = message.data.map((candle: OkexKline) => {
     return {
       instrument_id: instrumentId,
       underlying_index: instrumentId.split('-')[0],
@@ -46,10 +46,11 @@ export async function handleCandles(message: { arg: any; data: Array<Candle> }) 
       volume: +candle[5],
       currency_volume: +candle[6],
       granularity: +granularity,
+      exchange: Exchange.Okex,
     };
   });
 
-  await InstrumentCandleDao.upsert(candles);
+  await InstrumentKlineDao.upsert(candles);
 }
 
 function isBtcSwapCandle(instId: string) {

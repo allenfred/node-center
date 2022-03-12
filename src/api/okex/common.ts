@@ -2,8 +2,8 @@ import PublicClient from './publicClient';
 import { OKEX_HTTP_HOST } from '../../config';
 import * as bluebird from 'bluebird';
 import logger from '../../logger';
-import { Business, Instrument, Candle, InstrumentReqOptions } from '../../types';
-import { InstrumentCandleDao } from '../../dao';
+import { Exchange, Business, Instrument, OkexKline, InstrumentReqOptions } from '../../types';
+import { InstrumentKlineDao } from '../../dao';
 import { getISOString } from '../../util';
 import * as moment from 'moment';
 
@@ -90,7 +90,7 @@ async function getSwapInstruments(): Promise<Array<Instrument>> {
 }
 
 // V5 获取合约K线数据
-async function getCandles({ instrumentId, start, end, granularity }: { instrumentId: string; start: string; end: string; granularity: number }): Promise<Array<Candle>> {
+async function getCandles({ instrumentId, start, end, granularity }: { instrumentId: string; start: string; end: string; granularity: number }): Promise<Array<OkexKline>> {
   try {
     const data = await pClient.getCandles({ instId: instrumentId, before: new Date(start).valueOf(), after: new Date(end).valueOf(), bar: KlineInterval[+granularity] });
     if (+data.code === 0) {
@@ -178,8 +178,8 @@ async function getCandlesWithLimitedSpeed(options: Array<InstrumentReqOptions>) 
             granularity: option.granularity,
           });
         })
-        .then((data: Array<Candle>) => {
-          const readyCandles = data.map((candle: Candle) => {
+        .then((data: Array<OkexKline>) => {
+          const readyCandles = data.map((candle: OkexKline) => {
             return {
               instrument_id: option.instrument_id,
               underlying_index: option.instrument_id.split('-')[0],
@@ -192,10 +192,11 @@ async function getCandlesWithLimitedSpeed(options: Array<InstrumentReqOptions>) 
               volume: +candle[5],
               currency_volume: +candle[6],
               granularity: option.granularity,
+              exchange: Exchange.Okex,
             };
           });
 
-          return InstrumentCandleDao.upsert(readyCandles);
+          return InstrumentKlineDao.upsert(readyCandles);
         });
     },
     { concurrency: 5 }

@@ -1,10 +1,10 @@
 import * as bluebird from 'bluebird';
-import { BtcSwapCandle, SwapUSDTCandle } from '../database/models';
-import { InstrumentCandleSchema } from '../types';
+import { BtcSwapKline, UsdtSwapKline } from '../database/models';
+import { InstrumentKlineSchema } from '../types';
 import logger from '../logger';
 
-async function upsert(candles: InstrumentCandleSchema[]) {
-  return bluebird.map(candles, async (candle: InstrumentCandleSchema) => {
+async function upsert(candles: InstrumentKlineSchema[]) {
+  return bluebird.map(candles, async (candle: InstrumentKlineSchema) => {
     //find unique candle by underlying_index & timestamp & alias & granularity
     const uniqueCondition = {
       instrument_id: candle.instrument_id,
@@ -22,7 +22,7 @@ async function upsert(candles: InstrumentCandleSchema[]) {
     } else {
       await Model.create(candle)
         .then((res: any) => {
-          logger.info(`Create ${candle.instrument_id} ${candle.granularity}`);
+          logger.info(`Create Kline ${candle.exchange}/${candle.instrument_id} ${candle.granularity}`);
         })
         .catch((err) => {
           logger.error(`create candle `, err);
@@ -33,14 +33,14 @@ async function upsert(candles: InstrumentCandleSchema[]) {
 
 function getModel(candle) {
   if (candle.instrument_id.includes('BTC')) {
-    return BtcSwapCandle;
+    return BtcSwapKline;
   } else {
-    return SwapUSDTCandle;
+    return UsdtSwapKline;
   }
 }
 
-const InstrumentCandleDao = {
+const InstrumentKlineDao = {
   upsert,
 };
 
-export { InstrumentCandleDao };
+export { InstrumentKlineDao };

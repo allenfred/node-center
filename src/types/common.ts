@@ -23,9 +23,9 @@ export type close = string;
 export type volume = string;
 export type currency_volume = string;
 
-export type Candle = [timestamp, open, high, low, close, volume, currency_volume];
+export type OkexKline = [timestamp, open, high, low, close, volume, currency_volume];
 
-export interface InstrumentCandleSchema {
+export interface InstrumentKlineSchema {
   instrument_id: string; // 	合约ID (如果是交割合约：BTC-USDT-190322)
   underlying_index?: string; // 交易货币币种，如：BTC-USD-190322 中的BTC
   quote_currency?: string; // 计价货币币种，如：BTC-USD-190322 中的USD
@@ -38,6 +38,7 @@ export interface InstrumentCandleSchema {
   currency_volume?: number; // 按币种折算的交易量
   alias?: string; // 本周 this_week 次周 next_week 季度 quarter 永续 swap
   granularity: number; // 60 180 300 900 1800 3600 7200 14400 21600 43200 86400 604800
+  exchange: string; // okex / biance
 }
 
 export interface InstrumentReqOptions extends Instrument {
@@ -110,7 +111,7 @@ export interface OkexWsMessage {
   data: Ticker[] | Trade[] | PriceRange[] | Depth[] | MarkPrice[];
 }
 
-export enum CandleChannel {
+export enum KlineChannel {
   candle1W = 604800,
   candle1D = 86400,
   candle12H = 43200,
@@ -137,5 +138,10 @@ export const V3CandleChannels = [
   'candle86400s', // 1 day
   'candle604800s', // 1 week
 ];
+
+export enum Exchange {
+  Okex = 'okex',
+  Biance = 'biance',
+}
 
 export * from './biance';

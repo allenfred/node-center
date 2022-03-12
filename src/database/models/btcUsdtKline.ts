@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const { String, Number, Date } = Schema.Types;
 
@@ -10,9 +10,10 @@ const schema = new Schema({
   low: Number, // 	最低价格
   close: Number, // 收盘价格
   volume: Number, // 	交易量
-  granularity: Number // 60 180 300 900 1800 3600 7200 14400 21600 43200 86400 604800
+  granularity: Number, // 60 180 300 900 1800 3600 7200 14400 21600 43200 86400 604800
+  exchange: { type: String, default: 'okex' }, // okex/biance/bybit
 });
 
-schema.index({ timestamp: 1, granularity: 1 }, { unique: true });
+schema.index({ timestamp: 1, granularity: 1, exchange: 1 }, { unique: true });
 
-export const btcUSDTCandle = mongoose.model("btc_usdt_candles", schema);
+export const btcUsdtKline = mongoose.model('btc_usdt_klines', schema);

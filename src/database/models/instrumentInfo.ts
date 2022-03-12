@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+const { String, Number, Date } = Schema.Types;
 
 // 公共-全量合约信息频道 https://www.okex.me/docs/zh/#futures_ws-order
 const schema = new Schema({
@@ -13,8 +14,9 @@ const schema = new Schema({
   trade_increment: Number, // futures 下单数量精度
   size_increment: String, // swap 下单数量精度
   alias: String, // 本周 this_week 次周 next_week 季度 quarter 永续 swap
+  exchange: { type: String, default: 'okex' }, // okex/biance/bybit
 });
 
-schema.index({ instrument_id: 1 }, { unique: true });
+schema.index({ instrument_id: 1, exchange: 1 }, { unique: true });
 
 export const InstrumentInfo = mongoose.model('instrument_infos', schema);

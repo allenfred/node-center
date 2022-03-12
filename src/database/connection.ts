@@ -1,10 +1,10 @@
-var mongoose = require('mongoose');
-const username = 'dev';
-const password = 'qazwsx123';
+const mongoose = require('mongoose');
 // HK server
 const host = '8.210.170.98';
 const port = '27017';
-const db = 'okex';
+const db = 'crypto';
+const username = 'dev';
+const password = 'qazwsx123';
 
 mongoose.set('useCreateIndex', true);
 
