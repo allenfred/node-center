@@ -63,7 +63,7 @@ async function setupOkexWsClient(clients: any[]) {
 
   wsClient.on('message', (data: any) => {
     try {
-      logger.info(`!!! websocket message =${data}`);
+      // logger.info(`!!! websocket message =${data}`);
       var obj: Msg = JSON.parse(data);
       var eventType = obj.event;
 

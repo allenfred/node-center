@@ -29,6 +29,7 @@ async function setupServer() {
   wsServer.on('connection', function connection(ws: any) {
     ws.channels = [];
     clients.push(ws);
+
     ws.on('message', function incoming(message: any) {
       logger.info(`received: ${message}`);
       const data = JSON.parse(message);
@@ -40,6 +41,11 @@ async function setupServer() {
       if (data.op === 'unsubscribe') {
         ws.channels = ws.channels.filter((channel: string) => !data.args.includes(channel));
       }
+    });
+
+    ws.on('close', (e) => {
+      console.log(e);
+      logger.info('someone disconnected.');
     });
   });
 }
