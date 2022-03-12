@@ -21,9 +21,9 @@ async function upsert(candles: InstrumentKlineSchema[]) {
       });
     } else {
       await Model.create(candle)
-        .then((res: any) => {
-          logger.info(`Create Kline ${candle.exchange}/${candle.instrument_id} ${candle.granularity}`);
-        })
+        // .then((res: any) => {
+        //   logger.info(`Create Kline ${candle.exchange}/${candle.instrument_id} ${candle.granularity}`);
+        // })
         .catch((err) => {
           logger.error(`create candle `, err);
         });

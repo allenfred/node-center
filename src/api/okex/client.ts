@@ -8,41 +8,12 @@ import * as common from '../../api/okex/common';
 import { handleMessage } from './handler';
 import { InstrumentInfoDao } from '../../dao';
 
-const clients = [];
-
 let wsClient: any;
-const event = new EventEmitter();
 
 interface Msg {
   event?: string;
   arg: any;
   data: any[];
-}
-
-// websocket 返回消息
-function onMessage(data: any) {
-  try {
-    // logger.info(`!!! websocket message =${data}`);
-    var obj: Msg = JSON.parse(data);
-    var eventType = obj.event;
-
-    // if (eventType == 'login') {
-    //   //登录消息
-    //   if (obj?.success == true) {
-    //     event.emit('login');
-    //   }
-
-    //   return;
-    // }
-
-    // channels 订阅消息
-    if (eventType == undefined) {
-      handleMessage(obj);
-      broadCastMessage(obj);
-    }
-  } catch (e) {
-    logger.error('handleMessage catch err: ', e);
-  }
 }
 
 async function subChannels() {
@@ -67,7 +38,7 @@ function getChannelIndex(arg: any) {
   return `candle${KlineChannel[arg.channel]}:${arg.instId}`;
 }
 
-function broadCastMessage(msg: OkexWsMessage) {
+function broadCastMessage(msg: OkexWsMessage, clients: any[]) {
   if (!clients.length) {
     return;
   }
@@ -79,7 +50,7 @@ function broadCastMessage(msg: OkexWsMessage) {
   });
 }
 
-async function setupOkexWsClient() {
+async function setupOkexWsClient(clients: any[]) {
   wsClient = new V3WebsocketClient(OKEX_WS_HOST);
   wsClient.connect();
 
@@ -90,7 +61,30 @@ async function setupOkexWsClient() {
     wsClient.connect();
   });
 
-  wsClient.on('message', onMessage);
+  wsClient.on('message', (data: any) => {
+    try {
+      logger.info(`!!! websocket message =${data}`);
+      var obj: Msg = JSON.parse(data);
+      var eventType = obj.event;
+
+      // if (eventType == 'login') {
+      //   //登录消息
+      //   if (obj?.success == true) {
+      //     event.emit('login');
+      //   }
+
+      //   return;
+      // }
+
+      // channels 订阅消息
+      if (eventType == undefined) {
+        handleMessage(obj);
+        broadCastMessage(obj, clients);
+      }
+    } catch (e) {
+      logger.error('handleMessage catch err: ', e);
+    }
+  });
 }
 
 async function initOkexMarketMonitor(wsClient: any) {
