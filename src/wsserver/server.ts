@@ -3,10 +3,11 @@ import { V3WebsocketClient } from '@okfe/okex-node';
 import { OKEX_WS_HOST } from '../config';
 import logger from '../logger';
 import { Channel, OkexWsMessage, Instrument, CandleChannel } from '../types';
-import * as swap from '../okex/swap';
-import * as common from '../okex/common';
+import * as swap from '../api/okex/swap';
+import * as common from '../api/okex/common';
 import { handleMessage } from './handler';
 import { InstrumentInfoDao } from '../dao';
+import { setupBianceWsClient, initBianceInstruments } from '../api/biance';
 
 const WebSocket = require('ws');
 let wsServer: any;
@@ -81,7 +82,7 @@ function broadCastMessage(msg: OkexWsMessage) {
   });
 }
 
-async function setupClient() {
+async function setupOkexWsClient() {
   wsClient = new V3WebsocketClient(OKEX_WS_HOST);
   wsClient.connect();
 
@@ -117,6 +118,7 @@ async function setupServer() {
 }
 
 export async function setupWsserver() {
-  setupClient();
+  // setupOkexWsClient();
+  setupBianceWsClient();
   setupServer();
 }

@@ -1,7 +1,7 @@
 import { Job_Granularity, execJob } from './util';
 import connectMongo from '../database/connection';
-import * as currencyAPI from '../okex/currency';
-import * as commonAPI from '../okex/common';
+import * as currencyAPI from '../api/okex/currency';
+import * as commonAPI from '../api/okex/common';
 import logger from '../logger';
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)

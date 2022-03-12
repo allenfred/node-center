@@ -1,13 +1,12 @@
-import PublicClient from './publicClient';
-import { OKEX_HTTP_HOST } from '../config';
+import { OKEX_HTTP_HOST } from '../../config';
 import * as bluebird from 'bluebird';
-import logger from '../logger';
-import { Business, Instrument, Candle, InstrumentReqOptions } from '../types';
-import { InstrumentCandleDao } from '../dao';
-import { getISOString } from '../util';
+import logger from '../../logger';
+import { Business, Instrument, Candle, InstrumentReqOptions } from '../../types';
+import { InstrumentCandleDao } from '../../dao';
+import { getISOString } from '../../util';
 import * as moment from 'moment';
-
-const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
+import { getPerpetualInstruments, getKlines } from './client';
+import { BianceExchangeInfoResponse, BianceSymbolInfo, KlineApiParams } from '../../types';
 
 const candleChannels = [
   'candle5m', // 5 mins
@@ -22,68 +21,47 @@ const candleChannels = [
   'candle1W', // 1 week
 ];
 
-const Bar_Type = {
+const KlineInterval = {
   300: '5m',
   900: '15m',
   1800: '30m',
-  3600: '1H',
-  7200: '2H',
-  14400: '4H',
-  21600: '6H',
-  43200: '12H',
-  86400: '1D',
-  604800: '1W',
+  3600: '1h',
+  7200: '2h',
+  14400: '4h',
+  21600: '6h',
+  43200: '12h',
+  86400: '1d',
+  604800: '1w',
 };
 
 interface SimpleIntrument {
   instrument_id: string;
 }
 
-interface OkexInstrumentType {
-  instType: string;
-  instId: string;
-  uly: string;
-  category: string;
-  baseCcy: string;
-  quoteCcy: string;
-  settleCcy: string;
-  ctVal: string;
-  ctMult: string;
-  ctValCcy: string;
-  optType: string;
-  stk: string;
-  listTime: string;
-  expTime: string;
-  lever: string;
-  tickSz: string;
-  lotSz: string;
-  minSz: string;
-  ctType: string;
-  alias: string;
-  state: string;
-}
-
 async function getSwapInstruments(): Promise<Array<Instrument>> {
-  const data: { code: string; data: Array<OkexInstrumentType> } = await pClient.swap().getInstruments();
-  if (+data.code === 0) {
-    return data.data
-      .filter((i) => i.state === 'live')
-      .map((i) => {
-        return {
-          instrument_id: i.instId, // 合约ID，如BTC-USD-190322
-          underlying_index: i.ctValCcy, // 交易货币币种，如：BTC-USD-190322中的BTC
-          quote_currency: i.settleCcy, // 计价货币币种，如：BTC-USD-190322中的USD
-          tick_size: i.tickSz, // 下单价格精度 0.01
-          contract_val: i.ctVal, // 合约面值 100
-          listing: i.listTime, // 创建时间 '2019-09-06'
-          delivery: i.expTime, // 结算时间 '2019-09-20'
-          trade_increment: i.lotSz, // futures 下单数量精度
-          size_increment: i.lotSz, // swap 下单数量精度
-          alias: i.alias, // 本周 this_week 次周 next_week 季度 quarter 永续 swap
-          settlement_currency: i.settleCcy, // 盈亏结算和保证金币种，BTC
-          contract_val_currency: i.ctValCcy, // 合约面值计价币种
-        };
-      });
+  const data: Array<BianceSymbolInfo> = await getPerpetualInstruments();
+  if (data.length) {
+    return data.map((i) => {
+      let priceFilter: any;
+      if (i.filters && i.filters.length) {
+        priceFilter = i.filters.find((i) => i.filterType === 'PRICE_FILTER');
+      }
+
+      return {
+        instrument_id: i.baseAsset + '-' + i.quoteAsset + '-SWAP', // 合约ID，如BTC-USDT-SWAP
+        underlying_index: i.baseAsset, // 交易货币币种，如：BTC-USDT-SWAP中的BTC
+        quote_currency: i.quoteAsset, // 计价货币币种，如：BTC-USDT-SWAP中的USDT
+        tick_size: priceFilter ? priceFilter.tickSize : '0', // 下单价格精度 0.01
+        contract_val: '0', // 合约面值 100
+        listing: '', // 创建时间 '2019-09-06'
+        delivery: '', // 结算时间 '2019-09-20'
+        trade_increment: '', // futures 下单数量精度
+        size_increment: '1', // swap 下单数量精度
+        alias: 'swap', // 本周 this_week 次周 next_week 季度 quarter 永续 swap
+        settlement_currency: i.baseAsset, // 盈亏结算和保证金币种，BTC
+        contract_val_currency: i.marginAsset, // 合约面值计价币种
+      };
+    });
   } else {
     return [];
   }
@@ -92,16 +70,18 @@ async function getSwapInstruments(): Promise<Array<Instrument>> {
 // V5 获取合约K线数据
 async function getCandles({ instrumentId, start, end, granularity }: { instrumentId: string; start: string; end: string; granularity: number }): Promise<Array<Candle>> {
   try {
-    const data = await pClient.getCandles({ instId: instrumentId, before: new Date(start).valueOf(), after: new Date(end).valueOf(), bar: Bar_Type[+granularity] });
+    const data = await getKlines({ symbol: instrumentId, startTime: new Date(start).valueOf(), endTime: new Date(end).valueOf(), interval: KlineInterval[+granularity] } as KlineApiParams);
     if (+data.code === 0) {
-      logger.info(`获取 ${instrumentId}/${Bar_Type[+granularity]} K线成功: 从${moment(start).format('YYYY-MM-DD HH:mm:ss')}至${moment(end).format('YYYY-MM-DD HH:mm:ss')}, 共 ${data.data.length} 条`);
+      logger.info(
+        `获取 ${instrumentId}/${KlineInterval[+granularity]} K线成功: 从${moment(start).format('YYYY-MM-DD HH:mm:ss')}至${moment(end).format('YYYY-MM-DD HH:mm:ss')}, 共 ${data.data.length} 条`
+      );
       return data.data;
     } else {
-      logger.error(`获取 ${instrumentId}/${Bar_Type[+granularity]} K线失败: ${data.msg}`);
+      logger.error(`获取 ${instrumentId}/${KlineInterval[+granularity]} K线失败: ${data.msg}`);
       return [];
     }
   } catch (e) {
-    logger.error(`获取 ${instrumentId}/${Bar_Type[+granularity]} Catch Error: ${e}`);
+    logger.error(`获取 ${instrumentId}/${KlineInterval[+granularity]} Catch Error: ${e}`);
     return [];
   }
 }
@@ -163,7 +143,7 @@ function getBasicCommands(instruments: Instrument[], business: Business): Array<
 }
 
 async function getCandlesWithLimitedSpeed(options: Array<InstrumentReqOptions>) {
-  //设置系统限速规则: 5次/2s (okex官方API 限速规则：20次/2s)
+  //设置系统限速规则: 5次/2s (Biance官方API 限速规则：20次/2s)
   return bluebird.map(
     options,
     (option: any) => {

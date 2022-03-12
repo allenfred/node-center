@@ -1,4 +1,4 @@
-import { getISOString } from '../../util';
+import { getISOString } from '../../../util';
 import { getCandlesWithLimitedSpeed } from '../common';
 
 // 获取最近100条k线数据

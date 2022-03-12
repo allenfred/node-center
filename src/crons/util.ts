@@ -1,4 +1,4 @@
-import { getCandlesWithLimitedSpeed } from '../okex/common';
+import { getCandlesWithLimitedSpeed } from '../api/okex/common';
 import { getISOString } from '../util';
 import { InstrumentInfo } from '../database/models';
 import { Instrument, InstrumentReqOptions } from '../types';

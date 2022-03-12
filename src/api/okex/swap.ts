@@ -1,8 +1,8 @@
 import * as bluebird from 'bluebird';
-import logger from '../logger';
-import { Instrument } from '../types';
-import { InstrumentInfoDao } from '../dao';
-import { getCandleRequestOptions, isMainCurrency, getISOString } from '../util';
+import logger from '../../logger';
+import { Instrument } from '../../types';
+import { InstrumentInfoDao } from '../../dao';
+import { getCandleRequestOptions, isMainCurrency, getISOString } from '../../util';
 import { getCandles, getCandlesWithLimitedSpeed, getSwapInstruments } from './common';
 
 export async function initInstruments(): Promise<Instrument[]> {

@@ -1,6 +1,6 @@
 const axios = require('axios');
 const querystring = require('querystring');
-import logger from '../logger';
+import logger from '../../logger';
 
 export default function PublicClient(apiUri = 'https://www.okex.com', timeout = 3000, axiosConfig = {}) {
   const axiosInstance = axios.default.create(Object.assign({ baseURL: apiUri, timeout }, axiosConfig));
