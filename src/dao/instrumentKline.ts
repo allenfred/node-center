@@ -1,38 +1,42 @@
 import * as bluebird from 'bluebird';
 import { BtcSwapKline, UsdtSwapKline } from '../database/models';
-import { InstrumentKlineSchema } from '../types';
+import { InstKline } from '../types';
 import logger from '../logger';
 
-async function upsert(candles: InstrumentKlineSchema[]) {
-  return bluebird.map(candles, async (candle: InstrumentKlineSchema) => {
-    //find unique candle by underlying_index & timestamp & alias & granularity
+async function upsert(klines: InstKline[]) {
+  return bluebird.map(klines, async (kline: InstKline) => {
+    if (kline.instrument_id.indexOf('SWAP') === -1) {
+      return;
+    }
+    //find unique kline by underlying_index & timestamp & alias & granularity & exchange
     const uniqueCondition = {
-      instrument_id: candle.instrument_id,
-      timestamp: new Date(candle.timestamp),
-      granularity: candle.granularity,
+      instrument_id: kline.instrument_id,
+      timestamp: new Date(kline.timestamp),
+      granularity: kline.granularity,
+      exchange: kline.exchange,
     };
 
-    const Model = getModel(candle);
-    const existedCandle = await Model.findOne(uniqueCondition);
+    const Model = getModel(kline);
+    const existedkline = await Model.findOne(uniqueCondition);
 
-    if (existedCandle) {
-      await Model.updateOne(uniqueCondition, candle).catch((err: any) => {
-        logger.error(`update candle `, err);
+    if (existedkline) {
+      await Model.updateOne(uniqueCondition, kline).catch((err: any) => {
+        logger.error(`update kline `, err);
       });
     } else {
-      await Model.create(candle)
+      await Model.create(kline)
         // .then((res: any) => {
-        //   logger.info(`Create Kline ${candle.exchange}/${candle.instrument_id} ${candle.granularity}`);
+        //   logger.info(`Create Kline ${kline.exchange}/${kline.instrument_id} ${kline.granularity}`);
         // })
         .catch((err) => {
-          logger.error(`create candle `, err);
+          logger.error(`create kline `, err);
         });
     }
   });
 }
 
-function getModel(candle) {
-  if (candle.instrument_id.includes('BTC')) {
+function getModel(kline: any) {
+  if (kline.instrument_id.includes('BTC')) {
     return BtcSwapKline;
   } else {
     return UsdtSwapKline;

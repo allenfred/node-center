@@ -1,31 +1,22 @@
-import { EventEmitter } from 'events';
-import { V3WebsocketClient } from '@okfe/okex-node';
-import { OKEX_WS_HOST } from '../config';
 import logger from '../logger';
-import { Channel, OkexWsMessage, Instrument, KlineChannel } from '../types';
-import * as swap from '../api/okex/swap';
-import * as common from '../api/okex/common';
-import { handleMessage } from './../api/okex/handler';
-import { InstrumentInfoDao } from '../dao';
-import { setupBianceWsClient, initBianceInstruments } from '../api/biance';
-import { setupOkexWsClient } from '../api/okex';
+import { setupBianceWsClient, initBianceInsts, initBianceKlines } from '../api/biance';
+import { setupOkexWsClient, initOkxInsts } from '../api/okex';
 
 const WebSocket = require('ws');
 let wsServer: any;
 const clients = [];
 
-let wsClient: any;
-const event = new EventEmitter();
-
-interface Msg {
-  event?: string;
-  arg: any;
-  data: any[];
+enum ReadyState {
+  CONNECTING = 0,
+  OPEN = 1,
+  CLOSING = 2,
+  CLOSED = 3,
 }
 
 async function setupServer() {
   wsServer = new WebSocket.Server({ port: 8080 });
 
+  // TODO: manager client ids request headers
   wsServer.on('connection', function connection(ws: any) {
     ws.channels = [];
     clients.push(ws);
@@ -43,15 +34,23 @@ async function setupServer() {
       }
     });
 
-    ws.on('close', (e) => {
-      console.log(e);
+    ws.on('close', () => {
+      clients.find((e, i) => {
+        if (e.readyState === ReadyState.CLOSED) {
+          clients.splice(i, 1);
+        }
+      });
+
       logger.info('someone disconnected.');
     });
   });
 }
 
 export async function setupWsserver() {
-  setupOkexWsClient(clients);
-  // setupBianceWsClient();
+  // await initOkxInsts();
+  const insts = await initBianceInsts();
+  await initBianceKlines(insts);
+  // setupOkexWsClient(clients);
+  // setupBianceWsClient(clients);
   setupServer();
 }

@@ -1,9 +1,9 @@
 import * as bluebird from 'bluebird';
 import { btcUsdtKline } from '../database/models';
-import { InstrumentKlineSchema } from '../types';
+import { InstKline } from '../types';
 
-async function upsert(candles: InstrumentKlineSchema[]) {
-  return bluebird.map(candles, async (kline: InstrumentKlineSchema) => {
+async function upsert(candles: InstKline[]) {
+  return bluebird.map(candles, async (kline: InstKline) => {
     //find unique candle by underlying_index & timestamp & alias & granularity
     const uniqueCondition = {
       timestamp: new Date(kline.timestamp),

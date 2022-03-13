@@ -8,7 +8,7 @@ async function upsert(instruments: Instrument[]): Promise<any> {
     const uniqueCondition = {
       underlying_index: item.underlying_index,
       quote_currency: item.quote_currency,
-      alias: item.alias,
+      exchange: item.exchange,
     };
     let result: any;
 
@@ -23,13 +23,13 @@ async function upsert(instruments: Instrument[]): Promise<any> {
   });
 }
 
-async function findAll(): Promise<any> {
-  return await InstrumentInfo.find({});
+async function find(opts?: any): Promise<any> {
+  return await InstrumentInfo.find(opts);
 }
 
 const InstrumentInfoDao = {
   upsert,
-  findAll,
+  find,
 };
 
 export { InstrumentInfoDao };

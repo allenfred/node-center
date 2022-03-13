@@ -179,10 +179,15 @@ export interface BianceExchangeInfoResponse {
   timezone: string;
 }
 
-export interface KlineApiParams {
+export interface BianceKlineApiOpts {
   symbol: string;
   interval: string; // 1m 3m 5m ...
   startTime?: number; // LONG
   endTime?: number; // LONG
   limit?: number; // 默认值:500 最大值:1500.
+}
+
+export interface BianceWsMsg {
+  stream: string; // !miniTicker@arr / <symbol>@kline_<interval>
+  data: any[];
 }

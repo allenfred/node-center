@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 const { String, Number, Date } = Schema.Types;
 
 const schema = new Schema({
-  instrument_id: String, // 	合约ID BTC-USD-SWAP / BTC-USDT-SWAP
+  instrument_id: String, // 	合约ID BTC-USDT | BTC-USDT-SWAP
   underlying_index: String, // 交易货币币种，如：BTC-USD-190322 中的BTC
   quote_currency: String, // 计价货币币种，如：BTC-USD-190322 中的USD
   timestamp: Date, // 开始时间 ISO_8601

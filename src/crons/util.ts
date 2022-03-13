@@ -1,7 +1,8 @@
-import { getCandlesWithLimitedSpeed } from '../api/okex/common';
-import { getISOString } from '../util';
+import { getKlinesWithLimited as getOkxKlines } from '../api/okex/common';
+import { getKlinesWithLimited as getBianceKlines } from '../api/biance/common';
+import { getTimestamp } from '../util';
 import { InstrumentInfo } from '../database/models';
-import { Instrument, InstrumentReqOptions } from '../types';
+import { Instrument, InstReqOptions, Exchange } from '../types';
 
 const Job_Granularity = {
   FiveMins: 60 * 5,
@@ -19,8 +20,7 @@ const Job_Granularity = {
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 async function execJob(granularity: number) {
   // 获取所有合约信息
-  // const swapInstruments = await swap.initInstruments();
-  const swapInstruments: Instrument[] = await InstrumentInfo.find({});
+  const insts: Instrument[] = await InstrumentInfo.find({});
 
   const customFilter = (i: Instrument) => {
     if (granularity === 300) {
@@ -30,22 +30,25 @@ async function execJob(granularity: number) {
     }
   };
 
-  const swapOptions: InstrumentReqOptions[] = swapInstruments.filter(customFilter).map((i: Instrument) => {
+  const swapOptions: InstReqOptions[] = insts.filter(customFilter).map((i: Instrument) => {
     let candleCount = 10;
 
     if (granularity > Job_Granularity.TwoHour) {
       candleCount = 4;
     }
+
     return {
       // 最近 10 条K线数据
-      start: getISOString((-candleCount * granularity) / 60, 'm'),
+      start: getTimestamp((-candleCount * granularity) / 60, 'm'),
       end: new Date().toISOString(),
       granularity,
       instrument_id: i.instrument_id,
-    } as InstrumentReqOptions;
+      exchange: i.exchange,
+    } as InstReqOptions;
   });
 
-  return await getCandlesWithLimitedSpeed(swapOptions);
+  await getOkxKlines(swapOptions.filter((i) => i.exchange === Exchange.Okex));
+  await getBianceKlines(swapOptions.filter((i) => i.exchange === Exchange.Biance));
 }
 
 export { Job_Granularity, execJob };

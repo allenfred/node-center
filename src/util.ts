@@ -1,5 +1,5 @@
 import * as moment from 'moment';
-import { Channel, Ticker, PriceRange, MarkPrice, Depth, Trade } from './types';
+import { OkxKlineChannel, OkxWsTicker } from './types';
 
 export async function sleep(seconds: number) {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
@@ -26,42 +26,42 @@ export function getInstrumentAlias(instrumentId: string): string {
 
 function getStartEndOptions(size: number) {
   return [
-    { start: getISOString(-200 * size, 'm'), end: getISOString() },
+    { start: getTimestamp(-200 * size, 'm'), end: getTimestamp() },
     {
-      start: getISOString(-400 * size, 'm'),
-      end: getISOString(-200 * size, 'm'),
+      start: getTimestamp(-400 * size, 'm'),
+      end: getTimestamp(-200 * size, 'm'),
     },
     {
-      start: getISOString(-600 * size, 'm'),
-      end: getISOString(-400 * size, 'm'),
+      start: getTimestamp(-600 * size, 'm'),
+      end: getTimestamp(-400 * size, 'm'),
     },
     {
-      start: getISOString(-800 * size, 'm'),
-      end: getISOString(-600 * size, 'm'),
+      start: getTimestamp(-800 * size, 'm'),
+      end: getTimestamp(-600 * size, 'm'),
     },
     {
-      start: getISOString(-1000 * size, 'm'),
-      end: getISOString(-800 * size, 'm'),
+      start: getTimestamp(-1000 * size, 'm'),
+      end: getTimestamp(-800 * size, 'm'),
     },
     {
-      start: getISOString(-1200 * size, 'm'),
-      end: getISOString(-1000 * size, 'm'),
+      start: getTimestamp(-1200 * size, 'm'),
+      end: getTimestamp(-1000 * size, 'm'),
     },
     {
-      start: getISOString(-1400 * size, 'm'),
-      end: getISOString(-1200 * size, 'm'),
+      start: getTimestamp(-1400 * size, 'm'),
+      end: getTimestamp(-1200 * size, 'm'),
     },
     {
-      start: getISOString(-1600 * size, 'm'),
-      end: getISOString(-1400 * size, 'm'),
+      start: getTimestamp(-1600 * size, 'm'),
+      end: getTimestamp(-1400 * size, 'm'),
     },
     {
-      start: getISOString(-1800 * size, 'm'),
-      end: getISOString(-1600 * size, 'm'),
+      start: getTimestamp(-1800 * size, 'm'),
+      end: getTimestamp(-1600 * size, 'm'),
     },
     {
-      start: getISOString(-2000 * size, 'm'),
-      end: getISOString(-1800 * size, 'm'),
+      start: getTimestamp(-2000 * size, 'm'),
+      end: getTimestamp(-1800 * size, 'm'),
     },
   ].map((option) => {
     return Object.assign({}, option, {
@@ -70,7 +70,7 @@ function getStartEndOptions(size: number) {
   });
 }
 
-export function getCandleRequestOptions() {
+export function getKlineReqOptions() {
   const oneMinute = getStartEndOptions(1);
   const threeMinutes = getStartEndOptions(3);
   const fiveMinutes = getStartEndOptions(5);
@@ -96,8 +96,12 @@ export function getCandleRequestOptions() {
     .concat(day);
 }
 
-export function getISOString(amount: number = 0, unit: moment.DurationInputArg2 = 'm') {
-  return moment().add(amount, unit).toISOString();
+// export function getTimestamp(amount: number = 0, unit: moment.DurationInputArg2 = 'm') {
+//   return moment().add(amount, unit).toISOString();
+// }
+
+export function getTimestamp(amount: number = 0, unit: moment.DurationInputArg2 = 'm'): any {
+  return +moment().add(amount, unit);
 }
 
 export function isValidMarketData(marketData): Boolean {
@@ -113,13 +117,13 @@ export function isMainCurrency(name: string) {
 }
 
 //更新实时盘口信息
-export function refreshTradeInfo(memoryData: Array<Ticker | PriceRange | MarkPrice | Depth | Trade>, marketData) {
+export function refreshOkxTradeInfo(memoryData: Array<any>, marketData) {
   const ticker = memoryData.find(({ instrument_id }) => {
     return instrument_id === marketData.data[0].instrument_id;
   });
   let data = marketData.data[0];
   if (ticker) {
-    memoryData.map((item: Ticker | PriceRange | MarkPrice) => {
+    memoryData.map((item: any) => {
       if (ticker.instrument_id === item.instrument_id) {
         Object.assign(item, data);
       }

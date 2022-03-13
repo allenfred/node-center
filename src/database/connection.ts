@@ -12,6 +12,7 @@ async function connect() {
   await mongoose.connect(`mongodb://${username}:${password}@${host}:${port}/${db}`, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
+    maxPoolSize: 200,
   });
 }
 
