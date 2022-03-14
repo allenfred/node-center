@@ -26,7 +26,7 @@ async function upsert(tickers: InstTicker[]): Promise<any> {
 
       return result;
     },
-    { concurrency: 10 }
+    { concurrency: 30 }
   );
 }
 

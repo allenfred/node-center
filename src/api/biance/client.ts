@@ -30,8 +30,8 @@ async function setupBianceWsClient(clients: any) {
     close: () => {
       logger.error('!!! 与Biance wsserver断开连接 !!!');
     },
-    message: (data: BianceWsMsg) => {
-      handleMsg(data);
+    message: (data: any) => {
+      handleMsg(JSON.parse(data));
     },
   });
 }
