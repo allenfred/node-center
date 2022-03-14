@@ -27,8 +27,8 @@ async function getKlinesWithLimited(options: Array<InstReqOptions>) {
           return getBianceKlines({
             symbol: option.instrument_id,
             interval: BianceKlineInterval[option.granularity],
-            startTime: option.start,
-            endTime: option.end,
+            startTime: new Date(option.start).valueOf(),
+            endTime: new Date(option.end).valueOf(),
             limit: 1500,
           });
         })

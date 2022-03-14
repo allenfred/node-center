@@ -96,9 +96,9 @@ export function getKlineReqOptions() {
     .concat(day);
 }
 
-// export function getTimestamp(amount: number = 0, unit: moment.DurationInputArg2 = 'm') {
-//   return moment().add(amount, unit).toISOString();
-// }
+export function getISOString(amount: number = 0, unit: moment.DurationInputArg2 = 'm') {
+  return moment().add(amount, unit).toISOString();
+}
 
 export function getTimestamp(amount: number = 0, unit: moment.DurationInputArg2 = 'm'): any {
   return +moment().add(amount, unit);

@@ -1,6 +1,6 @@
 import { getKlinesWithLimited as getOkxKlines } from '../api/okex/common';
 import { getKlinesWithLimited as getBianceKlines } from '../api/biance/common';
-import { getTimestamp } from '../util';
+import { getTimestamp, getISOString } from '../util';
 import { InstrumentInfo } from '../database/models';
 import { Instrument, InstReqOptions, Exchange } from '../types';
 
@@ -39,8 +39,8 @@ async function execJob(granularity: number) {
 
     return {
       // 最近 10 条K线数据
-      start: getTimestamp((-candleCount * granularity) / 60, 'm'),
-      end: new Date().getTime() + '',
+      start: getISOString((-candleCount * granularity) / 60, 'm'),
+      end: new Date().toISOString(),
       granularity,
       instrument_id: i.instrument_id,
       exchange: i.exchange,
