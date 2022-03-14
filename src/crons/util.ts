@@ -40,7 +40,7 @@ async function execJob(granularity: number) {
     return {
       // 最近 10 条K线数据
       start: getTimestamp((-candleCount * granularity) / 60, 'm'),
-      end: new Date().toISOString(),
+      end: new Date().getTime() + '',
       granularity,
       instrument_id: i.instrument_id,
       exchange: i.exchange,
