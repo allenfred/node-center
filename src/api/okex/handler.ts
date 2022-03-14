@@ -81,7 +81,7 @@ function isTickerMsg(message: any) {
 }
 
 export async function handleMsg(message: OkxWsMsg) {
-  if (!(new Date().getSeconds() === 0 || new Date().getSeconds() === 30)) {
+  if (!(new Date().getSeconds() % 10 === 0)) {
     return;
   }
 

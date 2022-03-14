@@ -28,8 +28,8 @@ async function upsert(klines: InstKline[]) {
         // .then((res: any) => {
         //   logger.info(`Create Kline ${kline.exchange}/${kline.instrument_id} ${kline.granularity}`);
         // })
-        .catch((err) => {
-          logger.error(`create kline `, err);
+        .catch((err: any) => {
+          logger.error(`create kline catch Eror: `, err);
         });
     }
   });

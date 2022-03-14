@@ -48,9 +48,9 @@ async function setupServer() {
 
 export async function setupWsserver() {
   // await initOkxInsts();
-  const insts = await initBianceInsts();
-  await initBianceKlines(insts);
-  // setupOkexWsClient(clients);
-  // setupBianceWsClient(clients);
+  // const insts = await initBianceInsts();
+  // await initBianceKlines(insts);
+  setupOkexWsClient(clients);
+  setupBianceWsClient(clients);
   setupServer();
 }

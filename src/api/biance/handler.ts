@@ -63,7 +63,7 @@ function isTickerMsg(message: BianceWsMsg) {
 }
 
 export async function handleMsg(message: BianceWsMsg) {
-  if (!(new Date().getSeconds() % 5 === 0)) {
+  if (!(new Date().getSeconds() % 10 === 0)) {
     return;
   }
 

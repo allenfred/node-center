@@ -21,7 +21,7 @@ async function upsert(tickers: InstTicker[]): Promise<any> {
           result = await InstrumentTicker.create(ticker);
         }
       } catch (e) {
-        logger.error('upsertTicker catch error:' + instrument_id);
+        logger.error('upsertTicker catch error: ' + instrument_id);
       }
 
       return result;

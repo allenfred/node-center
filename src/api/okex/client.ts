@@ -59,15 +59,15 @@ async function getOkxKlines({ instrumentId, start, end, granularity }: KlineReqO
     const data = await pClient.getCandles({ instId: instrumentId, before: new Date(start).valueOf(), after: new Date(end).valueOf(), bar: KlineInterval[+granularity] });
     if (+data.code === 0) {
       logger.info(
-        `获取 ${instrumentId}/${KlineInterval[+granularity]} K线成功: 从${moment(start).format('YYYY-MM-DD HH:mm:ss')}至${moment(end).format('YYYY-MM-DD HH:mm:ss')}, 共 ${data.data.length} 条`
+        `获取 [Okx] ${instrumentId}/${KlineInterval[+granularity]} K线成功: 从${moment(start).format('YYYY-MM-DD HH:mm:ss')}至${moment(end).format('YYYY-MM-DD HH:mm:ss')}, 共 ${data.data.length} 条`
       );
       return data.data;
     } else {
-      logger.error(`获取 ${instrumentId}/${KlineInterval[+granularity]} K线失败: ${data.msg}`);
+      logger.error(`获取 [Okx] ${instrumentId}/${KlineInterval[+granularity]} K线失败: ${data.msg}`);
       return [];
     }
   } catch (e) {
-    logger.error(`获取 ${instrumentId}/${KlineInterval[+granularity]} Catch Error: ${e}`);
+    logger.error(`获取 [Okx] ${instrumentId}/${KlineInterval[+granularity]} Catch Error: ${e}`);
     return [];
   }
 }

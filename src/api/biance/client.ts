@@ -1,4 +1,5 @@
 const { Spot } = require('@binance/connector');
+import * as moment from 'moment';
 import { Instrument, Exchange, BianceExchangeInfoResponse, BianceSymbolInfo, BianceKline, BianceKlineApiOpts, FilterType, BianceWsMsg } from '../../types';
 import logger from '../../logger';
 import { InstrumentInfoDao } from '../../dao';
@@ -99,6 +100,11 @@ async function getBianceKlines(params: BianceKlineApiOpts) {
   return client
     .publicRequest('GET', '/fapi/v1/klines', params)
     .then((res: { data: Array<BianceKline> }) => {
+      logger.info(
+        `获取 [Biance] ${params.symbol}/${params.interval} K线成功: 从${moment(params.startTime).format('YYYY-MM-DD HH:mm:ss')}至${moment(params.endTime).format('YYYY-MM-DD HH:mm:ss')}, 共 ${
+          res.data.length
+        } 条`
+      );
       return res.data;
     })
     .catch((error: any) => {
