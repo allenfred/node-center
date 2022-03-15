@@ -114,7 +114,7 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
             // .filter((i) => i.instId.indexOf('USDT') !== -1)
             .map((i) => {
               return {
-                inst_id: i.instId,
+                instrument_id: i.instId,
                 last: i.last, // 最新成交价格
                 chg_24h: i.last - i.open24h, // 24小时价格变化
                 chg_rate_24h: (((i.last - i.open24h) * 100) / i.open24h).toFixed(4), // 24小时价格变化(百分比)

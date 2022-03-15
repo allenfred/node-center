@@ -92,7 +92,7 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
             // .filter((i) => i.s.indexOf('USDT') !== -1)
             .map((i: Ticker) => {
               return {
-                inst_id: i.s, // symbol
+                instrument_id: i.s, // symbol
                 last: i.c, // 最新成交价格
                 chg_24h: i.p, // 24小时价格变化
                 chg_rate_24h: i.P, // 24小时价格变化(百分比)
