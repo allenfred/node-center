@@ -26,9 +26,9 @@ export async function handleTickers(message: OkxWsMsg) {
     message.data.map((i) => {
       return {
         instrument_id: i.instId,
-        last: i.last,
-        best_ask: i.askPx,
-        best_bid: i.bidPx,
+        last: i.last, // 最新成交价格
+        chg_24h: i.last - i.open24h, // 24小时价格变化
+        chg_rate_24h: (((i.last - i.open24h) * 100) / i.open24h).toFixed(4), // 24小时价格变化(百分比)
         high_24h: i.high24h, // 24小时最高价
         low_24h: i.low24h, // 24小时最低价
         volume_24h: i.vol24h, // 24小时成交量（按张数统计）

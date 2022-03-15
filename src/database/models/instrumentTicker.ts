@@ -6,10 +6,10 @@ const { String, Number, Date } = Schema.Types;
 const schema = new Schema({
   instrument_id: String, // 合约ID，如 BTC-USD-180213 BTC-USD-SWAP
   last: Number, // 最新成交价
-  best_ask: Number, // 卖一价
-  best_bid: Number, // 买一价
   high_24h: Number, // 24小时最高价
   low_24h: Number, // 24小时最低价
+  chg_24h: Number, // 24小时价格变化
+  chg_rate_24h: Number, // 24小时价格变化(百分比)
   volume_24h: Number, // 24小时成交量（按张数统计）
   timestamp: Date, // 系统时间 ISO_8601
   open_interest: Number, // 持仓量

@@ -39,9 +39,9 @@ export async function handleTickers(message: BianceWsMsg) {
     message.data.map((i: Ticker) => {
       return {
         instrument_id: i.s, // symbol
-        last: i.c,
-        best_ask: '',
-        best_bid: '',
+        last: i.c, // 最新成交价格
+        chg_24h: i.p, // 24小时价格变化
+        chg_rate_24h: i.P, // 24小时价格变化(百分比)
         high_24h: i.h, // 24小时最高价
         low_24h: i.l, // 24小时最低价
         volume_24h: i.q, // 24小时成交量（按张数统计）
