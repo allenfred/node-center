@@ -1,5 +1,5 @@
 import { InstrumentKlineDao, InstrumentTickerDao } from '../../dao';
-import { Exchange, InstKline, BianceWsMsg } from '../../types';
+import { Exchange, InstKline, BianceWsMsg, BianceKlineChannel } from '../../types';
 
 interface MiniTicker {
   e: string; // 事件类型 24hrMiniTicker
@@ -36,22 +36,24 @@ interface Ticker {
 
 export async function handleTickers(message: BianceWsMsg) {
   await InstrumentTickerDao.upsert(
-    message.data.map((i: Ticker) => {
-      return {
-        instrument_id: i.s, // symbol
-        last: i.c, // 最新成交价格
-        chg_24h: i.p, // 24小时价格变化
-        chg_rate_24h: i.P, // 24小时价格变化(百分比)
-        high_24h: i.h, // 24小时最高价
-        low_24h: i.l, // 24小时最低价
-        volume_24h: i.q, // 24小时成交量（按张数统计）
-        timestamp: i.E, // 系统时间 ISO_8601
-        open_interest: '', // 持仓量
-        open_24h: i.o, // 24小时开盘价
-        volume_token_24h: i.v, // 	成交量（按币统计）
-        exchange: Exchange.Biance,
-      };
-    })
+    message.data
+      .filter((i) => i.s.indexOf('USDT') !== -1)
+      .map((i: Ticker) => {
+        return {
+          instrument_id: i.s, // symbol
+          last: i.c, // 最新成交价格
+          chg_24h: i.p, // 24小时价格变化
+          chg_rate_24h: i.P, // 24小时价格变化(百分比)
+          high_24h: i.h, // 24小时最高价
+          low_24h: i.l, // 24小时最低价
+          volume_24h: i.q, // 24小时成交量（按张数统计）
+          timestamp: i.E, // 系统时间 ISO_8601
+          open_interest: '', // 持仓量
+          open_24h: i.o, // 24小时开盘价
+          volume_token_24h: i.v, // 	成交量（按币统计）
+          exchange: Exchange.Biance,
+        };
+      })
   );
 }
 
@@ -70,4 +72,40 @@ export async function handleMsg(message: BianceWsMsg) {
   if (isTickerMsg(message)) {
     handleTickers(message);
   }
+}
+
+export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
+  if (!clients.length) {
+    return;
+  }
+
+  function getChannelIndex(arg: any) {
+    return `biance:candle${BianceKlineChannel[arg.channel]}:${arg.instId}`;
+  }
+
+  clients.map((client: any) => {
+    if (msg.stream === '!ticker@arr' && client.channels.includes('tickers')) {
+      client.send(
+        JSON.stringify({
+          channel: 'tickers',
+          data: msg.data
+            .filter((i) => i.s.indexOf('USDT') !== -1)
+            .map((i: Ticker) => {
+              return {
+                instrument_id: i.s, // symbol
+                last: i.c, // 最新成交价格
+                chg_24h: i.p, // 24小时价格变化
+                chg_rate_24h: i.P, // 24小时价格变化(百分比)
+                volume_24h: i.q, // 24小时成交量（按张数统计）
+                exchange: Exchange.Biance,
+              };
+            }),
+        })
+      );
+    }
+
+    // if (msg.stream === '!ticker@arr' && client.channels.includes(getChannelIndex(msg.arg))) {
+    //   client.send(JSON.stringify({ channel: getChannelIndex(msg.arg), data: msg.data }));
+    // }
+  });
 }

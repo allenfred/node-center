@@ -4,7 +4,7 @@ import { V3WebsocketClient as OkxWsClient } from '@okfe/okex-node';
 import { OKEX_WS_HOST, OKEX_HTTP_HOST } from '../../config';
 import logger from '../../logger';
 import { Exchange, OkxWsMsg, Instrument, OkxKlineChannel, OkxInst, KlineReqOpts, OkxKline } from '../../types';
-import { handleMsg } from './handler';
+import { handleMsg, broadCastMsg } from './handler';
 import { InstrumentInfoDao } from '../../dao';
 
 const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
@@ -115,22 +115,6 @@ function getBasicArgs(instruments: Instrument[]): Array<string> {
   return klineArgs.concat(tickerArgs);
 }
 
-function broadCastMessage(msg: OkxWsMsg, clients: any[]) {
-  if (!clients.length) {
-    return;
-  }
-
-  function getChannelIndex(arg: any) {
-    return `candle${OkxKlineChannel[arg.channel]}:${arg.instId}`;
-  }
-
-  clients.map((client: any) => {
-    if (client.channels.includes(getChannelIndex(msg.arg))) {
-      client.send(JSON.stringify({ channel: getChannelIndex(msg.arg), data: msg.data }));
-    }
-  });
-}
-
 async function setupOkexWsClient(clients: any[]) {
   const wsClient = new OkxWsClient(OKEX_WS_HOST);
   wsClient.connect();
@@ -168,7 +152,7 @@ async function setupOkexWsClient(clients: any[]) {
       // 公共频道消息
       if (eventType == undefined) {
         handleMsg(obj);
-        broadCastMessage(obj, clients);
+        broadCastMsg(obj, clients);
       }
     } catch (e) {
       logger.error('handleMessage catch err: ', e);

@@ -84,6 +84,19 @@ export enum OkxKlineChannel {
   candle5m = 300,
 }
 
+export enum BianceKlineChannel {
+  candle1W = 604800,
+  candle1D = 86400,
+  candle12H = 43200,
+  candle6H = 21600,
+  candle4H = 14400,
+  candle2H = 7200,
+  candle1H = 3600,
+  candle30m = 1800,
+  candle15m = 900,
+  candle5m = 300,
+}
+
 export interface OkxWsMsg {
   event?: string;
   arg: any;

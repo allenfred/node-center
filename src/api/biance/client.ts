@@ -3,7 +3,7 @@ import * as moment from 'moment';
 import { Instrument, Exchange, BianceExchangeInfoResponse, BianceSymbolInfo, BianceKline, BianceKlineApiOpts, FilterType, BianceWsMsg } from '../../types';
 import logger from '../../logger';
 import { InstrumentInfoDao } from '../../dao';
-import { handleMsg } from './handler';
+import { handleMsg, broadCastMsg } from './handler';
 
 const client = new Spot('', '', {
   baseURL: 'https://fapi.binance.com',
@@ -31,6 +31,7 @@ async function setupBianceWsClient(clients: any) {
       logger.error('!!! 与Biance wsserver断开连接 !!!');
     },
     message: (data: any) => {
+      broadCastMsg(JSON.parse(data), clients);
       handleMsg(JSON.parse(data));
     },
   });
