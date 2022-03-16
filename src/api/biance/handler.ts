@@ -89,7 +89,7 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
         JSON.stringify({
           channel: 'tickers',
           data: msg.data
-            // .filter((i) => i.s.indexOf('USDT') !== -1)
+            .filter((i) => i.s.endsWith('USDT'))
             .map((i: Ticker) => {
               return {
                 instrument_id: i.s, // symbol

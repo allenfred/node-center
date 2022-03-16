@@ -5,9 +5,6 @@ import logger from '../logger';
 
 async function upsert(klines: InstKline[]) {
   return bluebird.map(klines, async (kline: InstKline) => {
-    if (kline.instrument_id.indexOf('SWAP') === -1) {
-      return;
-    }
     //find unique kline by underlying_index & timestamp & alias & granularity & exchange
     const uniqueCondition = {
       instrument_id: kline.instrument_id,
