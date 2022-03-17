@@ -1,8 +1,20 @@
 const { Spot } = require('@binance/connector');
 import * as moment from 'moment';
-import { Instrument, Exchange, BianceExchangeInfoResponse, BianceSymbolInfo, BianceKline, BianceKlineApiOpts, FilterType, BianceWsMsg, BianceKlineChannel } from '../../types';
+import {
+  Instrument,
+  Exchange,
+  BianceExchangeInfoResponse,
+  BianceSymbolInfo,
+  BianceKline,
+  BianceKlineApiOpts,
+  FilterType,
+  BianceWsMsg,
+  KlineInterval,
+  WsFormatKline,
+  BianceWsKline,
+} from '../../types';
 import logger from '../../logger';
-import { InstrumentInfoDao, InstrumentTickerDao } from '../../dao';
+import { InstrumentTickerDao, InstrumentKlineDao } from '../../dao';
 
 const client = new Spot('', '', {
   baseURL: 'https://fapi.binance.com',
@@ -61,12 +73,40 @@ export async function handleTickers(message: BianceWsMsg) {
           volume_token_24h: i.v, // 	成交量（按币统计）
           exchange: Exchange.Biance,
         };
-      })
+      }),
   );
+}
+
+export async function handleKline(msg: BianceWsMsg) {
+  const k: BianceWsKline = msg.data['k'];
+
+  await InstrumentKlineDao.upsert([
+    {
+      instrument_id: k.s,
+      underlying_index: k.s.replace('USDT', ''),
+      quote_currency: 'USDT',
+      timestamp: k.t,
+      open: +k.o,
+      high: +k.h,
+      low: +k.l,
+      close: +k.c,
+      volume: +k.q,
+      currency_volume: +k.v,
+      granularity: KlineInterval['candle' + k.i],
+      exchange: Exchange.Biance,
+    },
+  ]);
 }
 
 function isTickerMsg(message: BianceWsMsg) {
   if (message && message.stream === '!ticker@arr') {
+    return true;
+  }
+  return false;
+}
+
+function isKlineMsg(message: BianceWsMsg) {
+  if (message && message.stream.indexOf('@kline') !== -1) {
     return true;
   }
   return false;
@@ -80,6 +120,10 @@ export async function handleMsg(message: BianceWsMsg) {
   if (isTickerMsg(message)) {
     handleTickers(message);
   }
+
+  if (isKlineMsg(message)) {
+    handleKline(message);
+  }
 }
 
 export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
@@ -87,11 +131,12 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
     return;
   }
 
-  function getChannelIndex(arg: any) {
-    return `biance:candle${BianceKlineChannel[arg.channel]}:${arg.instId}`;
+  function getSubChannel(interval: string, instId: string) {
+    return `biance:candle${KlineInterval[interval]}:${instId}`;
   }
 
   clients.map((client: any) => {
+    // ticker
     if (msg.stream === '!ticker@arr' && client.channels.includes('tickers')) {
       client.send(
         JSON.stringify({
@@ -108,41 +153,99 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
                 exchange: Exchange.Biance,
               };
             }),
-        })
+        }),
       );
     }
 
-    // if (msg.stream === '!ticker@arr' && client.channels.includes(getChannelIndex(msg.arg))) {
-    //   client.send(JSON.stringify({ channel: getChannelIndex(msg.arg), data: msg.data }));
-    // }
+    // kline
+    /**
+     * {
+        "e": "kline",     // 事件类型
+        "E": 123456789,   // 事件时间
+        "s": "BNBUSDT",    // 交易对
+        "k": {
+          "t": 123400000, // 这根K线的起始时间
+          "T": 123460000, // 这根K线的结束时间
+          "s": "BNBUSDT",  // 交易对
+          "i": "1m",      // K线间隔
+          "f": 100,       // 这根K线期间第一笔成交ID
+          "L": 200,       // 这根K线期间末一笔成交ID
+          "o": "0.0010",  // 开盘价
+          "c": "0.0020",  // 收盘价
+          "h": "0.0025",  // 最高价
+          "l": "0.0015",  // 最低价
+          "v": "1000",    // 这根K线期间成交量
+          "n": 100,       // 这根K线期间成交笔数
+          "x": false,     // 这根K线是否完结(是否已经开始下一根K线)
+          "q": "1.0000",  // 这根K线期间成交额
+          "V": "500",     // 主动买入的成交量
+          "Q": "0.500",   // 主动买入的成交额
+          "B": "123456"   // 忽略此参数
+        }
+      }
+    */
+    if (msg.stream.indexOf('kline') > -1) {
+      const strs = msg.stream.split('_');
+      const interval = strs[1]; // 1h
+      const instId = msg.data['s'];
+      const subChannel = getSubChannel(interval, instId);
+
+      if (client.channels.includes(subChannel)) {
+        const k = msg.data['k'];
+        client.send(
+          JSON.stringify({
+            channel: subChannel,
+            data: [k.t, k.o, k.h, k.l, k.c, k.q, k.v] as WsFormatKline,
+          }),
+        );
+      }
+    }
   });
 }
 
 async function setupBianceWsClient(clients: any) {
-  const intervals = ['15m', '30m', '1h', '2h', '4h'];
-  // support combined stream, e.g.
-  const instruments: Instrument[] = await InstrumentInfoDao.find({ exchange: Exchange.Biance });
-  const klineStreams = [];
-  instruments.forEach((e) => {
-    intervals.forEach((i) => {
-      klineStreams.push(e.instrument_id.replace('-', '') + '@kline_' + i);
-    });
-  });
+  const intervals = ['15m', '1h', '4h'];
 
+  // support combined stream, e.g.
+  const instruments: Instrument[] = await InstrumentTickerDao.findByTopVolume({
+    exchange: Exchange.Biance,
+    limit: 50,
+  });
+  const klineStreams = [];
+  instruments
+    .filter((i) => {
+      return i.instrument_id.endsWith('USDT');
+    })
+    .forEach((e) => {
+      intervals.forEach((i) => {
+        klineStreams.push(
+          e.instrument_id.replace('-', '').toLowerCase() + '@kline_' + i,
+        );
+      });
+    });
+
+  // stream名称中所有交易对均为小写
   // !miniTicker@arr 全市场的精简Ticker
   // !ticker@arr 全市场的完整Ticker
-  const combinedStreams = client.combinedStreams(['!ticker@arr'], {
-    open: () => {
-      logger.info('!!! 与Biance wsserver建立连接成功 !!!');
+  const combinedStreams = client.combinedStreams(
+    klineStreams.concat(['!ticker@arr']),
+    {
+      open: () => {
+        logger.info('!!! 与Biance wsserver建立连接成功 !!!');
+      },
+      close: () => {
+        logger.error('!!! 与Biance wsserver断开连接 !!!');
+      },
+      message: (data: any) => {
+        // const jsonData = JSON.parse(data);
+        // if (jsonData.stream !== '!ticker@arr') {
+        //   console.log(data);
+        // }
+        broadCastMsg(JSON.parse(data), clients);
+        handleMsg(JSON.parse(data));
+      },
     },
-    close: () => {
-      logger.error('!!! 与Biance wsserver断开连接 !!!');
-    },
-    message: (data: any) => {
-      broadCastMsg(JSON.parse(data), clients);
-      handleMsg(JSON.parse(data));
-    },
-  });
+  );
 }
 
 /* // API访问的限制
@@ -178,8 +281,12 @@ async function getBianceSwapInsts(): Promise<Array<Instrument>> {
           let lotSize: any;
 
           if (i.filters && i.filters.length) {
-            priceFilter = i.filters.filter((i) => i.filterType === FilterType.PRICE_FILTER);
-            lotSize = i.filters.filter((i) => i.filterType === FilterType.LOT_SIZE);
+            priceFilter = i.filters.filter(
+              (i) => i.filterType === FilterType.PRICE_FILTER,
+            );
+            lotSize = i.filters.filter(
+              (i) => i.filterType === FilterType.LOT_SIZE,
+            );
           }
 
           return {
@@ -210,9 +317,11 @@ async function getBianceKlines(params: BianceKlineApiOpts) {
     .publicRequest('GET', '/fapi/v1/klines', params)
     .then((res: { data: Array<BianceKline> }) => {
       logger.info(
-        `获取 [Biance] ${params.symbol}/${params.interval} K线成功: 从${moment(params.startTime).format('YYYY-MM-DD HH:mm:ss')}至${moment(params.endTime).format('YYYY-MM-DD HH:mm:ss')}, 共 ${
-          res.data.length
-        } 条`
+        `获取 [Biance] ${params.symbol}/${params.interval} K线成功: 从${moment(
+          params.startTime,
+        ).format('YYYY-MM-DD HH:mm:ss')}至${moment(params.endTime).format(
+          'YYYY-MM-DD HH:mm:ss',
+        )}, 共 ${res.data.length} 条`,
       );
       return res.data;
     })

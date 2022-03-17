@@ -37,7 +37,7 @@ async function getKlinesWithLimited(options: Array<InstReqOptions>): Promise<any
           } else if (exchange === Exchange.Okex) {
             return getOkxKlines({
               instrumentId: option.instrument_id,
-              granularity: BianceKlineInterval[option.granularity],
+              granularity: option.granularity,
               start: new Date(option.start).valueOf(),
               end: new Date(option.end).valueOf(),
             });

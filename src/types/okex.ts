@@ -1,6 +1,22 @@
-import { openTime, open, high, low, close, volume, currency_volume } from './common';
+import {
+  openTime,
+  open,
+  high,
+  low,
+  close,
+  volume,
+  currency_volume,
+} from './common';
 
-export type OkxKline = [openTime, open, high, low, close, volume, currency_volume];
+export type OkxKline = [
+  openTime,
+  open,
+  high,
+  low,
+  close,
+  volume,
+  currency_volume,
+];
 
 export enum OkxBusiness {
   FUTURES = 'futures',
@@ -50,7 +66,15 @@ export interface OkxWsOpenInterest {
 }
 
 // *** K线频道 ***
-export type OkxWsKline = [openTime, open, high, low, close, volume, currency_volume];
+export type OkxWsKline = [
+  openTime,
+  open,
+  high,
+  low,
+  close,
+  volume,
+  currency_volume,
+];
 
 // *** 交易频道 ***
 export interface OkxWsTrade {
@@ -71,27 +95,14 @@ export interface OkxWsFundingRate {
   fundingTime: string; // 最新的到期结算的资金费时间，Unix时间戳的毫秒数格式，如 1597026383085
 }
 
-export enum OkxKlineChannel {
-  candle1W = 604800,
-  candle1D = 86400,
-  candle12H = 43200,
-  candle6H = 21600,
-  candle4H = 14400,
-  candle2H = 7200,
-  candle1H = 3600,
-  candle30m = 1800,
-  candle15m = 900,
-  candle5m = 300,
-}
-
-export enum BianceKlineChannel {
-  candle1W = 604800,
-  candle1D = 86400,
-  candle12H = 43200,
-  candle6H = 21600,
-  candle4H = 14400,
-  candle2H = 7200,
-  candle1H = 3600,
+export enum KlineInterval {
+  candle1w = 604800,
+  candle1d = 86400,
+  candle12h = 43200,
+  candle6h = 21600,
+  candle4h = 14400,
+  candle2h = 7200,
+  candle1h = 3600,
   candle30m = 1800,
   candle15m = 900,
   candle5m = 300,

@@ -1,6 +1,36 @@
-import { openTime, closeTime, open, high, low, close, volume, currency_volume } from './common';
+import {
+  openTime,
+  closeTime,
+  open,
+  high,
+  low,
+  close,
+  volume,
+  currency_volume,
+} from './common';
 
-export type BianceKline = [openTime, open, high, low, close, volume, closeTime, currency_volume];
+export type BianceKline = [
+  openTime,
+  open,
+  high,
+  low,
+  close,
+  volume,
+  closeTime,
+  currency_volume,
+];
+
+export interface BianceWsKline {
+  t: any; // 时间戳
+  s: string; // symbol
+  i: string; // interval 1h / 4h
+  o: string; // open
+  c: string; // close
+  h: string; // high
+  l: string; // low
+  v: string; // 成交量 以币种计量
+  q: string; // 成交额 以USDT计量
+}
 
 /**
  * "symbols": [ // 交易对信息

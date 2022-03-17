@@ -30,8 +30,13 @@ async function upsert(tickers: InstTicker[]): Promise<any> {
   );
 }
 
+async function findByTopVolume(opts: any) {
+  return await InstrumentTicker.find({ exchange: opts.exchange }, null, { limit: opts.limit || 30, sort: { volume_24h: -1 } }).exec();
+}
+
 const InstrumentTickerDao = {
   upsert,
+  findByTopVolume,
 };
 
 export { InstrumentTickerDao };

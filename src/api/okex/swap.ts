@@ -10,7 +10,7 @@ export async function initOkxInsts(): Promise<Instrument[]> {
   let instruments: Array<Instrument> = await getOkxSwapInsts();
 
   // BTC合约及其他USDT本位合约
-  instruments = instruments.filter((i) => i.quote_currency === 'USDT' || i.quote_currency === 'BTC' || i.underlying_index === 'BTC');
+  instruments = instruments.filter((i) => i.instrument_id.endsWith('USDT-SWAP'));
   logger.info(`Okx[永续合约] - 获取公共合约全量信息成功，共: ${instruments.length} 条 ...`);
 
   //更新永续合约信息

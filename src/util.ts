@@ -1,5 +1,4 @@
 import * as moment from 'moment';
-import { OkxKlineChannel, OkxWsTicker } from './types';
 
 export async function sleep(seconds: number) {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));

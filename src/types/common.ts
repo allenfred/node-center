@@ -75,3 +75,5 @@ export interface KlineReqOpts {
   granularity: number;
   exchange?: Exchange;
 }
+
+export type WsFormatKline = [openTime, open, high, low, close, volume, currency_volume];

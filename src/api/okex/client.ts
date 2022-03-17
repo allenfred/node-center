@@ -3,12 +3,27 @@ import PublicClient from '../../lib/okex/publicClient';
 import { V3WebsocketClient as OkxWsClient } from '@okfe/okex-node';
 import { OKEX_WS_HOST, OKEX_HTTP_HOST } from '../../config';
 import logger from '../../logger';
-import { Exchange, OkxWsMsg, Instrument, OkxKlineChannel, OkxInst, KlineReqOpts, OkxKline, InstKline, OkxWsKline } from '../../types';
-import { InstrumentInfoDao, InstrumentTickerDao, InstrumentKlineDao } from '../../dao';
+import {
+  Exchange,
+  OkxWsMsg,
+  Instrument,
+  KlineInterval,
+  OkxInst,
+  KlineReqOpts,
+  OkxKline,
+  InstKline,
+  OkxWsKline,
+  WsFormatKline,
+} from '../../types';
+import {
+  InstrumentInfoDao,
+  InstrumentTickerDao,
+  InstrumentKlineDao,
+} from '../../dao';
 
 const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
 
-const KlineInterval = {
+const OkxIntervalBar = {
   300: '5m',
   900: '15m',
   1800: '30m',
@@ -26,15 +41,17 @@ interface SimpleIntrument {
 }
 
 async function getOkxSwapInsts(): Promise<Array<Instrument>> {
-  const data: { code: string; data: Array<OkxInst> } = await pClient.swap().getInstruments();
+  const data: { code: string; data: Array<OkxInst> } = await pClient
+    .swap()
+    .getInstruments();
   if (+data.code === 0) {
     return data.data
       .filter((i) => i.state === 'live')
       .map((i) => {
         return {
-          instrument_id: i.instId, // 合约ID，如BTC-USD-190322
-          underlying_index: i.ctValCcy, // 交易货币币种，如：BTC-USD-190322中的BTC
-          quote_currency: i.settleCcy, // 计价货币币种，如：BTC-USD-190322中的USD
+          instrument_id: i.instId, // 合约ID，如BTC-USDT-SWAP
+          underlying_index: i.ctValCcy, // 交易货币币种，如：BTC-USDT-SWAP中的BTC
+          quote_currency: i.settleCcy, // 计价货币币种，如：BTC-USDT-SWAP中的USDT
           tick_size: i.tickSz, // 下单价格精度 0.01
           contract_val: i.ctVal, // 合约面值 100
           listing: i.listTime, // 创建时间 '2019-09-06'
@@ -53,20 +70,42 @@ async function getOkxSwapInsts(): Promise<Array<Instrument>> {
 }
 
 // V5 获取合约K线数据
-async function getOkxKlines({ instrumentId, start, end, granularity }: KlineReqOpts): Promise<Array<OkxKline>> {
+async function getOkxKlines({
+  instrumentId,
+  start,
+  end,
+  granularity,
+}: KlineReqOpts): Promise<Array<OkxKline>> {
   try {
-    const data = await pClient.getCandles({ instId: instrumentId, before: new Date(start).valueOf(), after: new Date(end).valueOf(), bar: KlineInterval[+granularity] });
+    const data = await pClient.getCandles({
+      instId: instrumentId,
+      before: new Date(start).valueOf(),
+      after: new Date(end).valueOf(),
+      bar: OkxIntervalBar[+granularity],
+    });
     if (+data.code === 0) {
       logger.info(
-        `获取 [Okx] ${instrumentId}/${KlineInterval[+granularity]} K线成功: 从${moment(start).format('YYYY-MM-DD HH:mm:ss')}至${moment(end).format('YYYY-MM-DD HH:mm:ss')}, 共 ${data.data.length} 条`
+        `获取 [Okx] ${instrumentId}/${
+          KlineInterval[+granularity]
+        } K线成功: 从${moment(start).format('YYYY-MM-DD HH:mm:ss')}至${moment(
+          end,
+        ).format('YYYY-MM-DD HH:mm:ss')}, 共 ${data.data.length} 条`,
       );
       return data.data;
     } else {
-      logger.error(`获取 [Okx] ${instrumentId}/${KlineInterval[+granularity]} K线失败: ${data.msg}`);
+      logger.error(
+        `获取 [Okx] ${instrumentId}/${KlineInterval[+granularity]} K线失败: ${
+          data.msg
+        }`,
+      );
       return [];
     }
   } catch (e) {
-    logger.error(`获取 [Okx] ${instrumentId}/${KlineInterval[+granularity]} Catch Error: ${e}`);
+    logger.error(
+      `获取 [Okx] ${instrumentId}/${
+        KlineInterval[+granularity]
+      } Catch Error: ${e}`,
+    );
     return [];
   }
 }
@@ -80,7 +119,18 @@ function getBasicArgs(instruments: Instrument[]): Array<string> {
 
   instruments.map((i: Instrument | SimpleIntrument) => {
     // 公共-K线频道
-    ['candle5m', 'candle15m', 'candle30m', 'candle1H', 'candle2H', 'candle4H', 'candle6H', 'candle12H', 'candle1D', 'candle1W'].map((candleChannel) => {
+    [
+      'candle5m',
+      'candle15m',
+      'candle30m',
+      'candle1H',
+      'candle2H',
+      'candle4H',
+      'candle6H',
+      'candle12H',
+      'candle1D',
+      'candle1W',
+    ].map((candleChannel) => {
       if (candleChannel === 'candle5m') {
         if (i.instrument_id.indexOf('BTC') > -1) {
           klineArgs.push({ channel: candleChannel, instId: i.instrument_id });
@@ -122,7 +172,9 @@ async function setupOkexWsClient(clients: any[]) {
     logger.info('!!! 与Okx wsserver建立连接成功 !!!');
     // wsClient.login(apikey, secret, passphrase);
 
-    const instruments: Instrument[] = await InstrumentInfoDao.find({ exchange: Exchange.Okex });
+    const instruments: Instrument[] = await InstrumentInfoDao.find({
+      exchange: Exchange.Okex,
+    });
 
     // 订阅永续频道信息
     wsClient.subscribe(...getSwapSubArgs(instruments));
@@ -198,12 +250,12 @@ export async function handleTickers(message: OkxWsMsg) {
           volume_token_24h: i.volCcy24h, // 	成交量（按币统计）
           exchange: Exchange.Okex,
         };
-      })
+      }),
   );
 }
 
 export async function handleKlines(message: OkxWsMsg) {
-  const granularity = OkxKlineChannel[message.arg.channel];
+  const granularity = KlineInterval[message.arg.channel.toLowerCase()];
   const instrumentId = message.arg.instId;
 
   const klines: InstKline[] = message.data.map((kline: OkxWsKline) => {
@@ -260,7 +312,7 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
   }
 
   function getChannelIndex(arg: any) {
-    return `okex:candle${OkxKlineChannel[arg.channel]}:${arg.instId}`;
+    return `okex:candle${KlineInterval[arg.channel]}:${arg.instId}`;
   }
 
   clients.map((client: any) => {
@@ -275,17 +327,28 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
                 instrument_id: i.instId,
                 last: i.last, // 最新成交价格
                 chg_24h: i.last - i.open24h, // 24小时价格变化
-                chg_rate_24h: (((i.last - i.open24h) * 100) / i.open24h).toFixed(4), // 24小时价格变化(百分比)
+                chg_rate_24h: (
+                  ((i.last - i.open24h) * 100) /
+                  i.open24h
+                ).toFixed(4), // 24小时价格变化(百分比)
                 volume_24h: i.vol24h, // 24小时成交量（按张数统计）
                 exchange: Exchange.Okex,
               };
             }),
-        })
+        }),
       );
     }
 
-    if (msg.arg.channel.includes('candle') && client.channels.includes(getChannelIndex(msg.arg))) {
-      client.send(JSON.stringify({ channel: getChannelIndex(msg.arg), data: msg.data }));
+    if (
+      msg.arg.channel.includes('candle') &&
+      client.channels.includes(getChannelIndex(msg.arg))
+    ) {
+      client.send(
+        JSON.stringify({
+          channel: getChannelIndex(msg.arg),
+          data: msg.data as WsFormatKline,
+        }),
+      );
     }
   });
 }

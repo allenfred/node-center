@@ -30,7 +30,9 @@ async function setupServer() {
       }
 
       if (data.op === 'unsubscribe') {
-        ws.channels = ws.channels.filter((channel: string) => !data.args.includes(channel));
+        ws.channels = ws.channels.filter(
+          (channel: string) => !data.args.includes(channel),
+        );
       }
     });
 
@@ -47,7 +49,6 @@ async function setupServer() {
 }
 
 export async function setupWsserver() {
-  // await initOkxInsts();
   setupOkexWsClient(clients);
   setupBianceWsClient(clients);
   setupServer();
