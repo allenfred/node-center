@@ -1,5 +1,6 @@
+import { Exchange } from '../../../types';
 import { getTimestamp } from '../../../util';
-import { getKlinesWithLimited } from '../common';
+import { getKlinesWithLimited } from '../../common';
 
 // 获取最近100条k线数据
 async function getOkxBtcLatestKlines() {
@@ -51,7 +52,11 @@ async function getOkxBtcLatestKlines() {
     return Object.assign({}, option, { instrument_id: 'BTC-USDT' });
   });
 
-  return await getKlinesWithLimited(options);
+  return await getKlinesWithLimited(
+    options.map((opt: any) => {
+      return Object.assign({}, opt, { exchange: Exchange.Okex });
+    })
+  );
 }
 
 export { getOkxBtcLatestKlines };

@@ -1,8 +1,9 @@
 import { Job_Granularity, execJob } from './util';
 import connectMongo from '../database/connection';
 import * as currencyAPI from '../api/okex/currency';
-import * as commonAPI from '../api/okex/common';
+import * as commonAPI from '../api/common';
 import logger from '../logger';
+import { Exchange } from '../types';
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 // */5 * * * * At every 5 minute.
@@ -63,8 +64,9 @@ export const startJob = async () => {
 
   // At 00:15.
   if (hourNow === 0 && minuteNow === 15) {
-    await commonAPI.getLatestKlines('BTC-USD-SWAP');
-    await commonAPI.getLatestKlines('BTC-USDT-SWAP');
+    await commonAPI.getLatestKlines({ exchange: Exchange.Okex, instId: 'BTC-USD-SWAP', count: 500 });
+    await commonAPI.getLatestKlines({ exchange: Exchange.Okex, instId: 'BTC-USDT-SWAP', count: 500 });
+    await commonAPI.getLatestKlines({ exchange: Exchange.Biance, instId: 'BTCUSDT', count: 500 });
   }
 
   // At minute 15 on Monday.

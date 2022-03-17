@@ -70,8 +70,8 @@ export enum Exchange {
 
 export interface KlineReqOpts {
   instrumentId: string;
-  start: string;
-  end: string;
+  start: any;
+  end: any;
   granularity: number;
   exchange?: Exchange;
 }

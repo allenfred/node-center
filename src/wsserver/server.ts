@@ -1,6 +1,6 @@
 import logger from '../logger';
-import { setupBianceWsClient, initBianceInsts, initBianceKlines } from '../api/biance';
-import { setupOkexWsClient, initOkxInsts } from '../api/okex';
+import { setupBianceWsClient } from '../api/biance';
+import { setupOkexWsClient } from '../api/okex';
 
 const WebSocket = require('ws');
 let wsServer: any;

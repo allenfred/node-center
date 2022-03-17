@@ -1,5 +1,4 @@
-import { getKlinesWithLimited as getOkxKlines } from '../api/okex/common';
-import { getKlinesWithLimited as getBianceKlines } from '../api/biance/common';
+import { getKlinesWithLimited } from '../api/common';
 import { getTimestamp, getISOString } from '../util';
 import { InstrumentInfo } from '../database/models';
 import { Instrument, InstReqOptions, Exchange } from '../types';
@@ -47,8 +46,8 @@ async function execJob(granularity: number) {
     } as InstReqOptions;
   });
 
-  await getOkxKlines(swapOptions.filter((i) => i.exchange === Exchange.Okex));
-  await getBianceKlines(swapOptions.filter((i) => i.exchange === Exchange.Biance));
+  await getKlinesWithLimited(swapOptions.filter((i) => i.exchange === Exchange.Okex));
+  await getKlinesWithLimited(swapOptions.filter((i) => i.exchange === Exchange.Biance));
 }
 
 export { Job_Granularity, execJob };

@@ -1,6 +1,6 @@
 import { Job_Granularity, execJob } from './util';
 import connectMongo from '../database/connection';
-import { initOkxInsts, initOkxKlines } from '../api/okex';
+import { initOkxInsts, getOkxHistoryKlines } from '../api/okex';
 
 import logger from '../logger';
 
@@ -12,7 +12,7 @@ export const startJob = async () => {
 
   await connectMongo();
   const insts = await initOkxInsts();
-  await initOkxKlines(insts);
+  await getOkxHistoryKlines(insts);
 
   const endTime = new Date().getTime();
   const usedTime = ((endTime - startTime) / 1000).toFixed(1);
