@@ -13,6 +13,6 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true
   },
-  "files": ["src/main.ts", "src/crons/5min.ts"],
+  "files": ["src/main.ts", "src/crons/5min.ts", "src/crons/initBianceKlines.ts"],
   "exclude": ["node_modules"]
 }
