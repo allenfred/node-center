@@ -1,4 +1,4 @@
-export type timestamp = string;
+export type timestamp = any;
 export type openTime = timestamp;
 export type closeTime = timestamp;
 export type open = string;
@@ -76,4 +76,12 @@ export interface KlineReqOpts {
   exchange?: Exchange;
 }
 
-export type WsFormatKline = [openTime, open, high, low, close, volume, currency_volume];
+export type WsFormatKline = [
+  openTime,
+  open,
+  high,
+  low,
+  close,
+  volume,
+  currency_volume,
+];

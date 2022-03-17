@@ -1,5 +1,12 @@
 import * as bluebird from 'bluebird';
-import { Exchange, Instrument, OkxKline, BianceKline, InstReqOptions, BianceKlineApiOpts } from '../types';
+import {
+  Exchange,
+  Instrument,
+  OkxKline,
+  BianceKline,
+  InstReqOptions,
+  BianceKlineApiOpts,
+} from '../types';
 import { InstrumentKlineDao } from '../dao';
 import { getTimestamp } from '../util';
 import { getBianceKlines } from './biance/client';
@@ -18,7 +25,9 @@ const BianceKlineInterval = {
   604800: '1w',
 };
 
-async function getKlinesWithLimited(options: Array<InstReqOptions>): Promise<any> {
+async function getKlinesWithLimited(
+  options: Array<InstReqOptions>,
+): Promise<any> {
   //设置系统限速规则 (biance官方API 限速规则：2400次/60s)
   return bluebird.map(
     options,
@@ -73,7 +82,7 @@ async function getKlinesWithLimited(options: Array<InstReqOptions>): Promise<any
                 high: +kline[2],
                 low: +kline[3],
                 close: +kline[4],
-                volume: +kline[5],
+                volume: +kline[5], //
                 currency_volume: +kline[7],
                 granularity: option.granularity,
                 exchange: Exchange.Biance,
@@ -84,14 +93,19 @@ async function getKlinesWithLimited(options: Array<InstReqOptions>): Promise<any
           return InstrumentKlineDao.upsert(klines);
         });
     },
-    { concurrency: 5 }
+    { concurrency: 5 },
   );
 }
 
 // 获取最近100条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
 // For BTC (15min 30min 1h 2h 4h 6h 12h 1d)
 // For Others (15min 1h 4h 1d)
-async function getLatestKlines(opts: { exchange: Exchange; instId: any; count?: number; days?: number }) {
+async function getLatestKlines(opts: {
+  exchange: Exchange;
+  instId: any;
+  count?: number;
+  days?: number;
+}) {
   const reqOptions = [];
   let count = 100;
 
@@ -109,8 +123,8 @@ async function getLatestKlines(opts: { exchange: Exchange; instId: any; count?: 
         start: getTimestamp(15 * -count, 'm'),
         end: getTimestamp(0, 'm'),
         granularity: 900, // 15min
-      }
-    )
+      },
+    ),
   );
 
   if (opts.instId.indexOf('BTC') !== -1) {
@@ -122,8 +136,8 @@ async function getLatestKlines(opts: { exchange: Exchange; instId: any; count?: 
           start: getTimestamp(30 * -count, 'm'),
           end: getTimestamp(0, 'm'),
           granularity: 1800, // 30min
-        }
-      )
+        },
+      ),
     );
   }
 
@@ -135,8 +149,8 @@ async function getLatestKlines(opts: { exchange: Exchange; instId: any; count?: 
         start: getTimestamp(1 * -count, 'h'),
         end: getTimestamp(0, 'h'),
         granularity: 3600, // 1h
-      }
-    )
+      },
+    ),
   );
 
   if (instId.indexOf('BTC') !== -1) {
@@ -148,8 +162,8 @@ async function getLatestKlines(opts: { exchange: Exchange; instId: any; count?: 
           start: getTimestamp(2 * -count, 'h'),
           end: getTimestamp(0, 'h'),
           granularity: 7200, // 2h
-        }
-      )
+        },
+      ),
     );
   }
 
@@ -161,8 +175,8 @@ async function getLatestKlines(opts: { exchange: Exchange; instId: any; count?: 
         start: getTimestamp(4 * -count, 'h'),
         end: getTimestamp(0, 'h'),
         granularity: 14400, // 4h
-      }
-    )
+      },
+    ),
   );
 
   if (instId.indexOf('BTC') !== -1) {
@@ -174,8 +188,8 @@ async function getLatestKlines(opts: { exchange: Exchange; instId: any; count?: 
           start: getTimestamp(6 * -count, 'h'),
           end: getTimestamp(0, 'h'),
           granularity: 21600, // 6h
-        }
-      )
+        },
+      ),
     );
 
     reqOptions.push(
@@ -186,8 +200,8 @@ async function getLatestKlines(opts: { exchange: Exchange; instId: any; count?: 
           start: getTimestamp(12 * -count, 'h'),
           end: getTimestamp(0, 'h'),
           granularity: 43200, // 12h
-        }
-      )
+        },
+      ),
     );
   }
 
@@ -199,14 +213,14 @@ async function getLatestKlines(opts: { exchange: Exchange; instId: any; count?: 
         start: getTimestamp(24 * -count, 'h'),
         end: getTimestamp(0, 'h'),
         granularity: 86400, // 1d
-      }
-    )
+      },
+    ),
   );
 
   return await getKlinesWithLimited(
     reqOptions.map((opt: any) => {
       return Object.assign({}, opt, { exchange: opts.exchange });
-    })
+    }),
   );
 }
 

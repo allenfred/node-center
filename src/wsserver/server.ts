@@ -1,5 +1,5 @@
 import logger from '../logger';
-import { setupBianceWsClient } from '../api/biance';
+import { setupBianceWsClient, initBianceInsts } from '../api/biance';
 import { setupOkexWsClient } from '../api/okex';
 
 const WebSocket = require('ws');
@@ -38,7 +38,7 @@ async function setupServer() {
 
     ws.on('close', () => {
       clients.find((e, i) => {
-        if (e.readyState === ReadyState.CLOSED) {
+        if (e && e.readyState === ReadyState.CLOSED) {
           clients.splice(i, 1);
         }
       });
@@ -49,6 +49,7 @@ async function setupServer() {
 }
 
 export async function setupWsserver() {
+  // await initBianceInsts();
   setupOkexWsClient(clients);
   setupBianceWsClient(clients);
   setupServer();

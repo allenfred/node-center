@@ -312,7 +312,9 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
   }
 
   function getChannelIndex(arg: any) {
-    return `okex:candle${KlineInterval[arg.channel]}:${arg.instId}`;
+    return `okex:candle${KlineInterval[arg.channel.toLowerCase()]}:${
+      arg.instId
+    }`;
   }
 
   clients.map((client: any) => {
@@ -346,7 +348,7 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
       client.send(
         JSON.stringify({
           channel: getChannelIndex(msg.arg),
-          data: msg.data as WsFormatKline,
+          data: msg.data[0] as WsFormatKline,
         }),
       );
     }

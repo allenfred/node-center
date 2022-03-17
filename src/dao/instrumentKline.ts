@@ -25,19 +25,13 @@ async function upsert(klines: InstKline[]) {
         );
       });
     } else {
-      await Model.create(kline)
-        .then((res: any) => {
-          logger.info(
-            `[InsertKline:${kline.exchange}/${kline.instrument_id}/${kline.granularity}] success.`,
-          );
-        })
-        .catch((err: any) => {
-          logger.error(
-            `[InsertKline:${kline.exchange}/${kline.instrument_id}/${
-              kline.granularity
-            }] CatchError: ${err.stack.substring(0, 100)}`,
-          );
-        });
+      await Model.create(kline).catch((err: any) => {
+        logger.error(
+          `[InsertKline:${kline.exchange}/${kline.instrument_id}/${
+            kline.granularity
+          }] CatchError: ${err.stack.substring(0, 100)}`,
+        );
+      });
     }
   });
 }

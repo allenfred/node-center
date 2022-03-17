@@ -79,7 +79,6 @@ export async function handleTickers(message: BianceWsMsg) {
 
 export async function handleKline(msg: BianceWsMsg) {
   const k: BianceWsKline = msg.data['k'];
-
   await InstrumentKlineDao.upsert([
     {
       instrument_id: k.s,
@@ -90,8 +89,8 @@ export async function handleKline(msg: BianceWsMsg) {
       high: +k.h,
       low: +k.l,
       close: +k.c,
-      volume: +k.q,
-      currency_volume: +k.v,
+      volume: +k.v, // 成交量
+      currency_volume: +k.q, // 成交额 以USDT计价
       granularity: KlineInterval['candle' + k.i],
       exchange: Exchange.Biance,
     },
@@ -132,7 +131,7 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
   }
 
   function getSubChannel(interval: string, instId: string) {
-    return `biance:candle${KlineInterval[interval]}:${instId}`;
+    return `biance:candle${KlineInterval['candle' + interval]}:${instId}`;
   }
 
   clients.map((client: any) => {
@@ -188,14 +187,15 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
       const strs = msg.stream.split('_');
       const interval = strs[1]; // 1h
       const instId = msg.data['s'];
-      const subChannel = getSubChannel(interval, instId);
+      const subChannel = getSubChannel(interval, instId.toUpperCase());
 
       if (client.channels.includes(subChannel)) {
         const k = msg.data['k'];
+
         client.send(
           JSON.stringify({
             channel: subChannel,
-            data: [k.t, k.o, k.h, k.l, k.c, k.q, k.v] as WsFormatKline,
+            data: [k.t, k.o, k.h, k.l, k.c, k.v, k.q] as WsFormatKline,
           }),
         );
       }
@@ -229,6 +229,7 @@ async function setupBianceWsClient(clients: any) {
   // !ticker@arr 全市场的完整Ticker
   const combinedStreams = client.combinedStreams(
     klineStreams.concat(['!ticker@arr']),
+    // ['btcusdt@kline_1h'],
     {
       open: () => {
         logger.info('!!! 与Biance wsserver建立连接成功 !!!');
@@ -239,7 +240,7 @@ async function setupBianceWsClient(clients: any) {
       message: (data: any) => {
         // const jsonData = JSON.parse(data);
         // if (jsonData.stream !== '!ticker@arr') {
-        //   console.log(data);
+        // console.log(data);
         // }
         broadCastMsg(JSON.parse(data), clients);
         handleMsg(JSON.parse(data));
@@ -283,10 +284,11 @@ async function getBianceSwapInsts(): Promise<Array<Instrument>> {
           if (i.filters && i.filters.length) {
             priceFilter = i.filters.filter(
               (i) => i.filterType === FilterType.PRICE_FILTER,
-            );
+            )[0];
+
             lotSize = i.filters.filter(
               (i) => i.filterType === FilterType.LOT_SIZE,
-            );
+            )[0];
           }
 
           return {
@@ -316,6 +318,7 @@ async function getBianceKlines(params: BianceKlineApiOpts) {
   return client
     .publicRequest('GET', '/fapi/v1/klines', params)
     .then((res: { data: Array<BianceKline> }) => {
+      console.log(res.data);
       logger.info(
         `获取 [Biance] ${params.symbol}/${params.interval} K线成功: 从${moment(
           params.startTime,
