@@ -2,9 +2,8 @@ import * as bluebird from 'bluebird';
 import logger from '../../logger';
 import { Instrument } from '../../types';
 import { InstrumentInfoDao } from '../../dao';
-import { getKlineReqOptions } from '../../util';
 import { getBianceSwapInsts } from './client';
-import { getKlinesWithLimited, getMaxKlines } from './common';
+import { getLatestKlines, getMaxKlines } from './common';
 
 export async function initBianceInsts(): Promise<Instrument[]> {
   //获取全量永续合约信息
@@ -26,7 +25,7 @@ export async function initBianceKlines(instruments: Instrument[]): Promise<void>
     instruments,
     async (instrument: Instrument) => {
       logger.info(`!!! Biance[永续合约] - 开始请求 ${instrument.instrument_id} Klines !!!`);
-      await getMaxKlines(instrument.instrument_id);
+      await getLatestKlines(instrument.instrument_id);
       logger.info(`!!! Biance[永续合约] - ${instrument.instrument_id} Klines 请求完成 !!!`);
       return;
     },
