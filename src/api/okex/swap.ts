@@ -35,9 +35,9 @@ export async function getOkxHistoryKlines(
       return await getLatestKlines({
         exchange: Exchange.Okex,
         instId: instrument.instrument_id,
-        count: 300,
+        count: 240,
       });
     },
-    { concurrency: 2 },
+    { concurrency: 5 },
   );
 }
