@@ -318,7 +318,6 @@ async function getBianceKlines(params: BianceKlineApiOpts) {
   return client
     .publicRequest('GET', '/fapi/v1/klines', params)
     .then((res: { data: Array<BianceKline> }) => {
-      console.log(res.data);
       logger.info(
         `获取 [Biance] ${params.symbol}/${params.interval} K线成功: 从${moment(
           params.startTime,

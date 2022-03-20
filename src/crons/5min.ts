@@ -1,6 +1,5 @@
 import { Job_Granularity, execJob } from './util';
 import connectMongo from '../database/connection';
-import * as currencyAPI from '../api/okex/currency';
 import * as commonAPI from '../api/common';
 import logger from '../logger';
 import { Exchange } from '../types';
@@ -64,8 +63,16 @@ export const startJob = async () => {
 
   // At 00:15.
   if (hourNow === 0 && minuteNow === 15) {
-    await commonAPI.getLatestKlines({ exchange: Exchange.Okex, instId: 'BTC-USDT-SWAP', count: 500 });
-    await commonAPI.getLatestKlines({ exchange: Exchange.Biance, instId: 'BTCUSDT', count: 500 });
+    await commonAPI.getLatestKlines({
+      exchange: Exchange.Okex,
+      instId: 'BTC-USDT-SWAP',
+      count: 500,
+    });
+    await commonAPI.getLatestKlines({
+      exchange: Exchange.Biance,
+      instId: 'BTCUSDT',
+      count: 500,
+    });
   }
 
   // At minute 15 on Monday.

@@ -1,4 +1,3 @@
-import { Job_Granularity, execJob } from './util';
 import connectMongo from '../database/connection';
 import { initOkxInsts, getOkxHistoryKlines } from '../api/okex';
 

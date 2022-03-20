@@ -9,10 +9,14 @@ const password = 'qazwsx123';
 mongoose.set('useCreateIndex', true);
 
 async function connect() {
-  await mongoose.connect(`mongodb://${username}:${password}@${host}:${port}/${db}`, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
+  await mongoose.connect(
+    `mongodb://${username}:${password}@${host}:${port}/${db}`,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      poolSize: 10,
+    },
+  );
 }
 
 export default connect;
