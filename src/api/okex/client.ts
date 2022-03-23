@@ -318,7 +318,11 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
   }
 
   clients.map((client: any) => {
-    if (msg.arg.channel === 'tickers' && client.channels.includes('tickers')) {
+    if (
+      new Date().getSeconds() % 2 === 0 &&
+      msg.arg.channel === 'tickers' &&
+      client.channels.includes('tickers')
+    ) {
       client.send(
         JSON.stringify({
           channel: 'tickers',

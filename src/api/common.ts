@@ -107,7 +107,7 @@ async function getLatestKlines(opts: {
   days?: number;
 }) {
   const reqOptions = [];
-  let count = 100;
+  let count = 200;
 
   if (opts && opts.count > 0) {
     count = opts.count;

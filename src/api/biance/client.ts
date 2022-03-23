@@ -136,7 +136,11 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
 
   clients.map((client: any) => {
     // ticker
-    if (msg.stream === '!ticker@arr' && client.channels.includes('tickers')) {
+    if (
+      new Date().getSeconds() % 2 === 0 &&
+      msg.stream === '!ticker@arr' &&
+      client.channels.includes('tickers')
+    ) {
       client.send(
         JSON.stringify({
           channel: 'tickers',

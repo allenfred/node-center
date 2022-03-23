@@ -34,6 +34,6 @@ export async function getBianceHistoryKlines(
         count: 500,
       });
     },
-    { concurrency: 3 },
+    { concurrency: 2 },
   );
 }

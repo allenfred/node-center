@@ -38,6 +38,6 @@ export async function getOkxHistoryKlines(
         count: 240,
       });
     },
-    { concurrency: 5 },
+    { concurrency: 2 },
   );
 }
