@@ -63,12 +63,12 @@ export const startJob = async () => {
 
   // At 00:15.
   if (hourNow === 0 && minuteNow === 15) {
-    await commonAPI.getLatestKlines({
+    await commonAPI.getKlines({
       exchange: Exchange.Okex,
       instId: 'BTC-USDT-SWAP',
       count: 500,
     });
-    await commonAPI.getLatestKlines({
+    await commonAPI.getKlines({
       exchange: Exchange.Biance,
       instId: 'BTCUSDT',
       count: 500,

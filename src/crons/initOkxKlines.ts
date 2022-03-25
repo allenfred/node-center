@@ -1,6 +1,6 @@
 import connectMongo from '../database/connection';
 import { initOkxInsts, getOkxHistoryKlines } from '../api/okex';
-
+import * as _ from 'lodash';
 import logger from '../logger';
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)

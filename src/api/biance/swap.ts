@@ -1,9 +1,10 @@
 import * as bluebird from 'bluebird';
+import * as _ from 'lodash';
 import logger from '../../logger';
 import { Exchange, Instrument } from '../../types';
 import { InstrumentInfoDao } from '../../dao';
 import { getBianceSwapInsts } from './client';
-import { getLatestKlines } from './../common';
+import { getKlines } from './../common';
 
 export async function initBianceInsts(): Promise<Instrument[]> {
   //获取全量永续合约信息
@@ -19,7 +20,7 @@ export async function initBianceInsts(): Promise<Instrument[]> {
   await InstrumentInfoDao.upsert(instruments);
   logger.info(`Biance[永续合约] - 公共合约全量信息更新数据库成功 ...`);
 
-  return instruments;
+  return _.sortBy(instruments, ['instrument_id']);
 }
 
 export async function getBianceHistoryKlines(
@@ -28,7 +29,7 @@ export async function getBianceHistoryKlines(
   return bluebird.map(
     instruments,
     async (instrument: Instrument) => {
-      return await getLatestKlines({
+      return await getKlines({
         exchange: Exchange.Biance,
         instId: instrument.instrument_id,
         count: 500,

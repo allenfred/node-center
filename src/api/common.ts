@@ -100,9 +100,11 @@ async function getKlinesWithLimited(
 // 获取最近100条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
 // For BTC (15min 30min 1h 2h 4h 6h 12h 1d)
 // For Others (15min 1h 4h 1d)
-async function getLatestKlines(opts: {
+async function getKlines(opts: {
   exchange: Exchange;
   instId: any;
+  start?: any;
+  end?: any;
   count?: number;
   days?: number;
 }) {
@@ -120,8 +122,8 @@ async function getLatestKlines(opts: {
       {},
       {
         instrument_id: instId,
-        start: getTimestamp(15 * -count, 'm'),
-        end: getTimestamp(0, 'm'),
+        start: opts.start || getTimestamp(15 * -count, 'm'),
+        end: opts.end || getTimestamp(0, 'm'),
         granularity: 900, // 15min
       },
     ),
@@ -133,8 +135,8 @@ async function getLatestKlines(opts: {
         {},
         {
           instrument_id: instId,
-          start: getTimestamp(30 * -count, 'm'),
-          end: getTimestamp(0, 'm'),
+          start: opts.start || getTimestamp(30 * -count, 'm'),
+          end: opts.end || getTimestamp(0, 'm'),
           granularity: 1800, // 30min
         },
       ),
@@ -146,8 +148,8 @@ async function getLatestKlines(opts: {
       {},
       {
         instrument_id: instId,
-        start: getTimestamp(1 * -count, 'h'),
-        end: getTimestamp(0, 'h'),
+        start: opts.start || getTimestamp(1 * -count, 'h'),
+        end: opts.end || getTimestamp(0, 'h'),
         granularity: 3600, // 1h
       },
     ),
@@ -159,8 +161,8 @@ async function getLatestKlines(opts: {
         {},
         {
           instrument_id: instId,
-          start: getTimestamp(2 * -count, 'h'),
-          end: getTimestamp(0, 'h'),
+          start: opts.start || getTimestamp(2 * -count, 'h'),
+          end: opts.end || getTimestamp(0, 'h'),
           granularity: 7200, // 2h
         },
       ),
@@ -172,8 +174,8 @@ async function getLatestKlines(opts: {
       {},
       {
         instrument_id: instId,
-        start: getTimestamp(4 * -count, 'h'),
-        end: getTimestamp(0, 'h'),
+        start: opts.start || getTimestamp(4 * -count, 'h'),
+        end: opts.end || getTimestamp(0, 'h'),
         granularity: 14400, // 4h
       },
     ),
@@ -185,8 +187,8 @@ async function getLatestKlines(opts: {
         {},
         {
           instrument_id: instId,
-          start: getTimestamp(6 * -count, 'h'),
-          end: getTimestamp(0, 'h'),
+          start: opts.start || getTimestamp(6 * -count, 'h'),
+          end: opts.end || getTimestamp(0, 'h'),
           granularity: 21600, // 6h
         },
       ),
@@ -197,8 +199,8 @@ async function getLatestKlines(opts: {
         {},
         {
           instrument_id: instId,
-          start: getTimestamp(12 * -count, 'h'),
-          end: getTimestamp(0, 'h'),
+          start: opts.start || getTimestamp(12 * -count, 'h'),
+          end: opts.end || getTimestamp(0, 'h'),
           granularity: 43200, // 12h
         },
       ),
@@ -210,8 +212,8 @@ async function getLatestKlines(opts: {
       {},
       {
         instrument_id: instId,
-        start: getTimestamp(24 * -count, 'h'),
-        end: getTimestamp(0, 'h'),
+        start: opts.start || getTimestamp(24 * -count, 'h'),
+        end: opts.end || getTimestamp(0, 'h'),
         granularity: 86400, // 1d
       },
     ),
@@ -224,4 +226,4 @@ async function getLatestKlines(opts: {
   );
 }
 
-export { getKlinesWithLimited, getLatestKlines };
+export { getKlinesWithLimited, getKlines };
