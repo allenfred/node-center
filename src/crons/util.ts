@@ -29,25 +29,31 @@ async function execJob(granularity: number) {
     }
   };
 
-  const swapOptions: InstReqOptions[] = insts.filter(customFilter).map((i: Instrument) => {
-    let candleCount = 10;
+  const swapOptions: InstReqOptions[] = insts
+    .filter(customFilter)
+    .map((i: Instrument) => {
+      let candleCount = 10;
 
-    if (granularity > Job_Granularity.TwoHour) {
-      candleCount = 4;
-    }
+      if (granularity > Job_Granularity.TwoHour) {
+        candleCount = 4;
+      }
 
-    return {
-      // 最近 10 条K线数据
-      start: getISOString((-candleCount * granularity) / 60, 'm'),
-      end: new Date().toISOString(),
-      granularity,
-      instrument_id: i.instrument_id,
-      exchange: i.exchange,
-    } as InstReqOptions;
-  });
+      return {
+        // 最近 10 条K线数据
+        start: getISOString((-candleCount * granularity) / 60, 'm'),
+        end: new Date().toISOString(),
+        granularity,
+        instrument_id: i.instrument_id,
+        exchange: i.exchange,
+      } as InstReqOptions;
+    });
 
-  await getKlinesWithLimited(swapOptions.filter((i) => i.exchange === Exchange.Okex));
-  await getKlinesWithLimited(swapOptions.filter((i) => i.exchange === Exchange.Biance));
+  await getKlinesWithLimited(
+    swapOptions.filter((i) => i.exchange === Exchange.Okex),
+  );
+  await getKlinesWithLimited(
+    swapOptions.filter((i) => i.exchange === Exchange.Biance),
+  );
 }
 
 export { Job_Granularity, execJob };

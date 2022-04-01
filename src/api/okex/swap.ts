@@ -19,7 +19,11 @@ export async function initOkxInsts(): Promise<Instrument[]> {
   );
 
   //更新永续合约信息
-  await InstrumentInfoDao.upsert(instruments);
+  await InstrumentInfoDao.upsert(
+    instruments.map((i: any) => {
+      return Object.assign(i, { tick_size: +i.tick_size }) as any;
+    }),
+  );
   logger.info(`Okx[永续合约] - 公共合约全量信息更新数据库成功 ...`);
 
   return _.sortBy(instruments, ['instrument_id']);

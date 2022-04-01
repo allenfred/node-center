@@ -21,11 +21,6 @@ export const startJob = async () => {
     await execJob(Job_Granularity.FifteenMins);
   }
 
-  // half-hourly
-  if (minuteNow % 30 === 0) {
-    await execJob(Job_Granularity.HalfHour);
-  }
-
   // hourly
   if (minuteNow === 5) {
     await execJob(Job_Granularity.OneHour);
