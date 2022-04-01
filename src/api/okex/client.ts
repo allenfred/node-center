@@ -119,25 +119,8 @@ function getBasicArgs(instruments: Instrument[]): Array<string> {
 
   instruments.map((i: Instrument | SimpleIntrument) => {
     // 公共-K线频道
-    [
-      'candle5m',
-      'candle15m',
-      'candle30m',
-      'candle1H',
-      'candle2H',
-      'candle4H',
-      'candle6H',
-      'candle12H',
-      'candle1D',
-      'candle1W',
-    ].map((candleChannel) => {
-      if (candleChannel === 'candle5m') {
-        if (i.instrument_id.indexOf('BTC') > -1) {
-          klineArgs.push({ channel: candleChannel, instId: i.instrument_id });
-        }
-      } else {
-        klineArgs.push({ channel: candleChannel, instId: i.instrument_id });
-      }
+    ['candle15m', 'candle1H', 'candle4H'].map((candleChannel) => {
+      klineArgs.push({ channel: candleChannel, instId: i.instrument_id });
     });
   });
 
