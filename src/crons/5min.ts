@@ -3,6 +3,8 @@ import connectMongo from '../database/connection';
 import * as commonAPI from '../api/common';
 import logger from '../logger';
 import { Exchange } from '../types';
+import { initOkxInsts } from '../api/okex';
+import { initBianceInsts } from '../api/biance';
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 // */5 * * * * At every 5 minute.
@@ -48,6 +50,8 @@ export const startJob = async () => {
 
   // At 00:05.
   if (hourNow === 0 && minuteNow === 5) {
+    await initOkxInsts();
+    await initBianceInsts();
     await execJob(Job_Granularity.OneDay);
   }
 
