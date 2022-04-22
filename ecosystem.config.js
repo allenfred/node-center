@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'crypto-server',
+      name: 'node-digger',
       script: 'dist/main.js',
     },
     {
