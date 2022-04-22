@@ -1,0 +1,4 @@
+{
+  "name": "crypto-server",
+  "script": "dist/main.js"
+}
