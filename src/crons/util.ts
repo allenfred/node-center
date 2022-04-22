@@ -20,12 +20,20 @@ const Job_Granularity = {
 async function execJob(granularity: number) {
   // 获取所有合约信息
   const insts: Instrument[] = await InstrumentInfo.find({});
+  // 5min / 30min / 2h / 6h / 1w
+  const jobsForBtcOnly = [
+    Job_Granularity.FiveMins,
+    Job_Granularity.HalfHour,
+    Job_Granularity.TwoHour,
+    Job_Granularity.SixHour,
+    Job_Granularity.Weekly,
+  ];
 
   const customFilter = (i: Instrument) => {
-    if (granularity === 300) {
+    if (jobsForBtcOnly.includes(granularity)) {
       return i.underlying_index === 'BTC';
     } else {
-      return i.underlying_index === 'BTC' || i.quote_currency === 'USDT';
+      return i.quote_currency === 'USDT';
     }
   };
 
