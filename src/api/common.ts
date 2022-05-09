@@ -129,20 +129,6 @@ async function getKlines(opts: {
     ),
   );
 
-  if (opts.instId.indexOf('BTC') !== -1) {
-    reqOptions.push(
-      Object.assign(
-        {},
-        {
-          instrument_id: instId,
-          start: opts.start || getTimestamp(30 * -count, 'm'),
-          end: opts.end || getTimestamp(0, 'm'),
-          granularity: 1800, // 30min
-        },
-      ),
-    );
-  }
-
   reqOptions.push(
     Object.assign(
       {},
@@ -154,20 +140,6 @@ async function getKlines(opts: {
       },
     ),
   );
-
-  if (instId.indexOf('BTC') !== -1) {
-    reqOptions.push(
-      Object.assign(
-        {},
-        {
-          instrument_id: instId,
-          start: opts.start || getTimestamp(2 * -count, 'h'),
-          end: opts.end || getTimestamp(0, 'h'),
-          granularity: 7200, // 2h
-        },
-      ),
-    );
-  }
 
   reqOptions.push(
     Object.assign(
@@ -181,7 +153,43 @@ async function getKlines(opts: {
     ),
   );
 
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: instId,
+        start: opts.start || getTimestamp(24 * -count, 'h'),
+        end: opts.end || getTimestamp(0, 'h'),
+        granularity: 86400, // 1d
+      },
+    ),
+  );
+
   if (instId.indexOf('BTC') !== -1) {
+    reqOptions.push(
+      Object.assign(
+        {},
+        {
+          instrument_id: instId,
+          start: opts.start || getTimestamp(30 * -count, 'm'),
+          end: opts.end || getTimestamp(0, 'm'),
+          granularity: 1800, // 30min
+        },
+      ),
+    );
+
+    reqOptions.push(
+      Object.assign(
+        {},
+        {
+          instrument_id: instId,
+          start: opts.start || getTimestamp(2 * -count, 'h'),
+          end: opts.end || getTimestamp(0, 'h'),
+          granularity: 7200, // 2h
+        },
+      ),
+    );
+
     reqOptions.push(
       Object.assign(
         {},
@@ -206,18 +214,6 @@ async function getKlines(opts: {
       ),
     );
   }
-
-  reqOptions.push(
-    Object.assign(
-      {},
-      {
-        instrument_id: instId,
-        start: opts.start || getTimestamp(24 * -count, 'h'),
-        end: opts.end || getTimestamp(0, 'h'),
-        granularity: 86400, // 1d
-      },
-    ),
-  );
 
   return await getKlinesWithLimited(
     reqOptions.map((opt: any) => {

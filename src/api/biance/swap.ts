@@ -32,7 +32,7 @@ export async function getBianceHistoryKlines(
       return await getKlines({
         exchange: Exchange.Biance,
         instId: instrument.instrument_id,
-        count: 500,
+        count: 1500,
       });
     },
     { concurrency: 2 },
