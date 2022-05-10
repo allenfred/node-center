@@ -14,25 +14,18 @@ async function upsert(klines: InstKline[]) {
     };
 
     const Model = getModel(kline);
-    const existedkline = await Model.findOne(uniqueCondition);
 
-    if (existedkline) {
-      await Model.updateOne(uniqueCondition, kline).catch((err: any) => {
+    await Model.updateOne(uniqueCondition, kline, { upsert: true })
+      .then((res) => {
+        logger.info(res.n);
+      })
+      .catch((err: any) => {
         logger.error(
           `[UpdateKline:${kline.exchange}/${kline.instrument_id}/${
             kline.granularity
           }] CatchError: ${err.stack.substring(0, 100)}`,
         );
       });
-    } else {
-      await Model.create(kline).catch((err: any) => {
-        logger.error(
-          `[InsertKline:${kline.exchange}/${kline.instrument_id}/${
-            kline.granularity
-          }] CatchError: ${err.stack.substring(0, 100)}`,
-        );
-      });
-    }
   });
 }
 
