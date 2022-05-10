@@ -15,17 +15,15 @@ async function upsert(klines: InstKline[]) {
 
     const Model = getModel(kline);
 
-    await Model.updateOne(uniqueCondition, kline, { upsert: true })
-      .then((res) => {
-        logger.info(res.n);
-      })
-      .catch((err: any) => {
+    await Model.updateOne(uniqueCondition, kline, { upsert: true }).catch(
+      (err: any) => {
         logger.error(
           `[UpdateKline:${kline.exchange}/${kline.instrument_id}/${
             kline.granularity
           }] CatchError: ${err.stack.substring(0, 100)}`,
         );
-      });
+      },
+    );
   });
 }
 
