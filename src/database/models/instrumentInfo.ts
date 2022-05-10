@@ -15,6 +15,7 @@ const schema = new Schema({
   size_increment: String, // swap 下单数量精度
   alias: String, // 本周 this_week 次周 next_week 季度 quarter 永续 swap
   exchange: { type: String, default: 'okex' }, // okex/biance/bybit
+  klines: Number, // klines数据是否ready 1 / 0
 });
 
 schema.index({ instrument_id: 1, exchange: 1 }, { unique: true });

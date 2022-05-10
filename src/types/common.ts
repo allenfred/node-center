@@ -22,6 +22,7 @@ export interface Instrument {
   settlement_currency: string; // 盈亏结算和保证金币种，BTC
   contract_val_currency: string; // 合约面值计价币种
   exchange: Exchange;
+  klines?: number; // k线数据是否ready
 }
 
 export interface InstTicker {

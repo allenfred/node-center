@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import logger from '../../logger';
 import { Exchange, Instrument, KlineReqOpts } from '../../types';
 import { InstrumentInfoDao } from '../../dao';
+import { InstrumentInfo } from '../../database/models';
 import { getOkxSwapInsts } from './client';
 import { getKlines, getKlinesWithLimited } from './../common';
 import { getTimestamp } from '../../util';
@@ -25,9 +26,12 @@ export async function initOkxInsts(): Promise<Instrument[]> {
       return Object.assign(i, { tick_size: +i.tick_size }) as any;
     }),
   );
-  logger.info(`Okx[永续合约] - 公共合约全量信息更新数据库成功 ...`);
+  let data: any = await InstrumentInfoDao.find({ exchange: Exchange.Okex });
+  data = data.filter((i: Instrument) => i.klines !== 1);
 
-  return _.sortBy(instruments, ['instrument_id']);
+  logger.info(`Okex[永续合约] - 待初始化K线的合约数量 ${data.length} ...`);
+
+  return _.sortBy(data, ['instrument_id']);
 }
 
 // 获取最多过去 1500 条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
@@ -109,22 +113,19 @@ export async function getOkxHistoryKlines(
   });
 
   return bluebird.map(
-    reqOpts,
-    async (opt: KlineReqOpts) => {
-      return await getKlinesWithLimited(
-        reqOpts.map((opt: any) => {
+    instruments,
+    async (inst: any) => {
+      await getKlinesWithLimited(
+        getReqOptions(inst.instrument_id).map((opt: any) => {
           return Object.assign({}, opt, { exchange: Exchange.Okex });
         }),
       );
 
-      // return await getKlines({
-      //   exchange: Exchange.Okex,
-      //   instId: opt.instrumentId,
-      //   count: 100, // Okx K线接口 最大为100
-      //   start: opt.start,
-      //   end: opt.end,
-      // });
+      return InstrumentInfo.updateOne(
+        { exchange: Exchange.Okex, instrument_id: inst.instrument_id },
+        { klines: 1 },
+      );
     },
-    { concurrency: 5 },
+    { concurrency: 2 },
   );
 }

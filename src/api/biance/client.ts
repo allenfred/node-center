@@ -79,22 +79,20 @@ export async function handleTickers(message: BianceWsMsg) {
 
 export async function handleKline(msg: BianceWsMsg) {
   const k: BianceWsKline = msg.data['k'];
-  await InstrumentKlineDao.upsert([
-    {
-      instrument_id: k.s,
-      underlying_index: k.s.replace('USDT', ''),
-      quote_currency: 'USDT',
-      timestamp: k.t,
-      open: +k.o,
-      high: +k.h,
-      low: +k.l,
-      close: +k.c,
-      volume: +k.v, // 成交量
-      currency_volume: +k.q, // 成交额 以USDT计价
-      granularity: KlineInterval['candle' + k.i],
-      exchange: Exchange.Biance,
-    },
-  ]);
+  await InstrumentKlineDao.upsertOne({
+    instrument_id: k.s,
+    underlying_index: k.s.replace('USDT', ''),
+    quote_currency: 'USDT',
+    timestamp: k.t,
+    open: +k.o,
+    high: +k.h,
+    low: +k.l,
+    close: +k.c,
+    volume: +k.v, // 成交量
+    currency_volume: +k.q, // 成交额 以USDT计价
+    granularity: KlineInterval['candle' + k.i],
+    exchange: Exchange.Biance,
+  });
 }
 
 function isTickerMsg(message: BianceWsMsg) {

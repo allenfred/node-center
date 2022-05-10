@@ -3,6 +3,7 @@ import * as _ from 'lodash';
 import logger from '../../logger';
 import { Exchange, Instrument } from '../../types';
 import { InstrumentInfoDao } from '../../dao';
+import { InstrumentInfo } from '../../database/models';
 import { getBianceSwapInsts } from './client';
 import { getKlines } from './../common';
 
@@ -18,9 +19,12 @@ export async function initBianceInsts(): Promise<Instrument[]> {
 
   //更新永续合约信息
   await InstrumentInfoDao.upsert(instruments);
-  logger.info(`Biance[永续合约] - 公共合约全量信息更新数据库成功 ...`);
+  let data: any = await InstrumentInfoDao.find({ exchange: Exchange.Biance });
+  data = data.filter((i: Instrument) => i.klines !== 1);
 
-  return _.sortBy(instruments, ['instrument_id']);
+  logger.info(`Biance[永续合约] - 待初始化K线的合约数量 ${data.length} ...`);
+
+  return _.sortBy(data, ['instrument_id']);
 }
 
 export async function getBianceHistoryKlines(
@@ -28,12 +32,17 @@ export async function getBianceHistoryKlines(
 ): Promise<void> {
   return bluebird.map(
     instruments,
-    async (instrument: Instrument) => {
-      return await getKlines({
+    async (inst: Instrument) => {
+      await getKlines({
         exchange: Exchange.Biance,
-        instId: instrument.instrument_id,
+        instId: inst.instrument_id,
         count: 1500,
       });
+
+      return InstrumentInfo.updateOne(
+        { exchange: Exchange.Biance, instrument_id: inst.instrument_id },
+        { klines: 1 },
+      );
     },
     { concurrency: 2 },
   );

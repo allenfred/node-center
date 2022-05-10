@@ -76,38 +76,32 @@ async function getOkxKlines({
   end,
   granularity,
 }: KlineReqOpts): Promise<Array<OkxKline>> {
-  try {
-    const data = await pClient.getCandles({
+  return pClient
+    .getCandles({
       instId: instrumentId,
       before: new Date(start).valueOf(),
       after: new Date(end).valueOf(),
       bar: OkxIntervalBar[+granularity],
-    });
-    if (+data.code === 0) {
+      limit: 300,
+    })
+    .then((res) => {
       logger.info(
         `获取 [Okx] ${instrumentId}/${
           KlineInterval[+granularity]
         } K线成功: 从${moment(start).format('YYYY-MM-DD HH:mm:ss')}至${moment(
           end,
-        ).format('YYYY-MM-DD HH:mm:ss')}, 共 ${data.data.length} 条`,
+        ).format('YYYY-MM-DD HH:mm:ss')}, 共 ${res.data.length} 条`,
       );
-      return data.data;
-    } else {
+      return res.data;
+    })
+    .catch((e) => {
       logger.error(
-        `获取 [Okx] ${instrumentId}/${KlineInterval[+granularity]} K线失败: ${
-          data.msg
-        }`,
+        `获取 [Okx] ${instrumentId}/${
+          KlineInterval[+granularity]
+        } Catch Error: ${e}`,
       );
       return [];
-    }
-  } catch (e) {
-    logger.error(
-      `获取 [Okx] ${instrumentId}/${
-        KlineInterval[+granularity]
-      } Catch Error: ${e}`,
-    );
-    return [];
-  }
+    });
 }
 
 function getSwapSubArgs(instruments: Instrument[]): Array<string> {
@@ -258,7 +252,7 @@ export async function handleKlines(message: OkxWsMsg) {
     };
   });
 
-  await InstrumentKlineDao.upsert(klines);
+  await InstrumentKlineDao.upsertOne(klines[0]);
 }
 
 function isKlineMsg(message: any) {

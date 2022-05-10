@@ -90,7 +90,17 @@ async function getKlinesWithLimited(
             });
           }
 
-          return InstrumentKlineDao.upsert(klines);
+          return InstrumentKlineDao.upsertMany(
+            {
+              exchange,
+              instrument_id: option.instrument_id,
+              granularity: option.granularity,
+            },
+            klines,
+          );
+        })
+        .then(() => {
+          return Promise.resolve();
         });
     },
     { concurrency: 5 },
