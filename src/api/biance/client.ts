@@ -136,7 +136,7 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
     // ticker
     if (
       new Date().getSeconds() % 2 === 0 &&
-      msg.stream === '!ticker@arr' &&
+      (msg.stream === '!ticker@arr' || msg.stream === '!miniTicker@arr') &&
       client.channels.includes('tickers')
     ) {
       // client.send(
