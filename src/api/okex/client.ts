@@ -113,7 +113,10 @@ function getBasicArgs(instruments: Instrument[]): Array<string> {
 
   instruments.map((i: Instrument | SimpleIntrument) => {
     // 公共-K线频道
-    ['candle15m', 'candle1H', 'candle4H'].map((candleChannel) => {
+    // const subChannels = ['candle15m', 'candle1H', 'candle4H'];
+    const subChannels = ['candle1H', 'candle4H'];
+
+    subChannels.map((candleChannel) => {
       klineArgs.push({ channel: candleChannel, instId: i.instrument_id });
     });
   });

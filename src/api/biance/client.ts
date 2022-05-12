@@ -139,24 +139,6 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
       (msg.stream === '!ticker@arr' || msg.stream === '!miniTicker@arr') &&
       client.channels.includes('tickers')
     ) {
-      // client.send(
-      //   JSON.stringify({
-      //     channel: 'tickers',
-      //     data: msg.data
-      //       .filter((i) => i.s.endsWith('USDT'))
-      //       .map((i: Ticker) => {
-      //         return {
-      //           instrument_id: i.s, // symbol
-      //           last: i.c, // 最新成交价格
-      //           chg_24h: i.p, // 24小时价格变化
-      //           chg_rate_24h: i.P, // 24小时价格变化(百分比)
-      //           volume_24h: i.q, // 24小时成交量（按张数统计）
-      //           exchange: Exchange.Biance,
-      //         };
-      //       }),
-      //   }),
-      // );
-
       client.send(
         JSON.stringify({
           channel: 'tickers',
@@ -249,9 +231,8 @@ async function setupBianceWsClient(clients: any) {
   // !miniTicker@arr 全市场的精简Ticker
   // !ticker@arr 全市场的完整Ticker
   const combinedStreams = client.combinedStreams(
-    // klineStreams.concat(['!ticker@arr']),
-    ['!miniTicker@arr'],
-    // ['!ticker@arr'],
+    klineStreams.concat(['!miniTicker@arr']),
+    // ['!miniTicker@arr'],
     {
       open: () => {
         logger.info('!!! 与Biance wsserver建立连接成功 !!!');
