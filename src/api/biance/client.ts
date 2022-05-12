@@ -115,11 +115,11 @@ export async function handleMsg(message: BianceWsMsg) {
   }
 
   if (isTickerMsg(message)) {
-    handleTickers(message);
+    // handleTickers(message);
   }
 
   if (isKlineMsg(message)) {
-    handleKline(message);
+    // handleKline(message);
   }
 }
 
