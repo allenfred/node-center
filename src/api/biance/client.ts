@@ -230,8 +230,8 @@ async function setupBianceWsClient(clients: any) {
   // !miniTicker@arr 全市场的精简Ticker
   // !ticker@arr 全市场的完整Ticker
   const combinedStreams = client.combinedStreams(
-    klineStreams.concat(['!ticker@arr']),
-    // ['btcusdt@kline_1h'],
+    // klineStreams.concat(['!ticker@arr']),
+    ['!ticker@arr'],
     {
       open: () => {
         logger.info('!!! 与Biance wsserver建立连接成功 !!!');
