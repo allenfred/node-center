@@ -139,6 +139,24 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
       msg.stream === '!ticker@arr' &&
       client.channels.includes('tickers')
     ) {
+      // client.send(
+      //   JSON.stringify({
+      //     channel: 'tickers',
+      //     data: msg.data
+      //       .filter((i) => i.s.endsWith('USDT'))
+      //       .map((i: Ticker) => {
+      //         return {
+      //           instrument_id: i.s, // symbol
+      //           last: i.c, // 最新成交价格
+      //           chg_24h: i.p, // 24小时价格变化
+      //           chg_rate_24h: i.P, // 24小时价格变化(百分比)
+      //           volume_24h: i.q, // 24小时成交量（按张数统计）
+      //           exchange: Exchange.Biance,
+      //         };
+      //       }),
+      //   }),
+      // );
+
       client.send(
         JSON.stringify({
           channel: 'tickers',
@@ -148,8 +166,8 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
               return {
                 instrument_id: i.s, // symbol
                 last: i.c, // 最新成交价格
-                chg_24h: i.p, // 24小时价格变化
-                chg_rate_24h: i.P, // 24小时价格变化(百分比)
+                chg_24h: +i.c - +i.o, // 24小时价格变化
+                chg_rate_24h: (((+i.c - +i.o) * 100) / +i.o).toFixed(4), // 24小时价格变化(百分比)
                 volume_24h: i.q, // 24小时成交量（按张数统计）
                 exchange: Exchange.Biance,
               };
@@ -206,7 +224,8 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
 }
 
 async function setupBianceWsClient(clients: any) {
-  const intervals = ['15m', '1h', '4h'];
+  // const intervals = ['15m', '1h', '4h'];
+  const intervals = ['1h', '4h'];
 
   // support combined stream, e.g.
   const instruments: Instrument[] = await InstrumentTickerDao.findByTopVolume({
@@ -231,6 +250,7 @@ async function setupBianceWsClient(clients: any) {
   // !ticker@arr 全市场的完整Ticker
   const combinedStreams = client.combinedStreams(
     // klineStreams.concat(['!ticker@arr']),
+    // ['!miniTicker@arr'],
     ['!ticker@arr'],
     {
       open: () => {
