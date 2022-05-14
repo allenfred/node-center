@@ -86,19 +86,17 @@ async function getOkxKlines({
     })
     .then((res) => {
       logger.info(
-        `获取 [Okx] ${instrumentId}/${
+        `获取 [Okx/${instrumentId}/${
           KlineInterval[+granularity]
-        } K线成功: 从${moment(start).format('YYYY-MM-DD HH:mm:ss')}至${moment(
+        }] K线: ${moment(start).format('YYYY-MM-DD HH:mm:ss')}至${moment(
           end,
-        ).format('YYYY-MM-DD HH:mm:ss')}, 共 ${res.data.length} 条`,
+        ).format('MM-DD HH:mm:ss')}, ${res.data.length} 条`,
       );
       return res.data;
     })
     .catch((e) => {
       logger.error(
-        `获取 [Okx] ${instrumentId}/${
-          KlineInterval[+granularity]
-        } Catch Error: ${e}`,
+        `获取 [Okx/${instrumentId}/${KlineInterval[+granularity]}]: ${e}`,
       );
       return [];
     });

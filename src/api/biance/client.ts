@@ -322,19 +322,17 @@ async function getBianceKlines(params: BianceKlineApiOpts) {
     .publicRequest('GET', '/fapi/v1/klines', params)
     .then((res: { data: Array<BianceKline> }) => {
       logger.info(
-        `获取 [Biance] ${params.symbol}/${params.interval} K线成功: 从${moment(
+        `获取 [Biance/${params.symbol}/${params.interval}] K线: ${moment(
           params.startTime,
         ).format('YYYY-MM-DD HH:mm:ss')}至${moment(params.endTime).format(
-          'YYYY-MM-DD HH:mm:ss',
-        )}, 共 ${res.data.length} 条`,
+          'MM-DD HH:mm:ss',
+        )}, ${res.data.length} 条`,
       );
       return res.data;
     })
     .catch((e: any) => {
       logger.error(
-        `获取 [Biance] ${params.symbol}/${
-          params.interval
-        } Catch Error: ${e.toString()}`,
+        `获取 [Biance/${params.symbol}/${params.interval}]: ${e.message}`,
       );
       return [];
     });
