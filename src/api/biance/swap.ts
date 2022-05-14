@@ -151,14 +151,21 @@ function getReqOptions(opts: {
 
 export async function getHistoryKlines(
   instruments: Instrument[],
-  opts?: { days?: number; count?: number; start?: number; end?: number },
+  opts?: {
+    days?: number;
+    count?: number;
+    start?: number;
+    end?: number;
+    delay?: number;
+  },
 ): Promise<void> {
   const count = opts && opts.count ? opts.count : 1000;
+  const delayMillseconds = opts && opts.delay ? opts.delay : 100;
 
   return bluebird.each(instruments, ({ instrument_id }: any) => {
     //设置系统限速规则 (biance官方API 限速规则：2400次/60s)
     return bluebird
-      .delay(100)
+      .delay(delayMillseconds)
       .then(() => {
         return getBianceKlines(
           getReqOptions({

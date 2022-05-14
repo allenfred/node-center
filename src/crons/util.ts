@@ -66,7 +66,7 @@ async function execJob(granularity: number) {
 
   await Biance.getHistoryKlines(
     validInsts.filter((i) => i.exchange === Exchange.Biance),
-    { count: 10 },
+    { count: 10, delay: 1000 },
   );
 }
 
