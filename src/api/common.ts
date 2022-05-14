@@ -8,9 +8,10 @@ import {
   BianceKlineApiOpts,
 } from '../types';
 import { InstrumentKlineDao } from '../dao';
-import { getTimestamp } from '../util';
+import { getTimestamp, getMemoryUsage } from '../util';
 import { getBianceKlines } from './biance/client';
 import { getOkxKlines } from './okex/client';
+import logger from '../logger';
 
 const BianceKlineInterval = {
   300: '5m',

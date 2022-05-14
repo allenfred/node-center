@@ -18,7 +18,7 @@
     "src/crons/5min.ts",
     "src/crons/initBianceKlines.ts",
     "src/crons/initOkxKlines.ts",
-    "src/scripts/klines.ts"
+    "src/scripts/digger.ts"
   ],
   "exclude": ["node_modules"]
 }

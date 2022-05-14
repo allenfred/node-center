@@ -6,7 +6,7 @@ import { InstrumentInfoDao } from '../../dao';
 import { InstrumentInfo } from '../../database/models';
 import { getOkxSwapInsts } from './client';
 import { getKlines, getKlinesWithLimited } from './../common';
-import { getTimestamp } from '../../util';
+import { getTimestamp, getMemoryUsage } from '../../util';
 
 export async function initOkxInsts(): Promise<Instrument[]> {
   //获取全量永续合约信息

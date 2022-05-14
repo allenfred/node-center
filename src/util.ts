@@ -1,4 +1,5 @@
 import * as moment from 'moment';
+import { memoryUsage } from 'process';
 
 export async function sleep(seconds: number) {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
@@ -95,11 +96,17 @@ export function getKlineReqOptions() {
     .concat(day);
 }
 
-export function getISOString(amount: number = 0, unit: moment.DurationInputArg2 = 'm') {
+export function getISOString(
+  amount: number = 0,
+  unit: moment.DurationInputArg2 = 'm',
+) {
   return moment().add(amount, unit).toISOString();
 }
 
-export function getTimestamp(amount: number = 0, unit: moment.DurationInputArg2 = 'm'): any {
+export function getTimestamp(
+  amount: number = 0,
+  unit: moment.DurationInputArg2 = 'm',
+): any {
   return +moment().add(amount, unit);
 }
 
@@ -134,4 +141,14 @@ export function refreshOkxTradeInfo(memoryData: Array<any>, marketData) {
 
 export function getNumber(str: string) {
   return str.match(/\d+/)[0];
+}
+
+export function getMemoryUsage() {
+  const usage: any = memoryUsage();
+  return {
+    rss: (usage.rss / (1024 * 1024)).toFixed(2) + 'MB',
+    heapTotal: (usage.heapTotal / (1024 * 1024)).toFixed(2) + 'MB',
+    heapUsed: (usage.heapUsed / (1024 * 1024)).toFixed(2) + 'MB',
+    arrayBuffers: (usage.arrayBuffers / (1024 * 1024)).toFixed(2) + 'MB',
+  };
 }

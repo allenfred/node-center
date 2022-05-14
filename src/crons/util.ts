@@ -37,24 +37,24 @@ async function execJob(granularity: number) {
     }
   };
 
-  const swapOptions: InstReqOptions[] = insts
-    .filter(customFilter)
-    .map((i: Instrument) => {
-      let candleCount = 10;
+  const validInsts = insts.filter(customFilter);
 
-      if (granularity > Job_Granularity.TwoHour) {
-        candleCount = 4;
-      }
+  const swapOptions: InstReqOptions[] = validInsts.map((i: Instrument) => {
+    let candleCount = 10;
 
-      return {
-        // 最近 10 条K线数据
-        start: getISOString((-candleCount * granularity) / 60, 'm'),
-        end: new Date().toISOString(),
-        granularity,
-        instrument_id: i.instrument_id,
-        exchange: i.exchange,
-      } as InstReqOptions;
-    });
+    if (granularity > Job_Granularity.TwoHour) {
+      candleCount = 4;
+    }
+
+    return {
+      // 最近 10 条K线数据
+      start: getISOString((-candleCount * granularity) / 60, 'm'),
+      end: new Date().toISOString(),
+      granularity,
+      instrument_id: i.instrument_id,
+      exchange: i.exchange,
+    } as InstReqOptions;
+  });
 
   await getKlinesWithLimited(
     swapOptions.filter((i) => i.exchange === Exchange.Okex),

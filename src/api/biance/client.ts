@@ -274,6 +274,18 @@ async function setupBianceWsClient(clients: any) {
   }
 ]
 */
+async function getExchangeInfo() {
+  return client
+    .publicRequest('GET', '/fapi/v1/exchangeInfo', {})
+    .then((res: { data: BianceExchangeInfoResponse }) => {
+      return res.data;
+    })
+    .catch((error: any) => {
+      logger.error(error);
+      return [];
+    });
+}
+
 async function getBianceSwapInsts(): Promise<Array<Instrument>> {
   return client
     .publicRequest('GET', '/fapi/v1/exchangeInfo', {})
@@ -338,4 +350,10 @@ async function getBianceKlines(params: BianceKlineApiOpts) {
     });
 }
 
-export { client, getBianceSwapInsts, setupBianceWsClient, getBianceKlines };
+export {
+  client,
+  getExchangeInfo,
+  getBianceSwapInsts,
+  setupBianceWsClient,
+  getBianceKlines,
+};
