@@ -4,11 +4,17 @@ import logger from '../logger';
 import { Exchange } from '../types';
 
 const myArgs = process.argv.slice(2);
-console.log('myArgs: ', myArgs);
-const instId = myArgs[0];
+console.log('Args: ', myArgs);
 
 const startJob = async () => {
+  if (!myArgs.length) {
+    logger.info('缺少参数');
+    return;
+  }
+
+  const instId = myArgs[0].toUpperCase();
   const startTime = new Date().getTime();
+
   await connectMongo();
 
   if (instId.endsWith('SWAP')) {

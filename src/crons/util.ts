@@ -59,9 +59,9 @@ async function execJob(granularity: number) {
   await getKlinesWithLimited(
     swapOptions.filter((i) => i.exchange === Exchange.Okex),
   );
-  await getKlinesWithLimited(
-    swapOptions.filter((i) => i.exchange === Exchange.Biance),
-  );
+  // await getKlinesWithLimited(
+  //   swapOptions.filter((i) => i.exchange === Exchange.Biance),
+  // );
 }
 
 export { Job_Granularity, execJob };

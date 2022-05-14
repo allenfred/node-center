@@ -330,8 +330,12 @@ async function getBianceKlines(params: BianceKlineApiOpts) {
       );
       return res.data;
     })
-    .catch((error: any) => {
-      logger.error(error);
+    .catch((e: any) => {
+      logger.error(
+        `获取 [Biance] ${params.symbol}/${
+          params.interval
+        } Catch Error: ${e.toString()}`,
+      );
       return [];
     });
 }
