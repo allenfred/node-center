@@ -33,7 +33,7 @@ export async function initInstruments(): Promise<Instrument[]> {
 // For BTC (15min 30min 1h 2h 4h 6h 12h 1d)
 // For Others (15min 1h 4h 1d)
 function getReqOptions(instId: string, opts: HistoryKlinesJobsOpts = {}) {
-  const reqOptions = [];
+  let reqOptions = [];
   let count = 1000;
 
   if (opts && opts.count > 0) {
@@ -139,7 +139,9 @@ function getReqOptions(instId: string, opts: HistoryKlinesJobsOpts = {}) {
   }
 
   if (opts && opts.includeInterval && opts.includeInterval.length) {
-    reqOptions.filter((i) => opts.includeInterval.includes(i.granularity));
+    reqOptions = reqOptions.filter((i) =>
+      opts.includeInterval.includes(i.granularity),
+    );
   }
 
   return reqOptions;
@@ -151,7 +153,7 @@ export async function getHistoryKlines(
 ): Promise<void> {
   let opts = options || {};
   if (!opts.count) {
-    opts = Object.assign(opts, { count: 1000 });
+    opts = Object.assign({}, opts, { count: 1000 });
   }
 
   const delayMillseconds = opts && opts.delay ? opts.delay : 100;

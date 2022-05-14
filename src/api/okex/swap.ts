@@ -46,7 +46,7 @@ function getReqOptions(
 ): KlineReqOpts[] {
   const instrumentId = instId;
   const count = opts.count || 300;
-  const reqOptions = [];
+  let reqOptions = [];
 
   for (let i = 0; i < 1; i++) {
     reqOptions.push({
@@ -109,7 +109,9 @@ function getReqOptions(
   }
 
   if (opts && opts.includeInterval && opts.includeInterval.length) {
-    reqOptions.filter((i) => opts.includeInterval.includes(i.granularity));
+    reqOptions = reqOptions.filter((i) =>
+      opts.includeInterval.includes(i.granularity),
+    );
   }
 
   return reqOptions;
@@ -142,7 +144,6 @@ export async function getHistoryKlines(
         );
       })
       .then(() => {
-        logger.info(`[${Exchange.Biance}/${instrument_id}] K线 Done.`);
         return;
       });
   });

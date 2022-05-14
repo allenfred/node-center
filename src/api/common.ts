@@ -163,15 +163,15 @@ async function getBianceKlines(
           );
         })
         .then(() => {
-          // logger.info(
-          //   `[${exchange}/${instrument_id}/${
-          //     KlineInterval[+granularity]
-          //   }] K线 Done.`,
-          // );
-          // return Promise.resolve();
+          logger.info(
+            `[${exchange}/${instrument_id}/${
+              KlineInterval[+granularity]
+            }] K线 Done.`,
+          );
+          return Promise.resolve();
         });
     },
-    { concurrency: 5 },
+    { concurrency: 2 },
   );
 }
 
@@ -221,7 +221,7 @@ async function getOkexKlines(
         })
         .then(() => {
           logger.info(
-            `[${exchange}/${exchange}/${
+            `[${exchange}/${instrument_id}/${
               KlineInterval[+granularity]
             }] K线 Done.`,
           );
