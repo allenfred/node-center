@@ -329,7 +329,12 @@ async function getSwapInsts(): Promise<Array<Instrument>> {
     });
 }
 
+let status = 1;
+
 async function getKlines(params: BianceKlineApiOpts) {
+  if (status !== 1) {
+    logger.error('[Biance] 接口受限 status code:' + status);
+  }
   return client
     .publicRequest('GET', '/fapi/v1/klines', params)
     .then((res: { data: Array<BianceKline> }) => {
@@ -346,6 +351,14 @@ async function getKlines(params: BianceKlineApiOpts) {
       logger.error(
         `获取 [Biance/${params.symbol}/${params.interval}]: ${e.message}`,
       );
+      if (e.message.indexOf('418') > -1) {
+        status = 418;
+      }
+
+      if (e.message.indexOf('429') > -1) {
+        status = 429;
+      }
+
       return [];
     });
 }
