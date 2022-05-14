@@ -20,6 +20,9 @@ const Job_Granularity = {
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 async function execJob(granularity: number) {
+  const hourNow = new Date().getHours();
+  const minuteNow = new Date().getMinutes();
+
   // 获取所有合约信息
   const insts: Instrument[] = await InstrumentInfo.find({});
   // 5min / 30min / 2h / 6h / 1w
@@ -61,12 +64,16 @@ async function execJob(granularity: number) {
   // 最近 10 条K线数据
   await Okex.getHistoryKlines(
     validInsts.filter((i) => i.exchange === Exchange.Okex),
-    { count: 10 },
+    { count: 10, includeInterval: [granularity] },
   );
 
   await Biance.getHistoryKlines(
     validInsts.filter((i) => i.exchange === Exchange.Biance),
-    { count: 10, delay: 5000 },
+    {
+      count: 10,
+      delay: 1000,
+      includeInterval: [granularity],
+    },
   );
 }
 

@@ -1,7 +1,12 @@
 import * as bluebird from 'bluebird';
 import * as _ from 'lodash';
 import logger from '../../logger';
-import { Exchange, Instrument, KlineReqOpts } from '../../types';
+import {
+  Exchange,
+  Instrument,
+  KlineReqOpts,
+  HistoryKlinesJobsOpts,
+} from '../../types';
 import { InstrumentInfoDao } from '../../dao';
 import { InstrumentInfo } from '../../database/models';
 import { getSwapInsts } from './client';
@@ -35,14 +40,11 @@ export async function initInstruments(): Promise<Instrument[]> {
 }
 
 // 获取最多过去 1500 条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
-function getReqOptions(opts: {
-  instId: any;
-  start?: any;
-  end?: any;
-  count?: number;
-  days?: number;
-}): KlineReqOpts[] {
-  const instrumentId = opts.instId;
+function getReqOptions(
+  instId: string,
+  opts: HistoryKlinesJobsOpts = {},
+): KlineReqOpts[] {
+  const instrumentId = instId;
   const count = opts.count || 300;
   const reqOptions = [];
 
@@ -106,25 +108,29 @@ function getReqOptions(opts: {
     }
   }
 
+  if (opts && opts.includeInterval && opts.includeInterval.length) {
+    reqOptions.filter((i) => opts.includeInterval.includes(i.granularity));
+  }
+
   return reqOptions;
 }
 
 export async function getHistoryKlines(
   instruments: Instrument[],
-  opts?: { count?: number; days?: number; start?: number; end?: number },
+  options?: HistoryKlinesJobsOpts,
 ): Promise<void> {
   //获取所有时间粒度请求参数 如[60/180/300 900/1800/3600/7200/14400/21600/43200/86400]
-  const count = opts && opts.count ? opts.count : 300;
+  let opts = options || {};
+  if (!opts.count) {
+    opts = Object.assign(opts, { count: 300 });
+  }
 
   return bluebird.each(instruments, ({ instrument_id }: any) => {
     return bluebird
       .delay(1000)
       .then(() => {
         return getOkexKlines(
-          getReqOptions({
-            instId: instrument_id,
-            count,
-          }).map((opt: any) => {
+          getReqOptions(instrument_id, opts).map((opt: any) => {
             return Object.assign({}, opt, { exchange: Exchange.Okex });
           }),
         );

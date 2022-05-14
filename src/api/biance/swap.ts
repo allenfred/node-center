@@ -1,7 +1,7 @@
 import * as bluebird from 'bluebird';
 import * as _ from 'lodash';
 import logger from '../../logger';
-import { Exchange, Instrument } from '../../types';
+import { Exchange, Instrument, HistoryKlinesJobsOpts } from '../../types';
 import { InstrumentInfoDao } from '../../dao';
 import { InstrumentKlineDao } from '../../dao';
 import { InstrumentInfo } from '../../database/models';
@@ -32,21 +32,13 @@ export async function initInstruments(): Promise<Instrument[]> {
 // 获取最近100条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
 // For BTC (15min 30min 1h 2h 4h 6h 12h 1d)
 // For Others (15min 1h 4h 1d)
-function getReqOptions(opts: {
-  instId: any;
-  start?: any;
-  end?: any;
-  count?: number;
-  days?: number;
-}) {
+function getReqOptions(instId: string, opts: HistoryKlinesJobsOpts = {}) {
   const reqOptions = [];
-  let count = 200;
+  let count = 1000;
 
   if (opts && opts.count > 0) {
     count = opts.count;
   }
-
-  const { instId } = opts;
 
   reqOptions.push(
     Object.assign(
@@ -146,20 +138,22 @@ function getReqOptions(opts: {
     );
   }
 
+  if (opts && opts.includeInterval && opts.includeInterval.length) {
+    reqOptions.filter((i) => opts.includeInterval.includes(i.granularity));
+  }
+
   return reqOptions;
 }
 
 export async function getHistoryKlines(
   instruments: Instrument[],
-  opts?: {
-    days?: number;
-    count?: number;
-    start?: number;
-    end?: number;
-    delay?: number;
-  },
+  options?: HistoryKlinesJobsOpts,
 ): Promise<void> {
-  const count = opts && opts.count ? opts.count : 1000;
+  let opts = options || {};
+  if (!opts.count) {
+    opts = Object.assign(opts, { count: 1000 });
+  }
+
   const delayMillseconds = opts && opts.delay ? opts.delay : 100;
 
   return bluebird.each(instruments, ({ instrument_id }: any) => {
@@ -168,10 +162,7 @@ export async function getHistoryKlines(
       .delay(delayMillseconds)
       .then(() => {
         return getBianceKlines(
-          getReqOptions({
-            instId: instrument_id,
-            count,
-          }).map((opt: any) => {
+          getReqOptions(instrument_id, opts).map((opt: any) => {
             return Object.assign({}, opt, { exchange: Exchange.Biance });
           }),
           InstrumentKlineDao.reinsertMany,

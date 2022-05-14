@@ -86,3 +86,13 @@ export type WsFormatKline = [
   volume,
   currency_volume,
 ];
+
+export interface HistoryKlinesJobsOpts {
+  days?: number;
+  count?: number;
+  start?: number;
+  end?: number;
+  delay?: number;
+  includeInterval?: number[];
+  excludeInterval?: number[];
+}
