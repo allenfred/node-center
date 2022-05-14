@@ -66,11 +66,11 @@ export const startJob = async () => {
       instId: 'BTC-USDT-SWAP',
       count: 500,
     });
-    await commonAPI.getKlines({
-      exchange: Exchange.Biance,
-      instId: 'BTCUSDT',
-      count: 500,
-    });
+    // await commonAPI.getKlines({
+    //   exchange: Exchange.Biance,
+    //   instId: 'BTCUSDT',
+    //   count: 500,
+    // });
   }
 
   // At minute 15 on Monday.
