@@ -40,7 +40,7 @@ interface SimpleIntrument {
   instrument_id: string;
 }
 
-async function getOkxSwapInsts(): Promise<Array<Instrument>> {
+async function getSwapInsts(): Promise<Array<Instrument>> {
   const data: { code: string; data: Array<OkxInst> } = await pClient
     .swap()
     .getInstruments();
@@ -70,7 +70,7 @@ async function getOkxSwapInsts(): Promise<Array<Instrument>> {
 }
 
 // V5 获取合约K线数据
-async function getOkxKlines({
+async function getKlines({
   instrumentId,
   start,
   end,
@@ -85,13 +85,13 @@ async function getOkxKlines({
       limit: 300,
     })
     .then((res) => {
-      logger.info(
-        `获取 [Okx/${instrumentId}/${
-          KlineInterval[+granularity]
-        }] K线: ${moment(start).format('YYYY-MM-DD HH:mm:ss')}至${moment(
-          end,
-        ).format('MM-DD HH:mm:ss')}, ${res.data.length} 条`,
-      );
+      // logger.info(
+      //   `获取 [Okx/${instrumentId}/${
+      //     KlineInterval[+granularity]
+      //   }] K线: ${moment(start).format('YYYY-MM-DD HH:mm:ss')}至${moment(
+      //     end,
+      //   ).format('MM-DD HH:mm:ss')}, ${res.data.length} 条`,
+      // );
       return res.data;
     })
     .catch((e) => {
@@ -142,7 +142,7 @@ function getBasicArgs(instruments: Instrument[]): Array<string> {
   return klineArgs.concat(tickerArgs);
 }
 
-async function setupOkexWsClient(clients: any[]) {
+async function setupWsClient(clients: any[]) {
   const wsClient = new OkxWsClient(OKEX_WS_HOST);
   wsClient.connect();
 
@@ -337,4 +337,4 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
   });
 }
 
-export { setupOkexWsClient, getOkxSwapInsts, getOkxKlines };
+export { setupWsClient, getSwapInsts, getKlines };

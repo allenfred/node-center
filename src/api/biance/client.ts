@@ -205,7 +205,7 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
   });
 }
 
-async function setupBianceWsClient(clients: any) {
+async function setupWsClient(clients: any) {
   // const intervals = ['15m', '1h', '4h'];
   const intervals = ['1h', '4h'];
 
@@ -286,7 +286,7 @@ async function getExchangeInfo() {
     });
 }
 
-async function getBianceSwapInsts(): Promise<Array<Instrument>> {
+async function getSwapInsts(): Promise<Array<Instrument>> {
   return client
     .publicRequest('GET', '/fapi/v1/exchangeInfo', {})
     .then((res: { data: BianceExchangeInfoResponse }) => {
@@ -329,17 +329,17 @@ async function getBianceSwapInsts(): Promise<Array<Instrument>> {
     });
 }
 
-async function getBianceKlines(params: BianceKlineApiOpts) {
+async function getKlines(params: BianceKlineApiOpts) {
   return client
     .publicRequest('GET', '/fapi/v1/klines', params)
     .then((res: { data: Array<BianceKline> }) => {
-      logger.info(
-        `获取 [Biance/${params.symbol}/${params.interval}] K线: ${moment(
-          params.startTime,
-        ).format('YYYY-MM-DD HH:mm:ss')}至${moment(params.endTime).format(
-          'MM-DD HH:mm:ss',
-        )}, ${res.data.length} 条`,
-      );
+      // logger.info(
+      //   `获取 [Biance/${params.symbol}/${params.interval}] K线: ${moment(
+      //     params.startTime,
+      //   ).format('YYYY-MM-DD HH:mm:ss')}至${moment(params.endTime).format(
+      //     'MM-DD HH:mm:ss',
+      //   )}, ${res.data.length} 条`,
+      // );
       return res.data;
     })
     .catch((e: any) => {
@@ -350,10 +350,4 @@ async function getBianceKlines(params: BianceKlineApiOpts) {
     });
 }
 
-export {
-  client,
-  getExchangeInfo,
-  getBianceSwapInsts,
-  setupBianceWsClient,
-  getBianceKlines,
-};
+export { client, getExchangeInfo, getSwapInsts, setupWsClient, getKlines };

@@ -2,6 +2,8 @@ import { getKlinesWithLimited } from '../api/common';
 import { getTimestamp, getISOString } from '../util';
 import { InstrumentInfo } from '../database/models';
 import { Instrument, InstReqOptions, Exchange } from '../types';
+import * as Okex from '../api/okex';
+import * as Biance from '../api/biance';
 
 const Job_Granularity = {
   FiveMins: 60 * 5,
@@ -39,30 +41,33 @@ async function execJob(granularity: number) {
 
   const validInsts = insts.filter(customFilter);
 
-  const swapOptions: InstReqOptions[] = validInsts.map((i: Instrument) => {
-    let candleCount = 10;
+  // const swapOptions: InstReqOptions[] = validInsts.map((i: Instrument) => {
+  //   let candleCount = 10;
 
-    if (granularity > Job_Granularity.TwoHour) {
-      candleCount = 4;
-    }
+  //   if (granularity > Job_Granularity.TwoHour) {
+  //     candleCount = 4;
+  //   }
 
-    return {
-      // 最近 10 条K线数据
-      start: getISOString((-candleCount * granularity) / 60, 'm'),
-      end: new Date().toISOString(),
-      granularity,
-      instrument_id: i.instrument_id,
-      exchange: i.exchange,
-    } as InstReqOptions;
-  });
+  //   return {
+  //     // 最近 10 条K线数据
+  //     start: getISOString((-candleCount * granularity) / 60, 'm'),
+  //     end: new Date().toISOString(),
+  //     granularity,
+  //     instrument_id: i.instrument_id,
+  //     exchange: i.exchange,
+  //   } as InstReqOptions;
+  // });
 
-  await getKlinesWithLimited(
-    swapOptions.filter((i) => i.exchange === Exchange.Okex),
+  // 最近 10 条K线数据
+  await Okex.getHistoryKlines(
+    validInsts.filter((i) => i.exchange === Exchange.Okex),
+    { count: 10 },
   );
 
-  // await getKlinesWithLimited(
-  //   swapOptions.filter((i) => i.exchange === Exchange.Biance),
-  // );
+  await Biance.getHistoryKlines(
+    validInsts.filter((i) => i.exchange === Exchange.Biance),
+    { count: 10 },
+  );
 }
 
 export { Job_Granularity, execJob };

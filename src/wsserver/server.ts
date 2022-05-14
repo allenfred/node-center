@@ -1,6 +1,6 @@
 import logger from '../logger';
-import { setupBianceWsClient, initBianceInsts } from '../api/biance';
-import { setupOkexWsClient } from '../api/okex';
+import * as Biance from '../api/biance';
+import * as Okex from '../api/okex';
 
 const WebSocket = require('ws');
 let wsServer: any;
@@ -49,7 +49,7 @@ async function setupServer() {
 }
 
 export async function setupWsserver() {
-  setupOkexWsClient(clients);
-  setupBianceWsClient(clients);
+  Okex.setupWsClient(clients);
+  Biance.setupWsClient(clients);
   setupServer();
 }

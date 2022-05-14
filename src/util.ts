@@ -5,6 +5,11 @@ export async function sleep(seconds: number) {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 }
 
+export function wait(seconds: number) {
+  let ChildProcess_ExecSync = require('child_process').execSync;
+  ChildProcess_ExecSync('sleep ' + seconds);
+}
+
 export function getInstrumentAlias(instrumentId: string): string {
   if (instrumentId.includes('SWAP')) {
     return 'swap';

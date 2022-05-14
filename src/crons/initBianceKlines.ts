@@ -1,5 +1,5 @@
 import connectMongo from '../database/connection';
-import { initBianceInsts, getBianceHistoryKlines } from '../api/biance';
+import { initInstruments, getHistoryKlines } from '../api/biance';
 
 import logger from '../logger';
 
@@ -10,8 +10,8 @@ export const startJob = async () => {
   const startTime = new Date().getTime();
 
   await connectMongo();
-  const insts = await initBianceInsts();
-  await getBianceHistoryKlines(insts);
+  const insts = await initInstruments();
+  await getHistoryKlines(insts);
 
   const endTime = new Date().getTime();
   const usedTime = ((endTime - startTime) / 1000).toFixed(1);

@@ -1,5 +1,5 @@
 import connectMongo from '../database/connection';
-import { initOkxInsts, getOkxHistoryKlines } from '../api/okex';
+import { initInstruments, getHistoryKlines } from '../api/okex';
 import * as _ from 'lodash';
 import logger from '../logger';
 
@@ -10,8 +10,8 @@ export const startJob = async () => {
   const startTime = new Date().getTime();
 
   await connectMongo();
-  const insts = await initOkxInsts();
-  await getOkxHistoryKlines(insts);
+  const insts = await initInstruments();
+  await getHistoryKlines(insts);
 
   const endTime = new Date().getTime();
   const usedTime = ((endTime - startTime) / 1000).toFixed(1);

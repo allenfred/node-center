@@ -4,13 +4,13 @@ import logger from '../../logger';
 import { Exchange, Instrument, KlineReqOpts } from '../../types';
 import { InstrumentInfoDao } from '../../dao';
 import { InstrumentInfo } from '../../database/models';
-import { getOkxSwapInsts } from './client';
-import { getKlines, getKlinesWithLimited } from './../common';
-import { getTimestamp, getMemoryUsage } from '../../util';
+import { getSwapInsts } from './client';
+import { getOkexKlines } from './../common';
+import { getTimestamp, getMemoryUsage, wait } from '../../util';
 
-export async function initOkxInsts(): Promise<Instrument[]> {
+export async function initInstruments(): Promise<Instrument[]> {
   //获取全量永续合约信息
-  let instruments: Array<Instrument> = await getOkxSwapInsts();
+  let instruments: Array<Instrument> = await getSwapInsts();
 
   // BTC合约及其他USDT本位合约
   instruments = instruments.filter((i) =>
@@ -35,63 +35,72 @@ export async function initOkxInsts(): Promise<Instrument[]> {
 }
 
 // 获取最多过去 1500 条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
-function getReqOptions(instrumentId: string): KlineReqOpts[] {
+function getReqOptions(opts: {
+  instId: any;
+  start?: any;
+  end?: any;
+  count?: number;
+  days?: number;
+}): KlineReqOpts[] {
+  const instrumentId = opts.instId;
+  const count = opts.count || 300;
   const reqOptions = [];
-  for (let i = 0; i < 5; i++) {
+
+  for (let i = 0; i < 1; i++) {
     reqOptions.push({
       instrument_id: instrumentId,
-      start: getTimestamp((i + 1) * 15 * -300, 'm'),
-      end: getTimestamp(i * 15 * -300, 'm'),
+      start: getTimestamp((i + 1) * 15 * -count, 'm'),
+      end: getTimestamp(i * 15 * -count, 'm'),
       granularity: 900, // 15m
     });
 
     reqOptions.push({
       instrument_id: instrumentId,
-      start: getTimestamp((i + 1) * -300, 'h'),
-      end: getTimestamp(i * -300, 'h'),
+      start: getTimestamp((i + 1) * -count, 'h'),
+      end: getTimestamp(i * -count, 'h'),
       granularity: 3600, // 1h
     });
 
     reqOptions.push({
       instrument_id: instrumentId,
-      start: getTimestamp((i + 1) * 4 * -300, 'h'),
-      end: getTimestamp(i * 4 * -300, 'h'),
+      start: getTimestamp((i + 1) * 4 * -count, 'h'),
+      end: getTimestamp(i * 4 * -count, 'h'),
       granularity: 14400, // 4h
     });
 
     reqOptions.push({
       instrument_id: instrumentId,
-      start: getTimestamp((i + 1) * 24 * -300, 'h'),
-      end: getTimestamp(i * 24 * -300, 'h'),
+      start: getTimestamp((i + 1) * 24 * -count, 'h'),
+      end: getTimestamp(i * 24 * -count, 'h'),
       granularity: 86400, // 1d
     });
 
     if (instrumentId.indexOf('BTC') !== -1) {
       reqOptions.push({
         instrument_id: instrumentId,
-        start: getTimestamp((i + 1) * 30 * -300, 'm'),
-        end: getTimestamp(i * 30 * -300, 'm'),
+        start: getTimestamp((i + 1) * 30 * -count, 'm'),
+        end: getTimestamp(i * 30 * -count, 'm'),
         granularity: 1800, // 30m
       });
 
       reqOptions.push({
         instrument_id: instrumentId,
-        start: getTimestamp((i + 1) * 2 * -300, 'h'),
-        end: getTimestamp(i * 2 * -300, 'h'),
+        start: getTimestamp((i + 1) * 2 * -count, 'h'),
+        end: getTimestamp(i * 2 * -count, 'h'),
         granularity: 7200, // 2h
       });
 
       reqOptions.push({
         instrument_id: instrumentId,
-        start: getTimestamp((i + 1) * 6 * -300, 'h'),
-        end: getTimestamp(i * 6 * -300, 'h'),
+        start: getTimestamp((i + 1) * 6 * -count, 'h'),
+        end: getTimestamp(i * 6 * -count, 'h'),
         granularity: 21600, // 6h
       });
 
       reqOptions.push({
         instrument_id: instrumentId,
-        start: getTimestamp((i + 1) * 12 * -300, 'h'),
-        end: getTimestamp(i * 12 * -300, 'h'),
+        start: getTimestamp((i + 1) * 12 * -count, 'h'),
+        end: getTimestamp(i * 12 * -count, 'h'),
         granularity: 43200, // 12h
       });
     }
@@ -100,32 +109,35 @@ function getReqOptions(instrumentId: string): KlineReqOpts[] {
   return reqOptions;
 }
 
-export async function getOkxHistoryKlines(
+export async function getHistoryKlines(
   instruments: Instrument[],
-  opts?: { days?: number; start?: number; end?: number },
+  opts?: { count?: number; days?: number; start?: number; end?: number },
 ): Promise<void> {
   //获取所有时间粒度请求参数 如[60/180/300 900/1800/3600/7200/14400/21600/43200/86400]
+  const count = opts && opts.count ? opts.count : 300;
 
-  let reqOpts: KlineReqOpts[] = [];
-
-  instruments.map((inst) => {
-    reqOpts = reqOpts.concat(getReqOptions(inst.instrument_id));
+  return bluebird.each(instruments, ({ instrument_id }: any) => {
+    return bluebird
+      .delay(1000)
+      .then(() => {
+        return getOkexKlines(
+          getReqOptions({
+            instId: instrument_id,
+            count,
+          }).map((opt: any) => {
+            return Object.assign({}, opt, { exchange: Exchange.Okex });
+          }),
+        );
+      })
+      .then(() => {
+        return InstrumentInfo.updateOne(
+          { exchange: Exchange.Okex, instrument_id },
+          { klines: 1 },
+        );
+      })
+      .then(() => {
+        logger.info(`[${Exchange.Biance}/${instrument_id}] K线 Done.`);
+        return;
+      });
   });
-
-  return bluebird.map(
-    instruments,
-    async (inst: any) => {
-      await getKlinesWithLimited(
-        getReqOptions(inst.instrument_id).map((opt: any) => {
-          return Object.assign({}, opt, { exchange: Exchange.Okex });
-        }),
-      );
-
-      return InstrumentInfo.updateOne(
-        { exchange: Exchange.Okex, instrument_id: inst.instrument_id },
-        { klines: 1 },
-      );
-    },
-    { concurrency: 2 },
-  );
 }

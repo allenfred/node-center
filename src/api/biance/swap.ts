@@ -3,13 +3,15 @@ import * as _ from 'lodash';
 import logger from '../../logger';
 import { Exchange, Instrument } from '../../types';
 import { InstrumentInfoDao } from '../../dao';
+import { InstrumentKlineDao } from '../../dao';
 import { InstrumentInfo } from '../../database/models';
-import { getBianceSwapInsts } from './client';
-import { getKlines } from './../common';
+import { getSwapInsts } from './client';
+import { getBianceKlines } from './../common';
+import { getTimestamp } from '../../util';
 
-export async function initBianceInsts(): Promise<Instrument[]> {
+export async function initInstruments(): Promise<Instrument[]> {
   //获取全量永续合约信息
-  let instruments: Array<Instrument> = await getBianceSwapInsts();
+  let instruments: Array<Instrument> = await getSwapInsts();
 
   // BTC合约及其他USDT本位合约
   instruments = instruments.filter((i) => i.instrument_id.endsWith('USDT'));
@@ -27,23 +29,156 @@ export async function initBianceInsts(): Promise<Instrument[]> {
   return _.sortBy(data, ['instrument_id']);
 }
 
-export async function getBianceHistoryKlines(
-  instruments: Instrument[],
-): Promise<void> {
-  return bluebird.map(
-    instruments,
-    async (inst: Instrument) => {
-      await getKlines({
-        exchange: Exchange.Biance,
-        instId: inst.instrument_id,
-        count: 1500,
-      });
+// 获取最近100条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
+// For BTC (15min 30min 1h 2h 4h 6h 12h 1d)
+// For Others (15min 1h 4h 1d)
+function getReqOptions(opts: {
+  instId: any;
+  start?: any;
+  end?: any;
+  count?: number;
+  days?: number;
+}) {
+  const reqOptions = [];
+  let count = 200;
 
-      return InstrumentInfo.updateOne(
-        { exchange: Exchange.Biance, instrument_id: inst.instrument_id },
-        { klines: 1 },
-      );
-    },
-    { concurrency: 2 },
+  if (opts && opts.count > 0) {
+    count = opts.count;
+  }
+
+  const { instId } = opts;
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: instId,
+        start: opts.start || getTimestamp(15 * -count, 'm'),
+        end: opts.end || getTimestamp(0, 'm'),
+        granularity: 900, // 15min
+      },
+    ),
   );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: instId,
+        start: opts.start || getTimestamp(1 * -count, 'h'),
+        end: opts.end || getTimestamp(0, 'h'),
+        granularity: 3600, // 1h
+      },
+    ),
+  );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: instId,
+        start: opts.start || getTimestamp(4 * -count, 'h'),
+        end: opts.end || getTimestamp(0, 'h'),
+        granularity: 14400, // 4h
+      },
+    ),
+  );
+
+  reqOptions.push(
+    Object.assign(
+      {},
+      {
+        instrument_id: instId,
+        start: opts.start || getTimestamp(24 * -count, 'h'),
+        end: opts.end || getTimestamp(0, 'h'),
+        granularity: 86400, // 1d
+      },
+    ),
+  );
+
+  if (instId.indexOf('BTC') !== -1) {
+    reqOptions.push(
+      Object.assign(
+        {},
+        {
+          instrument_id: instId,
+          start: opts.start || getTimestamp(30 * -count, 'm'),
+          end: opts.end || getTimestamp(0, 'm'),
+          granularity: 1800, // 30min
+        },
+      ),
+    );
+
+    reqOptions.push(
+      Object.assign(
+        {},
+        {
+          instrument_id: instId,
+          start: opts.start || getTimestamp(2 * -count, 'h'),
+          end: opts.end || getTimestamp(0, 'h'),
+          granularity: 7200, // 2h
+        },
+      ),
+    );
+
+    reqOptions.push(
+      Object.assign(
+        {},
+        {
+          instrument_id: instId,
+          start: opts.start || getTimestamp(6 * -count, 'h'),
+          end: opts.end || getTimestamp(0, 'h'),
+          granularity: 21600, // 6h
+        },
+      ),
+    );
+
+    reqOptions.push(
+      Object.assign(
+        {},
+        {
+          instrument_id: instId,
+          start: opts.start || getTimestamp(12 * -count, 'h'),
+          end: opts.end || getTimestamp(0, 'h'),
+          granularity: 43200, // 12h
+        },
+      ),
+    );
+  }
+
+  return reqOptions;
+}
+
+export async function getHistoryKlines(
+  instruments: Instrument[],
+  opts?: { days?: number; count?: number; start?: number; end?: number },
+): Promise<void> {
+  const count = opts && opts.count ? opts.count : 1000;
+
+  return bluebird.each(instruments, ({ instrument_id }: any) => {
+    //设置系统限速规则 (biance官方API 限速规则：2400次/60s)
+    return bluebird
+      .delay(100)
+      .then(() => {
+        return getBianceKlines(
+          getReqOptions({
+            instId: instrument_id,
+            count,
+          }).map((opt: any) => {
+            return Object.assign({}, opt, { exchange: Exchange.Biance });
+          }),
+          InstrumentKlineDao.reinsertMany,
+        );
+      })
+      .then(() => {
+        return InstrumentInfo.updateOne(
+          { exchange: Exchange.Biance, instrument_id },
+          { klines: 1 },
+        );
+      })
+      .then(() => {
+        logger.info(`[${Exchange.Biance}/${instrument_id}] K线 Done.`);
+        return;
+      });
+  });
 }

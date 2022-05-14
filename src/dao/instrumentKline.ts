@@ -4,29 +4,35 @@ import { InstKline } from '../types';
 import logger from '../logger';
 import * as _ from 'lodash';
 
+// for common update jobs
 async function upsert(klines: InstKline[]) {
-  return bluebird.map(klines, async (kline: InstKline) => {
-    //find unique kline by underlying_index & timestamp & alias & granularity & exchange
-    const uniqueCondition = {
-      instrument_id: kline.instrument_id,
-      timestamp: new Date(kline.timestamp),
-      granularity: kline.granularity,
-      exchange: kline.exchange,
-    };
-    const Model = getModel(kline.instrument_id);
+  return bluebird.map(
+    klines,
+    async (kline: InstKline) => {
+      //find unique kline by underlying_index & timestamp & alias & granularity & exchange
+      const uniqueCondition = {
+        instrument_id: kline.instrument_id,
+        timestamp: new Date(kline.timestamp),
+        granularity: kline.granularity,
+        exchange: kline.exchange,
+      };
+      const Model = getModel(kline.instrument_id);
 
-    await Model.updateOne(uniqueCondition, kline, { upsert: true }).catch(
-      (err: any) => {
-        logger.error(
-          `[UpdateKline:${kline.exchange}/${kline.instrument_id}/${
-            kline.granularity
-          }] CatchError: ${err.stack.substring(0, 100)}`,
-        );
-      },
-    );
-  });
+      await Model.updateOne(uniqueCondition, kline, { upsert: true }).catch(
+        (err: any) => {
+          logger.error(
+            `[UpdateKline:${kline.exchange}/${kline.instrument_id}/${
+              kline.granularity
+            }] CatchError: ${err.stack.substring(0, 100)}`,
+          );
+        },
+      );
+    },
+    { concurrency: 5 },
+  );
 }
 
+// for daily cron jobs
 async function upsertMany(opts: any, klines: InstKline[]) {
   if (!klines.length) {
     return;
@@ -64,6 +70,26 @@ async function upsertMany(opts: any, klines: InstKline[]) {
   }
 }
 
+// for init jobs
+async function reinsertMany(opts: any, klines: InstKline[]) {
+  if (!klines.length) {
+    return;
+  }
+
+  if (klines.length < 20) {
+    return upsert(klines);
+  }
+
+  const Model = getModel(opts.instrument_id);
+  const filter = Object.assign(opts, {
+    timestamp: { $in: _.map(klines, 'timestamp') },
+  });
+
+  await Model.deleteMany(filter);
+  return Model.insertMany(klines, { lean: true });
+}
+
+// for ws message jobs
 async function upsertOne(kline: InstKline) {
   //find unique kline by underlying_index & timestamp & alias & granularity & exchange
   const uniqueCondition = {
@@ -91,7 +117,9 @@ function getModel(instId: any) {
 
 const InstrumentKlineDao = {
   upsertOne,
+  upsert,
   upsertMany,
+  reinsertMany,
 };
 
 export { InstrumentKlineDao };

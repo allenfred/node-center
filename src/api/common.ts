@@ -6,11 +6,12 @@ import {
   BianceKline,
   InstReqOptions,
   BianceKlineApiOpts,
+  KlineInterval,
 } from '../types';
 import { InstrumentKlineDao } from '../dao';
-import { getTimestamp, getMemoryUsage } from '../util';
-import { getBianceKlines } from './biance/client';
-import { getOkxKlines } from './okex/client';
+import { getTimestamp, getMemoryUsage, sleep, wait } from '../util';
+import * as Biance from './biance/client';
+import * as Okex from './okex/client';
 import logger from '../logger';
 
 const BianceKlineInterval = {
@@ -28,16 +29,19 @@ const BianceKlineInterval = {
 
 async function getKlinesWithLimited(
   options: Array<InstReqOptions>,
+  updateOperate: any = InstrumentKlineDao.upsertMany,
 ): Promise<any> {
   //设置系统限速规则 (biance官方API 限速规则：2400次/60s)
+  //设置系统限速规则 (Okex官方API 限速规则：20次/2s)
+
   return bluebird.map(
     options,
     async (option: any) => {
-      const { exchange } = option;
-      return Promise.resolve()
+      const { exchange, instrument_id, granularity } = option;
+      Promise.resolve()
         .then(() => {
           if (exchange === Exchange.Biance) {
-            return getBianceKlines({
+            return Biance.getKlines({
               symbol: option.instrument_id,
               interval: BianceKlineInterval[option.granularity],
               startTime: new Date(option.start).valueOf(),
@@ -45,7 +49,7 @@ async function getKlinesWithLimited(
               limit: 1500,
             });
           } else if (exchange === Exchange.Okex) {
-            return getOkxKlines({
+            return Okex.getKlines({
               instrumentId: option.instrument_id,
               granularity: option.granularity,
               start: new Date(option.start).valueOf(),
@@ -91,6 +95,180 @@ async function getKlinesWithLimited(
             });
           }
 
+          return updateOperate(
+            {
+              exchange,
+              instrument_id: instrument_id,
+              granularity: granularity,
+            },
+            klines,
+          );
+        })
+        .then(() => {
+          logger.info(
+            `[${exchange}/${exchange}/${
+              KlineInterval[+granularity]
+            }] K线 Done.`,
+          );
+          return Promise.resolve();
+        });
+    },
+    { concurrency: 5 },
+  );
+}
+
+async function getBianceKlines(
+  options: Array<InstReqOptions>,
+  updateOperate: any = InstrumentKlineDao.upsertMany,
+): Promise<any> {
+  //设置系统限速规则 (biance官方API 限速规则：2400次/60s)
+
+  return bluebird.map(
+    options,
+    async (option: any) => {
+      const { exchange, instrument_id, granularity } = option;
+      return Biance.getKlines({
+        symbol: instrument_id,
+        interval: BianceKlineInterval[granularity],
+        startTime: new Date(option.start).valueOf(),
+        endTime: new Date(option.end).valueOf(),
+        limit: 1500,
+      })
+        .then((data: Array<any>) => {
+          let klines = [];
+          klines = data.map((candle: BianceKline) => {
+            return {
+              instrument_id,
+              underlying_index: instrument_id.split('-')[0],
+              quote_currency: instrument_id.split('-')[1],
+              timestamp: new Date(+candle[0]),
+              open: +candle[1],
+              high: +candle[2],
+              low: +candle[3],
+              close: +candle[4],
+              volume: +candle[5],
+              currency_volume: +candle[6],
+              granularity,
+              exchange,
+            };
+          });
+
+          return updateOperate(
+            {
+              exchange,
+              instrument_id,
+              granularity,
+            },
+            klines,
+          );
+        })
+        .then(() => {
+          // logger.info(
+          //   `[${exchange}/${instrument_id}/${
+          //     KlineInterval[+granularity]
+          //   }] K线 Done.`,
+          // );
+          // return Promise.resolve();
+        });
+    },
+    { concurrency: 5 },
+  );
+}
+
+async function getOkexKlines(
+  options: Array<InstReqOptions>,
+  updateOperate: any = InstrumentKlineDao.upsertMany,
+): Promise<any> {
+  //设置系统限速规则 (Okex官方API 限速规则：20次/2s)
+
+  return bluebird.map(
+    options,
+    async (option: any) => {
+      const { exchange, instrument_id, granularity } = option;
+      return Okex.getKlines({
+        instrumentId: instrument_id,
+        granularity,
+        start: new Date(option.start).valueOf(),
+        end: new Date(option.end).valueOf(),
+      })
+        .then((data: Array<any>) => {
+          let klines = [];
+          klines = data.map((candle: OkxKline) => {
+            return {
+              instrument_id,
+              underlying_index: instrument_id.split('-')[0],
+              quote_currency: instrument_id.split('-')[1],
+              timestamp: new Date(+candle[0]),
+              open: +candle[1],
+              high: +candle[2],
+              low: +candle[3],
+              close: +candle[4],
+              volume: +candle[5],
+              currency_volume: +candle[6],
+              granularity,
+              exchange,
+            };
+          });
+
+          return updateOperate(
+            {
+              exchange,
+              instrument_id,
+              granularity,
+            },
+            klines,
+          );
+        })
+        .then(() => {
+          logger.info(
+            `[${exchange}/${exchange}/${
+              KlineInterval[+granularity]
+            }] K线 Done.`,
+          );
+          return Promise.resolve();
+        });
+    },
+    { concurrency: 5 },
+  );
+}
+
+async function getOkxKlinesWithSleep(
+  options: Array<InstReqOptions>,
+): Promise<any> {
+  //设置系统限速规则 (biance官方API 限速规则：2400次/60s)
+  //设置系统限速规则 (Okex官方API 限速规则：20次/2s)
+
+  return bluebird
+    .each(options, (option: any, i: number) => {
+      const { exchange } = option;
+      return bluebird
+        .delay(100)
+        .then(() => {
+          return Okex.getKlines({
+            instrumentId: option.instrument_id,
+            granularity: option.granularity,
+            start: new Date(option.start).valueOf(),
+            end: new Date(option.end).valueOf(),
+          });
+        })
+        .then((data: any) => {
+          const klines = data.map((candle: OkxKline) => {
+            return {
+              instrument_id: option.instrument_id,
+              underlying_index: option.instrument_id.split('-')[0],
+              quote_currency: option.instrument_id.split('-')[1],
+              timestamp: new Date(+candle[0]),
+              open: +candle[1],
+              high: +candle[2],
+              low: +candle[3],
+              close: +candle[4],
+              volume: +candle[5],
+              currency_volume: +candle[6],
+              granularity: option.granularity,
+              exchange: Exchange.Okex,
+            };
+          });
+
           return InstrumentKlineDao.upsertMany(
             {
               exchange,
@@ -100,12 +278,11 @@ async function getKlinesWithLimited(
             klines,
           );
         })
-        .then(() => {
-          return Promise.resolve();
-        });
-    },
-    { concurrency: 5 },
-  );
+        .then(() => {});
+    })
+    .then(() => {
+      logger.info('Done!');
+    });
 }
 
 // 获取最近100条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
@@ -233,4 +410,10 @@ async function getKlines(opts: {
   );
 }
 
-export { getKlinesWithLimited, getKlines };
+export {
+  getKlinesWithLimited,
+  getOkxKlinesWithSleep,
+  getKlines,
+  getBianceKlines,
+  getOkexKlines,
+};
