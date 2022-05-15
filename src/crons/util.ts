@@ -48,7 +48,10 @@ async function execJob(granularity: number) {
   // 每12h更新过去24h全量数据
 
   let count = 10;
-  if (hourNow % 12 === 0) {
+  if (
+    hourNow % 12 === 0 &&
+    [Job_Granularity.FifteenMins, Job_Granularity.OneHour].includes(granularity)
+  ) {
     count = getCountByHoursAgo(24, granularity);
   }
 
