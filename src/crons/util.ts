@@ -45,9 +45,10 @@ async function execJob(granularity: number) {
 
   const validInsts = sortBy(insts.filter(customFilter), ['instrument_id']);
 
-  // 每12h更新过去24h全量数据
-
+  // 最近 10 条K线数据
   let count = 10;
+
+  // 每12h更新过去24h全量数据 (15mins, 1h)
   if (
     hourNow % 12 === 0 &&
     [Job_Granularity.FifteenMins, Job_Granularity.OneHour].includes(granularity)
@@ -55,7 +56,6 @@ async function execJob(granularity: number) {
     count = getCountByHoursAgo(24, granularity);
   }
 
-  // 最近 10 条K线数据
   await Okex.getHistoryKlines(
     validInsts.filter((i: any) => i.exchange === Exchange.Okex),
     { count, includeInterval: [granularity] },

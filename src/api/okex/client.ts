@@ -276,7 +276,7 @@ export async function handleMsg(message: OkxWsMsg) {
   }
 
   if (isKlineMsg(message)) {
-    // handleKlines(message);
+    handleKlines(message);
   }
 
   if (isTickerMsg(message)) {

@@ -119,7 +119,7 @@ export async function handleMsg(message: BianceWsMsg) {
   }
 
   if (isKlineMsg(message)) {
-    // handleKline(message);
+    handleKline(message);
   }
 }
 
