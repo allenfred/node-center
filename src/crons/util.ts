@@ -4,6 +4,7 @@ import { InstrumentInfo } from '../database/models';
 import { Instrument, InstReqOptions, Exchange } from '../types';
 import * as Okex from '../api/okex';
 import * as Biance from '../api/biance';
+import { sortBy } from 'lodash';
 
 const Job_Granularity = {
   FiveMins: 60 * 5,
@@ -42,33 +43,16 @@ async function execJob(granularity: number) {
     }
   };
 
-  const validInsts = insts.filter(customFilter);
-
-  // const swapOptions: InstReqOptions[] = validInsts.map((i: Instrument) => {
-  //   let candleCount = 10;
-
-  //   if (granularity > Job_Granularity.TwoHour) {
-  //     candleCount = 4;
-  //   }
-
-  //   return {
-  //     // 最近 10 条K线数据
-  //     start: getISOString((-candleCount * granularity) / 60, 'm'),
-  //     end: new Date().toISOString(),
-  //     granularity,
-  //     instrument_id: i.instrument_id,
-  //     exchange: i.exchange,
-  //   } as InstReqOptions;
-  // });
+  const validInsts = sortBy(insts.filter(customFilter), ['instrument_id']);
 
   // 最近 10 条K线数据
   await Okex.getHistoryKlines(
-    validInsts.filter((i) => i.exchange === Exchange.Okex),
+    validInsts.filter((i: any) => i.exchange === Exchange.Okex),
     { count: 10, includeInterval: [granularity] },
   );
 
   await Biance.getHistoryKlines(
-    validInsts.filter((i) => i.exchange === Exchange.Biance),
+    validInsts.filter((i: any) => i.exchange === Exchange.Biance),
     {
       count: 10,
       delay: 1000,

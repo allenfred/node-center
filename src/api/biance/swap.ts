@@ -177,7 +177,6 @@ export async function getHistoryKlines(
         );
       })
       .then(() => {
-        logger.info(`[${Exchange.Biance}/${instrument_id}] K线 Done.`);
         return;
       });
   });
