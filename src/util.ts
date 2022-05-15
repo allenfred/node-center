@@ -115,6 +115,14 @@ export function getTimestamp(
   return +moment().add(amount, unit);
 }
 
+export function getCountByHoursAgo(hours: number = 0, granu: number): any {
+  return parseInt((hours * 60 * 60) / granu + '');
+}
+
+export function getHoursAgo(hours: number = 0): any {
+  return +moment().add(-hours, 'h');
+}
+
 export function isValidMarketData(marketData): Boolean {
   return !!('data' in marketData && marketData.data.length > 0);
 }

@@ -89,6 +89,7 @@ export type WsFormatKline = [
 
 export interface HistoryKlinesJobsOpts {
   days?: number;
+  hours?: number;
   count?: number;
   start?: number;
   end?: number;

@@ -1,5 +1,5 @@
 import { getKlinesWithLimited } from '../api/common';
-import { getTimestamp, getISOString } from '../util';
+import { getTimestamp, getISOString, getCountByHoursAgo } from '../util';
 import { InstrumentInfo } from '../database/models';
 import { Instrument, InstReqOptions, Exchange } from '../types';
 import * as Okex from '../api/okex';
@@ -45,16 +45,23 @@ async function execJob(granularity: number) {
 
   const validInsts = sortBy(insts.filter(customFilter), ['instrument_id']);
 
+  // 每12h更新过去24h全量数据
+
+  let count = 10;
+  if (hourNow % 12 === 0) {
+    count = getCountByHoursAgo(24, granularity);
+  }
+
   // 最近 10 条K线数据
   await Okex.getHistoryKlines(
     validInsts.filter((i: any) => i.exchange === Exchange.Okex),
-    { count: 10, includeInterval: [granularity] },
+    { count, includeInterval: [granularity] },
   );
 
   await Biance.getHistoryKlines(
     validInsts.filter((i: any) => i.exchange === Exchange.Biance),
     {
-      count: 10,
+      count,
       delay: 1000,
       includeInterval: [granularity],
     },
