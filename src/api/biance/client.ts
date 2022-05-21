@@ -116,8 +116,12 @@ export async function handleMsg(message: BianceWsMsg, clients: any[]) {
     return;
   }
 
-  if (isTickerMsg(message)) {
-    // handleTickers(message);
+  if (
+    isTickerMsg(message) &&
+    new Date().getMinutes() === 0 &&
+    new Date().getSeconds() < 5
+  ) {
+    handleTickers(message);
   }
 
   if (isKlineMsg(message)) {

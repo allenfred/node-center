@@ -234,8 +234,12 @@ export async function handleMsg(message: OkxWsMsg, clients?: any[]) {
     handleKlines(message);
   }
 
-  if (isTickerMsg(message)) {
-    // handleTickers(message);
+  if (
+    isTickerMsg(message) &&
+    new Date().getMinutes() === 0 &&
+    new Date().getSeconds() < 5
+  ) {
+    handleTickers(message);
   }
 }
 
