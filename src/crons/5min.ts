@@ -44,13 +44,13 @@ export const startJob = async () => {
 
   // 12hourly
   if (hourNow % 12 === 0 && minuteNow === 5) {
+    await Okex.initInstruments();
+    await Biance.initInstruments();
     await execJob(Job_Granularity.TwelveHour);
   }
 
   // At 00:05.
   if (hourNow === 0 && minuteNow === 5) {
-    await Okex.initInstruments();
-    await Biance.initInstruments();
     await execJob(Job_Granularity.OneDay);
   }
 

@@ -109,7 +109,9 @@ function isKlineMsg(message: BianceWsMsg) {
   return false;
 }
 
-export async function handleMsg(message: BianceWsMsg) {
+export async function handleMsg(message: BianceWsMsg, clients: any[]) {
+  broadCastMsg(message, clients);
+
   if (!(new Date().getSeconds() % 10 === 0)) {
     return;
   }
@@ -245,8 +247,8 @@ async function setupWsClient(clients: any) {
         // if (jsonData.stream !== '!ticker@arr') {
         // console.log(data);
         // }
-        broadCastMsg(JSON.parse(data), clients);
-        handleMsg(JSON.parse(data));
+        // broadCastMsg(JSON.parse(data), clients);
+        handleMsg(JSON.parse(data), clients);
       },
     },
   );
