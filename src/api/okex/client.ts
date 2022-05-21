@@ -142,53 +142,6 @@ function getBasicArgs(instruments: Instrument[]): Array<string> {
   return klineArgs.concat(tickerArgs);
 }
 
-async function setupWsClient(clients: any[]) {
-  const wsClient = new OkxWsClient(OKEX_WS_HOST);
-  wsClient.connect();
-
-  wsClient.on('open', async () => {
-    logger.info('!!! 与Okx wsserver建立连接成功 !!!');
-    // wsClient.login(apikey, secret, passphrase);
-
-    const instruments: Instrument[] = await InstrumentInfoDao.find({
-      exchange: Exchange.Okex,
-    });
-
-    // 订阅永续频道信息
-    wsClient.subscribe(...getSwapSubArgs(instruments));
-  });
-
-  wsClient.on('close', () => {
-    logger.error('!!! 与Okx wsserver断开连接 !!!');
-    wsClient.connect();
-  });
-
-  wsClient.on('message', (data: any) => {
-    try {
-      // logger.info(`!!! ws message =${data}`);
-      var obj: OkxWsMsg = JSON.parse(data);
-      var eventType = obj.event;
-
-      // if (eventType == 'login') {
-      //   //登录消息
-      //   if (obj?.success == true) {
-      //     event.emit('login');
-      //   }
-
-      //   return;
-      // }
-
-      // 公共频道消息
-      if (eventType == undefined) {
-        handleMsg(obj);
-        broadCastMsg(obj, clients);
-      }
-    } catch (e) {
-      logger.error('handleMessage catch err: ', e);
-    }
-  });
-}
-
 /* V5 API 
 {
   "arg": {
@@ -270,7 +223,9 @@ function isTickerMsg(message: any) {
   return false;
 }
 
-export async function handleMsg(message: OkxWsMsg) {
+export async function handleMsg(message: OkxWsMsg, clients?: any[]) {
+  broadCastMsg(message, clients);
+
   if (!(new Date().getSeconds() % 10 === 0)) {
     return;
   }
@@ -333,6 +288,52 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
           data: msg.data[0] as WsFormatKline,
         }),
       );
+    }
+  });
+}
+
+async function setupWsClient(clients: any[]) {
+  const wsClient = new OkxWsClient(OKEX_WS_HOST);
+  wsClient.connect();
+
+  wsClient.on('open', async () => {
+    logger.info('!!! 与Okx wsserver建立连接成功 !!!');
+    // wsClient.login(apikey, secret, passphrase);
+
+    const instruments: Instrument[] = await InstrumentInfoDao.find({
+      exchange: Exchange.Okex,
+    });
+
+    // 订阅永续频道信息
+    wsClient.subscribe(...getSwapSubArgs(instruments));
+  });
+
+  wsClient.on('close', () => {
+    logger.error('!!! 与Okx wsserver断开连接 !!!');
+    wsClient.connect();
+  });
+
+  wsClient.on('message', (data: any) => {
+    try {
+      // logger.info(`!!! ws message =${data}`);
+      var obj: OkxWsMsg = JSON.parse(data);
+      var eventType = obj.event;
+
+      // if (eventType == 'login') {
+      //   //登录消息
+      //   if (obj?.success == true) {
+      //     event.emit('login');
+      //   }
+
+      //   return;
+      // }
+
+      // 公共频道消息
+      if (eventType == undefined) {
+        handleMsg(obj, clients);
+      }
+    } catch (e) {
+      logger.error('handleMessage catch err: ', e);
     }
   });
 }

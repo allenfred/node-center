@@ -18,9 +18,14 @@ async function find(opts?: any): Promise<any> {
   return await InstrumentInfo.find(opts);
 }
 
+async function deleteByIds(instIds: string[]) {
+  return await InstrumentInfo.deleteMany({ instrument_id: { $in: instIds } });
+}
+
 const InstrumentInfoDao = {
   upsert,
   find,
+  deleteByIds,
 };
 
 export { InstrumentInfoDao };

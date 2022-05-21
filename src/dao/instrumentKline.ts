@@ -62,7 +62,7 @@ async function upsertMany(opts: any, klines: InstKline[]) {
 
   if (filteredKlines.length) {
     // return upsert(filteredKlines);
-    return Model.insertMany(filteredKlines, { lean: true });
+    return Model.insertMany(filteredKlines, { ordered: false, lean: true });
   } else {
     logger.info(
       `[${opts.instrument_id}/${klines[0].granularity}] 数据已经ready, 无需更新...`,
@@ -86,7 +86,11 @@ async function reinsertMany(opts: any, klines: InstKline[]) {
   });
 
   await Model.deleteMany(filter);
-  return Model.insertMany(klines, { lean: true });
+  return Model.insertMany(klines, { ordered: false, lean: true }).catch(
+    (error: any) => {
+      logger.error(error);
+    },
+  );
 }
 
 // for ws message jobs

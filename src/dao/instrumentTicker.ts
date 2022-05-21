@@ -16,7 +16,10 @@ async function upsert(tickers: InstTicker[]): Promise<any> {
 
       try {
         if (one) {
-          result = await InstrumentTicker.updateOne({ instrument_id, exchange }, ticker);
+          result = await InstrumentTicker.updateOne(
+            { instrument_id, exchange },
+            ticker,
+          );
         } else {
           result = await InstrumentTicker.create(ticker);
         }
@@ -26,17 +29,30 @@ async function upsert(tickers: InstTicker[]): Promise<any> {
 
       return result;
     },
-    { concurrency: 30 }
+    { concurrency: 30 },
   );
 }
 
 async function findByTopVolume(opts: any) {
-  return await InstrumentTicker.find({ exchange: opts.exchange }, null, { limit: opts.limit || 30, sort: { volume_24h: -1 } }).exec();
+  return await InstrumentTicker.find({ exchange: opts.exchange }, null, {
+    limit: opts.limit || 30,
+    sort: { volume_24h: -1 },
+  }).exec();
+}
+
+async function find(opts?: any): Promise<any> {
+  return await InstrumentTicker.find(opts);
+}
+
+async function deleteByIds(instIds: string[]) {
+  return await InstrumentTicker.deleteMany({ instrument_id: { $in: instIds } });
 }
 
 const InstrumentTickerDao = {
   upsert,
   findByTopVolume,
+  find,
+  deleteByIds,
 };
 
 export { InstrumentTickerDao };

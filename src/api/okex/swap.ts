@@ -7,7 +7,7 @@ import {
   KlineReqOpts,
   HistoryKlinesJobsOpts,
 } from '../../types';
-import { InstrumentInfoDao } from '../../dao';
+import { InstrumentInfoDao, InstrumentTickerDao } from '../../dao';
 import { InstrumentInfo } from '../../database/models';
 import { getSwapInsts } from './client';
 import { getOkexKlines } from './../common';
@@ -24,6 +24,50 @@ export async function initInstruments(): Promise<Instrument[]> {
   logger.info(
     `Okx[永续合约] - 获取公共合约全量信息成功，共: ${instruments.length} 条 ...`,
   );
+
+  if (!instruments.length) {
+    return;
+  }
+
+  // ****** 处理下架合约 ******
+  const oldInsts: any = await InstrumentInfoDao.find({
+    exchange: Exchange.Okex,
+  });
+
+  const invalidInsts = _.differenceBy(oldInsts, instruments, 'instrument_id');
+
+  if (invalidInsts.length) {
+    logger.info(invalidInsts);
+    await InstrumentInfoDao.deleteByIds(
+      _.map(invalidInsts, 'instrument_id'),
+    ).then((result: any) => {
+      if (result.ok === 1) {
+        logger.info(
+          `Okx[永续合约] - 删除下架合约，共: ${result.deletedCount} 条 ...`,
+        );
+      }
+    });
+  }
+
+  // ****** 处理下架合约 ticker ******
+  const oldTickers: any = await InstrumentTickerDao.find({
+    exchange: Exchange.Okex,
+  });
+
+  const invalidTickers = _.differenceBy(
+    oldTickers,
+    instruments,
+    'instrument_id',
+  );
+
+  await InstrumentTickerDao.deleteByIds(
+    _.map(invalidTickers, 'instrument_id'),
+  ).then((result: any) => {
+    logger.info(
+      `Okx[永续合约] - 删除下架合约 Tickers，共: ${result.ok} 条 ...`,
+    );
+  });
+  // *************************
 
   //更新永续合约信息
   await InstrumentInfoDao.upsert(
