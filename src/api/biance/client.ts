@@ -77,7 +77,7 @@ export async function handleTickers(message: BianceWsMsg) {
   );
 }
 
-export async function handleKline(msg: BianceWsMsg) {
+export async function handleKlines(msg: BianceWsMsg) {
   const k: BianceWsKline = msg.data['k'];
   await InstrumentKlineDao.upsertOne({
     instrument_id: k.s,
@@ -96,7 +96,10 @@ export async function handleKline(msg: BianceWsMsg) {
 }
 
 function isTickerMsg(message: BianceWsMsg) {
-  if (message && message.stream === '!ticker@arr') {
+  if (
+    message &&
+    (message.stream === '!ticker@arr' || message.stream === '!miniTicker@arr')
+  ) {
     return true;
   }
   return false;
@@ -112,20 +115,18 @@ function isKlineMsg(message: BianceWsMsg) {
 export async function handleMsg(message: BianceWsMsg, clients: any[]) {
   broadCastMsg(message, clients);
 
-  if (!(new Date().getSeconds() % 10 === 0)) {
-    return;
-  }
-
+  // 每小时更新一次Ticker
   if (
     isTickerMsg(message) &&
     new Date().getMinutes() === 0 &&
-    new Date().getSeconds() < 5
+    new Date().getSeconds() < 10
   ) {
     handleTickers(message);
   }
 
-  if (isKlineMsg(message)) {
-    handleKline(message);
+  //  每10秒更新K线数据
+  if (new Date().getSeconds() % 10 === 0 && isKlineMsg(message)) {
+    handleKlines(message);
   }
 }
 

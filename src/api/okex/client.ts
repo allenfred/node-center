@@ -226,20 +226,18 @@ function isTickerMsg(message: any) {
 export async function handleMsg(message: OkxWsMsg, clients?: any[]) {
   broadCastMsg(message, clients);
 
-  if (!(new Date().getSeconds() % 10 === 0)) {
-    return;
-  }
-
-  if (isKlineMsg(message)) {
-    handleKlines(message);
-  }
-
+  //  每小时更新一次Ticker
   if (
     isTickerMsg(message) &&
     new Date().getMinutes() === 0 &&
-    new Date().getSeconds() < 5
+    new Date().getSeconds() < 10
   ) {
     handleTickers(message);
+  }
+
+  //  每10秒更新K线数据
+  if (new Date().getSeconds() % 10 === 0 && isKlineMsg(message)) {
+    handleKlines(message);
   }
 }
 
