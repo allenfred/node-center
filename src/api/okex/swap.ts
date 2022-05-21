@@ -37,7 +37,8 @@ export async function initInstruments(): Promise<Instrument[]> {
   const invalidInsts = _.differenceBy(oldInsts, instruments, 'instrument_id');
 
   if (invalidInsts.length) {
-    logger.info(invalidInsts);
+    logger.info(_.map(invalidInsts, 'instrument_id'));
+
     await InstrumentInfoDao.deleteByIds(
       _.map(invalidInsts, 'instrument_id'),
     ).then((result: any) => {
@@ -47,26 +48,25 @@ export async function initInstruments(): Promise<Instrument[]> {
         );
       }
     });
-  }
 
-  // ****** 处理下架合约 ticker ******
-  const oldTickers: any = await InstrumentTickerDao.find({
-    exchange: Exchange.Okex,
-  });
+    const oldTickers: any = await InstrumentTickerDao.find({
+      exchange: Exchange.Okex,
+    });
 
-  const invalidTickers = _.differenceBy(
-    oldTickers,
-    instruments,
-    'instrument_id',
-  );
-
-  await InstrumentTickerDao.deleteByIds(
-    _.map(invalidTickers, 'instrument_id'),
-  ).then((result: any) => {
-    logger.info(
-      `Okx[永续合约] - 删除下架合约 Tickers，共: ${result.ok} 条 ...`,
+    const invalidTickers = _.differenceBy(
+      oldTickers,
+      instruments,
+      'instrument_id',
     );
-  });
+
+    await InstrumentTickerDao.deleteByIds(
+      _.map(invalidTickers, 'instrument_id'),
+    ).then((result: any) => {
+      logger.info(
+        `Okx[永续合约] - 删除下架合约 Tickers，共: ${result.deletedCount} 条 ...`,
+      );
+    });
+  }
   // *************************
 
   //更新永续合约信息
