@@ -23,7 +23,7 @@ const client = new Spot('', '', {
 
 interface MiniTicker {
   e: string; // 事件类型 24hrMiniTicker
-  E: number; // 事件时间(毫秒) 123456789
+  E: string; // 事件时间(毫秒) 123456789
   s: string; // 交易对  BTCUSDT
   c: string; // 最新成交价格
   o: string; // 24小时前开始第一笔成交价格
@@ -58,12 +58,14 @@ export async function handleTickers(message: BianceWsMsg) {
   await InstrumentTickerDao.upsert(
     message.data
       .filter((i) => i.s.indexOf('USDT') !== -1)
-      .map((i: Ticker) => {
+      .map((i: MiniTicker) => {
         return {
           instrument_id: i.s, // symbol
           last: i.c, // 最新成交价格
-          chg_24h: i.p, // 24小时价格变化
-          chg_rate_24h: i.P, // 24小时价格变化(百分比)
+          // chg_24h: i.p, // 24小时价格变化
+          chg_24h: +i.c - +i.o, // 24小时价格变化
+          // chg_rate_24h: i.P, // 24小时价格变化(百分比)
+          chg_rate_24h: (((+i.c - +i.o) * 100) / +i.o).toFixed(4), // 24小时价格变化(百分比)
           high_24h: i.h, // 24小时最高价
           low_24h: i.l, // 24小时最低价
           volume_24h: i.q, // 24小时成交量（按张数统计）
