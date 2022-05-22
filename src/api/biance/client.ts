@@ -117,10 +117,10 @@ function isKlineMsg(message: BianceWsMsg) {
 export async function handleMsg(message: BianceWsMsg, clients: any[]) {
   broadCastMsg(message, clients);
 
-  // 每小时更新一次Ticker
+  // 每15min更新一次Ticker
   if (
     isTickerMsg(message) &&
-    new Date().getMinutes() === 0 &&
+    new Date().getMinutes() % 15 === 0 &&
     new Date().getSeconds() < 10
   ) {
     handleTickers(message);
