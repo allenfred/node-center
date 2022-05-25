@@ -1,5 +1,5 @@
 import connectMongo from './database/connection';
-import { InstrumentInfo, UsdtSwapKline, BtcSwapKline } from './database/models';
+import { InstrumentInfo, UsdtSwapKline } from './database/models';
 import * as _ from 'lodash';
 
 (async function main() {
@@ -22,46 +22,46 @@ import * as _ from 'lodash';
   //   console.log(res);
   // });
 
-  let flag = true;
-  const limit = 1000;
-  while (flag) {
-    const klines = await BtcSwapKline.find(
-      {},
-      '_id instrument_id timestamp open high low close volume exchange granularity underlying_index',
-      {
-        limit,
-        sort: { timestamp: -1 },
-      },
-    ).exec();
+  // let flag = true;
+  // const limit = 1000;
+  // while (flag) {
+  //   const klines = await BtcSwapKline.find(
+  //     {},
+  //     '_id instrument_id timestamp open high low close volume exchange granularity underlying_index',
+  //     {
+  //       limit,
+  //       sort: { timestamp: -1 },
+  //     },
+  //   ).exec();
 
-    if (klines.length < limit) {
-      flag = false;
-    }
+  //   if (klines.length < limit) {
+  //     flag = false;
+  //   }
 
-    await UsdtSwapKline.insertMany(
-      klines.map((k) => {
-        return _.omit(k, ['_id']);
-      }),
-    ).then((res) => {
-      if (res.length !== klines.length) {
-        flag = false;
-        console.log('insertMany wrong!!!');
-      } else {
-        console.log('insertMany success!!!');
-      }
-    });
+  //   await UsdtSwapKline.insertMany(
+  //     klines.map((k) => {
+  //       return _.omit(k, ['_id']);
+  //     }),
+  //   ).then((res) => {
+  //     if (res.length !== klines.length) {
+  //       flag = false;
+  //       console.log('insertMany wrong!!!');
+  //     } else {
+  //       console.log('insertMany success!!!');
+  //     }
+  //   });
 
-    await BtcSwapKline.deleteMany({
-      _id: { $in: _.map(klines, '_id') },
-    }).then((res) => {
-      if (res.deletedCount !== klines.length) {
-        console.log('deleteMany wrong!!!');
-        flag = false;
-      } else {
-        console.log('deleteMany success!!!');
-      }
-    });
-  }
+  //   await BtcSwapKline.deleteMany({
+  //     _id: { $in: _.map(klines, '_id') },
+  //   }).then((res) => {
+  //     if (res.deletedCount !== klines.length) {
+  //       console.log('deleteMany wrong!!!');
+  //       flag = false;
+  //     } else {
+  //       console.log('deleteMany success!!!');
+  //     }
+  //   });
+  // }
 
   // const klines = await BtcSwapKline.find(
   //   { instrument_id: 'BTC-USDT-SWAP' },
