@@ -38,7 +38,7 @@ const startJob = async () => {
       await commonAPI.getKlines({
         exchange: Exchange.Biance,
         instId,
-        count: 500,
+        count: 1500,
       });
     }
   }
