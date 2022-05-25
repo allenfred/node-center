@@ -63,8 +63,9 @@ async function getKlinesWithLimited(
             klines = data.map((candle: OkxKline) => {
               return {
                 instrument_id: option.instrument_id,
-                underlying_index: option.instrument_id.split('-')[0],
-                quote_currency: option.instrument_id.split('-')[1],
+                underlying_index: option.instrument_id.endsWith('USDT')
+                  ? option.instrument_id.replace('USDT', '')
+                  : option.instrument_id.split('-')[0],
                 timestamp: new Date(+candle[0]),
                 open: +candle[1],
                 high: +candle[2],
@@ -81,7 +82,6 @@ async function getKlinesWithLimited(
               return {
                 instrument_id: option.instrument_id,
                 underlying_index: option.instrument_id.replace('USDT', ''),
-                quote_currency: 'USDT',
                 timestamp: new Date(+kline[0]),
                 open: +kline[1],
                 high: +kline[2],
@@ -142,8 +142,8 @@ async function getBianceKlines(
           klines = data.map((candle: BianceKline) => {
             return {
               instrument_id,
-              underlying_index: instrument_id.split('-')[0],
-              quote_currency: instrument_id.split('-')[1],
+              underlying_index: instrument_id.replace('USDT', ''),
+              quote_currency: 'USDT',
               timestamp: new Date(+candle[0]),
               open: +candle[1],
               high: +candle[2],
@@ -200,7 +200,7 @@ async function getOkexKlines(
             return {
               instrument_id,
               underlying_index: instrument_id.split('-')[0],
-              quote_currency: instrument_id.split('-')[1],
+              quote_currency: 'USDT',
               timestamp: new Date(+candle[0]),
               open: +candle[1],
               high: +candle[2],

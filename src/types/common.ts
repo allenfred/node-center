@@ -11,7 +11,7 @@ export type currency_volume = string;
 export interface Instrument {
   instrument_id: string; // 合约ID，如BTC-USD-190322
   underlying_index: string; // 交易货币币种，如：BTC-USD-190322中的BTC
-  quote_currency: string; // 计价货币币种，如：BTC-USD-190322中的USD
+  quote_currency?: string; // 计价货币币种，如：BTC-USD-190322中的USD
   tick_size: string; // 下单价格精度 0.01
   contract_val: string; // 合约面值 100
   listing: string; // 创建时间 '2019-09-06'

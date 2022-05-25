@@ -1,5 +1,5 @@
 import * as bluebird from 'bluebird';
-import { BtcSwapKline, UsdtSwapKline } from '../database/models';
+import { UsdtSwapKline } from '../database/models';
 import { InstKline } from '../types';
 import logger from '../logger';
 import * as _ from 'lodash';
@@ -16,17 +16,16 @@ async function upsert(klines: InstKline[]) {
         granularity: kline.granularity,
         exchange: kline.exchange,
       };
-      const Model = getModel(kline.instrument_id);
 
-      await Model.updateOne(uniqueCondition, kline, { upsert: true }).catch(
-        (err: any) => {
-          logger.error(
-            `[UpdateKline:${kline.exchange}/${kline.instrument_id}/${
-              kline.granularity
-            }] CatchError: ${err.stack.substring(0, 100)}`,
-          );
-        },
-      );
+      await UsdtSwapKline.updateOne(uniqueCondition, kline, {
+        upsert: true,
+      }).catch((err: any) => {
+        logger.error(
+          `[UpdateKline:${kline.exchange}/${kline.instrument_id}/${
+            kline.granularity
+          }] CatchError: ${err.stack.substring(0, 100)}`,
+        );
+      });
     },
     { concurrency: 5 },
   );
@@ -42,11 +41,10 @@ async function upsertMany(opts: any, klines: InstKline[]) {
     return upsert(klines);
   }
 
-  const Model = getModel(opts.instrument_id);
   const filter = Object.assign(opts, {
     timestamp: { $in: _.map(klines, 'timestamp') },
   });
-  const data = await Model.find(filter, 'timestamp', {
+  const data = await UsdtSwapKline.find(filter, 'timestamp', {
     limit: klines.length,
     sort: { timestamp: 1 },
   }).exec();
@@ -62,7 +60,10 @@ async function upsertMany(opts: any, klines: InstKline[]) {
 
   if (filteredKlines.length) {
     // return upsert(filteredKlines);
-    return Model.insertMany(filteredKlines, { ordered: false, lean: true });
+    return UsdtSwapKline.insertMany(filteredKlines, {
+      ordered: false,
+      lean: true,
+    });
   } else {
     logger.info(
       `[${opts.instrument_id}/${klines[0].granularity}] 数据已经ready, 无需更新...`,
@@ -80,13 +81,12 @@ async function reinsertMany(opts: any, klines: InstKline[]) {
     return upsert(klines);
   }
 
-  const Model = getModel(opts.instrument_id);
   const filter = Object.assign(opts, {
     timestamp: { $in: _.map(klines, 'timestamp') },
   });
 
-  await Model.deleteMany(filter);
-  return Model.insertMany(klines, { ordered: false, lean: true }).catch(
+  await UsdtSwapKline.deleteMany(filter);
+  return UsdtSwapKline.insertMany(klines, { ordered: false, lean: true }).catch(
     (err: any) => {
       logger.error(err.message);
     },
@@ -102,21 +102,12 @@ async function upsertOne(kline: InstKline) {
     granularity: kline.granularity,
     exchange: kline.exchange,
   };
-  const Model = getModel(kline.instrument_id);
 
-  await Model.updateOne(uniqueCondition, kline, { upsert: true }).catch(
+  await UsdtSwapKline.updateOne(uniqueCondition, kline, { upsert: true }).catch(
     (err: any) => {
       logger.error(`update kline `, err);
     },
   );
-}
-
-function getModel(instId: any) {
-  if (instId.includes('BTC')) {
-    return BtcSwapKline;
-  } else {
-    return UsdtSwapKline;
-  }
 }
 
 const InstrumentKlineDao = {
