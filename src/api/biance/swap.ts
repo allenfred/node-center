@@ -83,7 +83,7 @@ export async function initInstruments(): Promise<Instrument[]> {
 // For Others (15min 1h 4h 1d)
 function getReqOptions(instId: string, opts: HistoryKlinesJobsOpts = {}) {
   let reqOptions = [];
-  let count = 1000;
+  let count = 1500;
 
   if (opts && opts.count > 0) {
     count = opts.count;
@@ -202,7 +202,7 @@ export async function getHistoryKlines(
 ): Promise<void> {
   let opts = options || {};
   if (!opts.count) {
-    opts = Object.assign({}, opts, { count: 1000 });
+    opts = Object.assign({}, opts, { count: 1500 });
   }
 
   const delayMillseconds = opts && opts.delay ? opts.delay : 100;

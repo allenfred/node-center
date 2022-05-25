@@ -344,6 +344,7 @@ async function getKlines(params: BianceKlineApiOpts) {
   if (status !== 1) {
     logger.error('[Biance] 接口受限 status code:' + status);
   }
+
   return client
     .publicRequest('GET', '/fapi/v1/klines', params)
     .then((res: { data: Array<BianceKline> }) => {
@@ -367,7 +368,6 @@ async function getKlines(params: BianceKlineApiOpts) {
       if (e.message.indexOf('429') > -1) {
         status = 429;
       }
-
       return [];
     });
 }

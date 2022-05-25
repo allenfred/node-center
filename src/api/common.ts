@@ -111,6 +111,9 @@ async function getKlinesWithLimited(
             }] K线 Done.`,
           );
           return Promise.resolve();
+        })
+        .catch((err) => {
+          logger.error(err);
         });
     },
     { concurrency: 5 },
@@ -164,7 +167,7 @@ async function getBianceKlines(
         })
         .then(() => {
           logger.info(
-            `[${exchange}/${instrument_id}/${
+            `[Biance/${instrument_id}/${
               KlineInterval[+granularity]
             }] K线 Done.`,
           );
@@ -221,7 +224,7 @@ async function getOkexKlines(
         })
         .then(() => {
           logger.info(
-            `[${exchange}/${instrument_id}/${
+            `[Biance/${instrument_id}/${
               KlineInterval[+granularity]
             }] K线 Done.`,
           );
@@ -232,63 +235,7 @@ async function getOkexKlines(
   );
 }
 
-async function getOkxKlinesWithSleep(
-  options: Array<InstReqOptions>,
-): Promise<any> {
-  //设置系统限速规则 (biance官方API 限速规则：2400次/60s)
-  //设置系统限速规则 (Okex官方API 限速规则：20次/2s)
-
-  return bluebird
-    .each(options, (option: any, i: number) => {
-      const { exchange } = option;
-      return bluebird
-        .delay(100)
-        .then(() => {
-          return Okex.getKlines({
-            instrumentId: option.instrument_id,
-            granularity: option.granularity,
-            start: new Date(option.start).valueOf(),
-            end: new Date(option.end).valueOf(),
-          });
-        })
-        .then((data: any) => {
-          const klines = data.map((candle: OkxKline) => {
-            return {
-              instrument_id: option.instrument_id,
-              underlying_index: option.instrument_id.split('-')[0],
-              quote_currency: option.instrument_id.split('-')[1],
-              timestamp: new Date(+candle[0]),
-              open: +candle[1],
-              high: +candle[2],
-              low: +candle[3],
-              close: +candle[4],
-              volume: +candle[5],
-              currency_volume: +candle[6],
-              granularity: option.granularity,
-              exchange: Exchange.Okex,
-            };
-          });
-
-          return InstrumentKlineDao.upsertMany(
-            {
-              exchange,
-              instrument_id: option.instrument_id,
-              granularity: option.granularity,
-            },
-            klines,
-          );
-        })
-        .then(() => {});
-    })
-    .then(() => {
-      logger.info('Done!');
-    });
-}
-
-// 获取最近100条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
-// For BTC (15min 30min 1h 2h 4h 6h 12h 1d)
-// For Others (15min 1h 4h 1d)
-async function getKlines(opts: {
+function getKlinesReqParams(opts: {
   exchange: Exchange;
   instId: any;
   start?: any;
@@ -303,7 +250,7 @@ async function getKlines(opts: {
     count = opts.count;
   }
 
-  const { instId } = opts;
+  const { instId, exchange } = opts;
 
   reqOptions.push(
     Object.assign(
@@ -403,8 +350,24 @@ async function getKlines(opts: {
     );
   }
 
+  return reqOptions.map((opt) => {
+    return Object.assign(opt, { exchange });
+  });
+}
+
+// 获取最近100条k线数据 (15min 30min 1h 2h 4h 6h 12h 1d)
+// For BTC (15min 30min 1h 2h 4h 6h 12h 1d)
+// For Others (15min 1h 4h 1d)
+async function getKlines(opts: {
+  exchange: Exchange;
+  instId: any;
+  start?: any;
+  end?: any;
+  count?: number;
+  days?: number;
+}) {
   return await getKlinesWithLimited(
-    reqOptions.map((opt: any) => {
+    getKlinesReqParams(opts).map((opt: any) => {
       return Object.assign({}, opt, { exchange: opts.exchange });
     }),
   );
@@ -412,8 +375,8 @@ async function getKlines(opts: {
 
 export {
   getKlinesWithLimited,
-  getOkxKlinesWithSleep,
   getKlines,
   getBianceKlines,
   getOkexKlines,
+  getKlinesReqParams,
 };

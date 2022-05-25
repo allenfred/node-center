@@ -87,8 +87,8 @@ async function reinsertMany(opts: any, klines: InstKline[]) {
 
   await Model.deleteMany(filter);
   return Model.insertMany(klines, { ordered: false, lean: true }).catch(
-    (error: any) => {
-      logger.error(error);
+    (err: any) => {
+      logger.error(err.message);
     },
   );
 }

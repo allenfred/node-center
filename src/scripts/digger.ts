@@ -1,6 +1,7 @@
 import connectMongo from '../database/connection';
 import * as commonAPI from '../api/common';
 import { getExchangeInfo } from '../api/biance/client';
+import { InstrumentKlineDao } from '../dao';
 import logger from '../logger';
 import { Exchange } from '../types';
 import { getMemoryUsage } from '../util';
@@ -9,7 +10,7 @@ const myArgs = process.argv.slice(2);
 
 const startJob = async () => {
   if (!myArgs.length) {
-    logger.info('缺少参数', { a: 1 });
+    logger.info('缺少参数');
     // logger.info('缺少参数');
     return;
   }
@@ -35,11 +36,13 @@ const startJob = async () => {
     }
 
     if (instId.endsWith('USDT')) {
-      await commonAPI.getKlines({
-        exchange: Exchange.Biance,
-        instId,
-        count: 1500,
-      });
+      await commonAPI.getBianceKlines(
+        commonAPI.getKlinesReqParams({
+          exchange: Exchange.Biance,
+          instId,
+          count: 1500,
+        }),
+      );
     }
   }
 
