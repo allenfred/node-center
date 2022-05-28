@@ -20,6 +20,7 @@ async function setupServer() {
   wsServer.on('connection', function connection(ws: any) {
     ws.channels = [];
     clients.push(ws);
+    logger.info('someone connected.');
 
     ws.on('message', function incoming(message: any) {
       logger.info(`received: ${message}`);
