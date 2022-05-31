@@ -15,6 +15,7 @@ import {
 } from '../../types';
 import logger from '../../logger';
 import { InstrumentTickerDao, InstrumentKlineDao } from '../../dao';
+import redisClient from '../../redis/client';
 
 const client = new Spot('', '', {
   baseURL: 'https://fapi.binance.com',
@@ -133,85 +134,79 @@ export async function handleMsg(message: BianceWsMsg, clients: any[]) {
 }
 
 export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
-  if (!clients.length) {
-    return;
-  }
-
   function getSubChannel(interval: string, instId: string) {
     return `biance:candle${KlineInterval['candle' + interval]}:${instId}`;
   }
 
-  clients.map((client: any) => {
-    // ticker
-    if (
-      new Date().getSeconds() % 2 === 0 &&
-      (msg.stream === '!ticker@arr' || msg.stream === '!miniTicker@arr') &&
-      client.channels.includes('tickers')
-    ) {
-      client.send(
-        JSON.stringify({
-          channel: 'tickers',
-          data: msg.data
-            .filter((i) => i.s.endsWith('USDT'))
-            .map((i: Ticker) => {
-              return {
-                instrument_id: i.s, // symbol
-                last: i.c, // 最新成交价格
-                chg_24h: +i.c - +i.o, // 24小时价格变化
-                chg_rate_24h: (((+i.c - +i.o) * 100) / +i.o).toFixed(4), // 24小时价格变化(百分比)
-                volume_24h: i.q, // 24小时成交量（按张数统计）
-                exchange: Exchange.Biance,
-              };
-            }),
+  if (msg.stream === '!ticker@arr' || msg.stream === '!miniTicker@arr') {
+    const pubMsg = JSON.stringify({
+      channel: 'tickers',
+      data: msg.data
+        .filter((i) => i.s.endsWith('USDT'))
+        .map((i: Ticker) => {
+          // [exchange, instrument_id, last, chg_24h, chg_rate_24h, volume_24h]
+          return [
+            Exchange.Biance,
+            i.s,
+            i.c,
+            +i.c - +i.o,
+            (((+i.c - +i.o) * 100) / +i.o).toFixed(4),
+            i.q,
+          ];
+          // return {
+          //   instrument_id: i.s, // symbol
+          //   last: i.c, // 最新成交价格
+          //   chg_24h: +i.c - +i.o, // 24小时价格变化
+          //   chg_rate_24h: (((+i.c - +i.o) * 100) / +i.o).toFixed(4), // 24小时价格变化(百分比)
+          //   volume_24h: i.q, // 24小时成交量（按张数统计）
+          //   exchange: Exchange.Biance,
+          // };
         }),
-      );
-    }
+    });
 
-    // kline
-    /**
-     * {
-        "e": "kline",     // 事件类型
-        "E": 123456789,   // 事件时间
-        "s": "BNBUSDT",    // 交易对
-        "k": {
-          "t": 123400000, // 这根K线的起始时间
-          "T": 123460000, // 这根K线的结束时间
-          "s": "BNBUSDT",  // 交易对
-          "i": "1m",      // K线间隔
-          "f": 100,       // 这根K线期间第一笔成交ID
-          "L": 200,       // 这根K线期间末一笔成交ID
-          "o": "0.0010",  // 开盘价
-          "c": "0.0020",  // 收盘价
-          "h": "0.0025",  // 最高价
-          "l": "0.0015",  // 最低价
-          "v": "1000",    // 这根K线期间成交量
-          "n": 100,       // 这根K线期间成交笔数
-          "x": false,     // 这根K线是否完结(是否已经开始下一根K线)
-          "q": "1.0000",  // 这根K线期间成交额
-          "V": "500",     // 主动买入的成交量
-          "Q": "0.500",   // 主动买入的成交额
-          "B": "123456"   // 忽略此参数
-        }
-      }
-    */
-    if (msg.stream.indexOf('kline') > -1) {
-      const strs = msg.stream.split('_');
-      const interval = strs[1]; // 1h
-      const instId = msg.data['s'];
-      const subChannel = getSubChannel(interval, instId.toUpperCase());
+    redisClient.publish('tickers', pubMsg);
+  }
 
-      if (client.channels.includes(subChannel)) {
-        const k = msg.data['k'];
-
-        client.send(
-          JSON.stringify({
-            channel: subChannel,
-            data: [k.t, k.o, k.h, k.l, k.c, k.v, k.q] as WsFormatKline,
-          }),
-        );
+  // kline msg body
+  /**
+   * {
+      "e": "kline",     // 事件类型
+      "E": 123456789,   // 事件时间
+      "s": "BNBUSDT",    // 交易对
+      "k": {
+        "t": 123400000, // 这根K线的起始时间
+        "T": 123460000, // 这根K线的结束时间
+        "s": "BNBUSDT",  // 交易对
+        "i": "1m",      // K线间隔
+        "f": 100,       // 这根K线期间第一笔成交ID
+        "L": 200,       // 这根K线期间末一笔成交ID
+        "o": "0.0010",  // 开盘价
+        "c": "0.0020",  // 收盘价
+        "h": "0.0025",  // 最高价
+        "l": "0.0015",  // 最低价
+        "v": "1000",    // 这根K线期间成交量
+        "n": 100,       // 这根K线期间成交笔数
+        "x": false,     // 这根K线是否完结(是否已经开始下一根K线)
+        "q": "1.0000",  // 这根K线期间成交额
+        "V": "500",     // 主动买入的成交量
+        "Q": "0.500",   // 主动买入的成交额
+        "B": "123456"   // 忽略此参数
       }
     }
-  });
+  */
+  if (msg.stream.indexOf('kline') > -1) {
+    const strs = msg.stream.split('_');
+    const interval = strs[1]; // 1h
+    const instId = msg.data['s'];
+    const subChannel = getSubChannel(interval, instId.toUpperCase());
+    const k = msg.data['k'];
+    const pubMsg = JSON.stringify({
+      channel: subChannel,
+      data: [k.t, k.o, k.h, k.l, k.c, k.v, k.q] as WsFormatKline,
+    });
+
+    redisClient.publish('klines', pubMsg);
+  }
 }
 
 async function setupWsClient(clients: any) {

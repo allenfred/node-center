@@ -20,6 +20,7 @@ import {
   InstrumentTickerDao,
   InstrumentKlineDao,
 } from '../../dao';
+import redisClient from '../../redis/client';
 
 const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
 
@@ -242,56 +243,47 @@ export async function handleMsg(message: OkxWsMsg, clients?: any[]) {
 }
 
 export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
-  if (!clients.length) {
-    return;
-  }
-
   function getChannelIndex(arg: any) {
     return `okex:candle${KlineInterval[arg.channel.toLowerCase()]}:${
       arg.instId
     }`;
   }
 
-  clients.map((client: any) => {
-    if (
-      new Date().getSeconds() % 2 === 0 &&
-      msg.arg.channel === 'tickers' &&
-      client.channels.includes('tickers')
-    ) {
-      client.send(
-        JSON.stringify({
-          channel: 'tickers',
-          data: msg.data
-            // .filter((i) => i.instId.indexOf('USDT') !== -1)
-            .map((i) => {
-              return {
-                instrument_id: i.instId,
-                last: i.last, // 最新成交价格
-                chg_24h: i.last - i.open24h, // 24小时价格变化
-                chg_rate_24h: (
-                  ((i.last - i.open24h) * 100) /
-                  i.open24h
-                ).toFixed(4), // 24小时价格变化(百分比)
-                volume_24h: i.vol24h, // 24小时成交量（按张数统计）
-                exchange: Exchange.Okex,
-              };
-            }),
-        }),
-      );
-    }
+  if (msg.arg.channel === 'tickers') {
+    const pubMsg = JSON.stringify({
+      channel: 'tickers',
+      data: msg.data.map((i) => {
+        // [exchange, instrument_id, last, chg_24h, chg_rate_24h, volume_24h]
+        return [
+          Exchange.Okex,
+          i.instId,
+          i.last,
+          i.last - i.open24h,
+          (((i.last - i.open24h) * 100) / i.open24h).toFixed(4),
+          i.vol24h,
+        ];
+        // return {
+        //   instrument_id: i.instId,
+        //   last: i.last, // 最新成交价格
+        //   chg_24h: i.last - i.open24h, // 24小时价格变化
+        //   chg_rate_24h: (((i.last - i.open24h) * 100) / i.open24h).toFixed(4), // 24小时价格变化(百分比)
+        //   volume_24h: i.vol24h, // 24小时成交量（按张数统计）
+        //   exchange: Exchange.Okex,
+        // };
+      }),
+    });
 
-    if (
-      msg.arg.channel.includes('candle') &&
-      client.channels.includes(getChannelIndex(msg.arg))
-    ) {
-      client.send(
-        JSON.stringify({
-          channel: getChannelIndex(msg.arg),
-          data: msg.data[0] as WsFormatKline,
-        }),
-      );
-    }
-  });
+    redisClient.publish('tickers', pubMsg);
+  }
+
+  if (msg.arg.channel.includes('candle')) {
+    const pubMsg = JSON.stringify({
+      channel: getChannelIndex(msg.arg),
+      data: msg.data[0] as WsFormatKline,
+    });
+
+    redisClient.publish('klines', pubMsg);
+  }
 }
 
 async function setupWsClient(clients: any[]) {
