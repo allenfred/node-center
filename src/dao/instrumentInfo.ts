@@ -6,30 +6,26 @@ async function upsert(instruments: Instrument[]): Promise<any> {
   return bluebird.map(instruments, async (item: Instrument) => {
     //find unique candle by underlying_index & quote_currency & alias.
     const uniqueCondition = {
-      underlying_index: item.underlying_index,
-      quote_currency: item.quote_currency,
-      alias: item.alias,
+      instrument_id: item.instrument_id,
+      exchange: item.exchange,
     };
-    let result: any;
 
-    const one = await InstrumentInfo.findOne(uniqueCondition);
-    if (one) {
-      result = await InstrumentInfo.updateOne(uniqueCondition, item);
-    } else {
-      result = await InstrumentInfo.create(item);
-    }
-
-    return result;
+    return InstrumentInfo.updateOne(uniqueCondition, item, { upsert: true });
   });
 }
 
-async function findAll(): Promise<any> {
-  return await InstrumentInfo.find({});
+async function find(opts?: any): Promise<any> {
+  return await InstrumentInfo.find(opts);
+}
+
+async function deleteByIds(instIds: string[]) {
+  return await InstrumentInfo.deleteMany({ instrument_id: { $in: instIds } });
 }
 
 const InstrumentInfoDao = {
   upsert,
-  findAll,
+  find,
+  deleteByIds,
 };
 
 export { InstrumentInfoDao };

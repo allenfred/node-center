@@ -1,5 +1,3 @@
 export * from './instrumentInfo';
-export * from './instrumentCandle';
+export * from './instrumentKline';
 export * from './instrumentTicker';
-export * from './btcUSDTCandle';
-export * from './btcSwapCandle';
