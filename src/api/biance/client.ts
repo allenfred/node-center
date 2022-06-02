@@ -211,7 +211,7 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
 
 async function setupWsClient(clients: any) {
   // const intervals = ['15m', '1h', '4h'];
-  const intervals = ['1h', '4h'];
+  const intervals = ['15m', '1h'];
 
   // support combined stream, e.g.
   const instruments: Instrument[] = await InstrumentTickerDao.findByTopVolume({
