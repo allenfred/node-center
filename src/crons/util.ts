@@ -56,19 +56,34 @@ async function execJob(granularity: number) {
     count = getCountByHoursAgo(24, granularity);
   }
 
-  await Okex.getHistoryKlines(
-    validInsts.filter((i: any) => i.exchange === Exchange.Okex),
-    { count, includeInterval: [granularity] },
-  );
+  await Promise.all([
+    Okex.getHistoryKlines(
+      validInsts.filter((i: any) => i.exchange === Exchange.Okex),
+      { count, includeInterval: [granularity] },
+    ),
+    Biance.getHistoryKlines(
+      validInsts.filter((i: any) => i.exchange === Exchange.Biance),
+      {
+        count,
+        delay: 500,
+        includeInterval: [granularity],
+      },
+    ),
+  ]);
 
-  await Biance.getHistoryKlines(
-    validInsts.filter((i: any) => i.exchange === Exchange.Biance),
-    {
-      count,
-      delay: 1000,
-      includeInterval: [granularity],
-    },
-  );
+  // await Okex.getHistoryKlines(
+  //   validInsts.filter((i: any) => i.exchange === Exchange.Okex),
+  //   { count, includeInterval: [granularity] },
+  // );
+
+  // await Biance.getHistoryKlines(
+  //   validInsts.filter((i: any) => i.exchange === Exchange.Biance),
+  //   {
+  //     count,
+  //     delay: 1000,
+  //     includeInterval: [granularity],
+  //   },
+  // );
 }
 
 export { Job_Granularity, execJob };

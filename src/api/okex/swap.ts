@@ -173,7 +173,7 @@ export async function getHistoryKlines(
 
   return bluebird.each(instruments, ({ instrument_id }: any) => {
     return bluebird
-      .delay(1000)
+      .delay(500)
       .then(() => {
         return getOkexKlines(
           getReqOptions(instrument_id, opts).map((opt: any) => {
