@@ -23,7 +23,7 @@ export const startJob = async () => {
   }
 
   // hourly
-  if (minuteNow === 5) {
+  if (minuteNow === 0) {
     await execJob(Job_Granularity.OneHour);
   }
 
