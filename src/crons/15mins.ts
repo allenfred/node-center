@@ -20,6 +20,7 @@ export const startJob = async () => {
   // 15 minutes. (exclude: xx:00)
   if (minuteNow !== 0 && minuteNow % 15 === 0) {
     await execJob(Job_Granularity.FifteenMins);
+    await execJob(Job_Granularity.OneHour);
   }
 
   // hourly
