@@ -24,6 +24,8 @@ export const startJob = async () => {
 
   // hourly
   if (minuteNow === 0) {
+    await Okex.initInstruments();
+    await Biance.initInstruments();
     await execJob(Job_Granularity.OneHour);
   }
 
