@@ -46,11 +46,11 @@ async function execJob(granularity: number) {
   const validInsts = sortBy(insts.filter(customFilter), ['instrument_id']);
 
   // 最近 4 条K线数据
-  let count = 4;
+  let count = 20;
 
-  if (minuteNow === 0 && granularity === Job_Granularity.FifteenMins) {
-    count = 8;
-  }
+  // if (minuteNow === 0 && granularity === Job_Granularity.FifteenMins) {
+  //   count = 8;
+  // }
 
   // 每12h更新过去24h全量数据 (15mins, 1h)
   if (

@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 // HK server
-const hk_host = '8.210.170.98';
+// const hk_host = '8.210.170.98';
 // SH server
 const sh_host = '121.4.15.211';
-// const host = sh_host;
-const host = hk_host;
-const port = '27017';
+const host = sh_host;
+const port = '27011';
 const db = 'crypto';
 const username = 'dev';
 const password = 'qazwsx123';
