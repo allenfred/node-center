@@ -71,7 +71,7 @@ export async function initInstruments(): Promise<Instrument[]> {
   //更新永续合约信息
   await InstrumentInfoDao.upsert(instruments);
   let data: any = await InstrumentInfoDao.find({ exchange: Exchange.Biance });
-  data = data.filter((i: Instrument) => i.klines !== 1);
+  // data = data.filter((i: Instrument) => i.klines !== 1);
 
   logger.info(`Biance[永续合约] - 待初始化K线的合约数量 ${data.length} ...`);
 

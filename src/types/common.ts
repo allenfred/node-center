@@ -94,6 +94,8 @@ export interface HistoryKlinesJobsOpts {
   start?: number;
   end?: number;
   delay?: number;
+  includeInst?: string[];
+  excludeInst?: string[];
   includeInterval?: number[];
   excludeInterval?: number[];
 }

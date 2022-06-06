@@ -14,13 +14,13 @@ import * as _ from 'lodash';
   //   console.log(res);
   // });
 
-  // await InstrumentInfo.updateMany(
-  //   { exchange: 'biance' },
-  //   { $set: { klines: 0 } },
-  //   // { multi: true },
-  // ).then((res) => {
-  //   console.log(res);
-  // });
+  await InstrumentInfo.updateMany(
+    {},
+    { $set: { klines: 0 } },
+    // { multi: true },
+  ).then((res) => {
+    console.log(res);
+  });
 
   // let flag = true;
   // const limit = 1000;

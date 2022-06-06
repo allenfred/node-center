@@ -76,7 +76,7 @@ export async function initInstruments(): Promise<Instrument[]> {
     }),
   );
   let data: any = await InstrumentInfoDao.find({ exchange: Exchange.Okex });
-  data = data.filter((i: Instrument) => i.klines !== 1);
+  // data = data.filter((i: Instrument) => i.klines !== 1);
 
   logger.info(`Okex[永续合约] - 待初始化K线的合约数量 ${data.length} ...`);
 
