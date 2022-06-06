@@ -30,29 +30,29 @@ export const startJob = async () => {
   }
 
   // 2hourly
-  if (hourNow % 2 === 0 && minuteNow === 5) {
+  if (hourNow % 2 === 0 && minuteNow === 0) {
     await execJob(Job_Granularity.TwoHour);
   }
 
   // 4hourly
-  if (hourNow % 4 === 0 && minuteNow === 5) {
+  if (hourNow % 4 === 0 && minuteNow === 0) {
     await execJob(Job_Granularity.FourHour);
   }
 
   // 6hourly
-  if (hourNow % 6 === 0 && minuteNow === 5) {
+  if (hourNow % 6 === 0 && minuteNow === 0) {
     await execJob(Job_Granularity.SixHour);
   }
 
   // 12hourly
-  if (hourNow % 12 === 0 && minuteNow === 5) {
+  if (hourNow % 12 === 0 && minuteNow === 0) {
     await Okex.initInstruments();
     await Biance.initInstruments();
     await execJob(Job_Granularity.TwelveHour);
   }
 
-  // At 00:05.
-  if (hourNow === 0 && minuteNow === 5) {
+  // At 00:00.
+  if (hourNow === 0 && minuteNow === 0) {
     await execJob(Job_Granularity.OneDay);
   }
 
