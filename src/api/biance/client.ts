@@ -216,7 +216,7 @@ async function setupWsClient(clients: any) {
   // support combined stream, e.g.
   const instruments: Instrument[] = await InstrumentTickerDao.findByTopVolume({
     exchange: Exchange.Biance,
-    limit: 50,
+    limit: 80,
   });
   const klineStreams = [];
   instruments
