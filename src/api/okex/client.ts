@@ -273,7 +273,11 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
       }),
     });
 
+    let wm = new WeakMap();
+    let b = new Object();
+    wm.set(b, pubMsg);
     redisClient.publish('tickers', pubMsg);
+    b = null;
   }
 
   if (msg.arg.channel.includes('candle')) {
@@ -282,7 +286,11 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
       data: msg.data[0] as WsFormatKline,
     });
 
+    let wm = new WeakMap();
+    let b = new Object();
+    wm.set(b, pubMsg);
     redisClient.publish('klines', pubMsg);
+    b = null;
   }
 }
 
