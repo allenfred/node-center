@@ -124,12 +124,12 @@ export async function handleMsg(message: BianceWsMsg, clients: any[]) {
     new Date().getMinutes() % 15 === 0 &&
     new Date().getSeconds() < 30
   ) {
-    handleTickers(message);
+    // handleTickers(message);
   }
 
   //  每30秒 更新K线数据
   if (new Date().getSeconds() % 30 === 0 && isKlineMsg(message)) {
-    handleKlines(message);
+    // handleKlines(message);
   }
 }
 
