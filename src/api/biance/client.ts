@@ -133,13 +133,13 @@ export async function handleMsg(message: BianceWsMsg, clients: any[]) {
   }
 }
 
-export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
-  function getSubChannel(interval: string, instId: string) {
-    return `biance:candle${KlineInterval['candle' + interval]}:${instId}`;
-  }
+function getSubChannel(interval: string, instId: string) {
+  return `biance:candle${KlineInterval['candle' + interval]}:${instId}`;
+}
 
+export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
   if (msg.stream === '!ticker@arr' || msg.stream === '!miniTicker@arr') {
-    const pubMsg = JSON.stringify({
+    let pubMsg = JSON.stringify({
       channel: 'tickers',
       data: msg.data
         .filter((i) => i.s.endsWith('USDT'))
@@ -167,6 +167,7 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
     let b = new Object();
     wm.set(b, pubMsg);
     redisClient.publish('tickers', pubMsg);
+    pubMsg = null;
     b = null;
   }
 
@@ -203,7 +204,7 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
     const instId = msg.data['s'];
     const subChannel = getSubChannel(interval, instId.toUpperCase());
     const k = msg.data['k'];
-    const pubMsg = JSON.stringify({
+    let pubMsg = JSON.stringify({
       channel: subChannel,
       data: [k.t, k.o, k.h, k.l, k.c, k.v, k.q] as WsFormatKline,
     });
@@ -212,6 +213,7 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
     let b = new Object();
     wm.set(b, pubMsg);
     redisClient.publish('klines', pubMsg);
+    pubMsg = null;
     b = null;
   }
 }

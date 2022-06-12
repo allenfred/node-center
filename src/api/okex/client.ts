@@ -250,7 +250,7 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
   }
 
   if (msg.arg.channel === 'tickers') {
-    const pubMsg = JSON.stringify({
+    let pubMsg = JSON.stringify({
       channel: 'tickers',
       data: msg.data.map((i) => {
         // [exchange, instrument_id, last, chg_24h, chg_rate_24h, volume_24h]
@@ -277,11 +277,12 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
     let b = new Object();
     wm.set(b, pubMsg);
     redisClient.publish('tickers', pubMsg);
+    pubMsg = null;
     b = null;
   }
 
   if (msg.arg.channel.includes('candle')) {
-    const pubMsg = JSON.stringify({
+    let pubMsg = JSON.stringify({
       channel: getChannelIndex(msg.arg),
       data: msg.data[0] as WsFormatKline,
     });
@@ -290,6 +291,7 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
     let b = new Object();
     wm.set(b, pubMsg);
     redisClient.publish('klines', pubMsg);
+    pubMsg = null;
     b = null;
   }
 }
@@ -318,8 +320,8 @@ async function setupWsClient(clients: any[]) {
   wsClient.on('message', (data: any) => {
     try {
       // logger.info(`!!! ws message =${data}`);
-      var obj: OkxWsMsg = JSON.parse(data);
-      var eventType = obj.event;
+      const obj: OkxWsMsg = JSON.parse(data);
+      const eventType = obj.event;
 
       // if (eventType == 'login') {
       //   //登录消息
