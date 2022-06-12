@@ -231,13 +231,13 @@ export async function handleMsg(message: OkxWsMsg, clients?: any[]) {
   if (
     isTickerMsg(message) &&
     new Date().getMinutes() % 15 === 0 &&
-    new Date().getSeconds() < 10
+    new Date().getSeconds() < 30
   ) {
     handleTickers(message);
   }
 
-  //  每10秒更新K线数据
-  if (new Date().getSeconds() % 10 === 0 && isKlineMsg(message)) {
+  //  每30秒 更新K线数据
+  if (new Date().getSeconds() % 30 === 0 && isKlineMsg(message)) {
     handleKlines(message);
   }
 }

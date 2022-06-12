@@ -122,13 +122,13 @@ export async function handleMsg(message: BianceWsMsg, clients: any[]) {
   if (
     isTickerMsg(message) &&
     new Date().getMinutes() % 15 === 0 &&
-    new Date().getSeconds() < 10
+    new Date().getSeconds() < 30
   ) {
     handleTickers(message);
   }
 
-  //  每10秒更新K线数据
-  if (new Date().getSeconds() % 10 === 0 && isKlineMsg(message)) {
+  //  每30秒 更新K线数据
+  if (new Date().getSeconds() % 30 === 0 && isKlineMsg(message)) {
     handleKlines(message);
   }
 }
@@ -139,7 +139,7 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
   }
 
   if (msg.stream === '!ticker@arr' || msg.stream === '!miniTicker@arr') {
-    const pubMsg = JSON.stringify({
+    let pubMsg = JSON.stringify({
       channel: 'tickers',
       data: msg.data
         .filter((i) => i.s.endsWith('USDT'))
@@ -165,6 +165,7 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
     });
 
     redisClient.publish('tickers', pubMsg);
+    pubMsg = null;
   }
 
   // kline msg body
@@ -200,12 +201,13 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
     const instId = msg.data['s'];
     const subChannel = getSubChannel(interval, instId.toUpperCase());
     const k = msg.data['k'];
-    const pubMsg = JSON.stringify({
+    let pubMsg = JSON.stringify({
       channel: subChannel,
       data: [k.t, k.o, k.h, k.l, k.c, k.v, k.q] as WsFormatKline,
     });
 
     redisClient.publish('klines', pubMsg);
+    pubMsg = null;
   }
 }
 
