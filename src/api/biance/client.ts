@@ -16,6 +16,7 @@ import {
 import logger from '../../logger';
 import { InstrumentTickerDao, InstrumentKlineDao } from '../../dao';
 import redisClient from '../../redis/client';
+let publisher = null;
 
 const client = new Spot('', '', {
   baseURL: 'https://fapi.binance.com',
@@ -122,12 +123,12 @@ export async function handleMsg(message: BianceWsMsg) {
     new Date().getMinutes() % 15 === 0 &&
     new Date().getSeconds() < 30
   ) {
-    // handleTickers(message);
+    handleTickers(message);
   }
 
   //  每30秒 更新K线数据
   if (new Date().getSeconds() % 30 === 0 && isKlineMsg(message)) {
-    // handleKlines(message);
+    handleKlines(message);
   }
 }
 
@@ -137,7 +138,7 @@ function getSubChannel(interval: string, instId: string) {
 
 export async function broadCastMsg(msg: BianceWsMsg) {
   if (msg.stream === '!ticker@arr' || msg.stream === '!miniTicker@arr') {
-    let pubMsg = JSON.stringify({
+    const pubMsg = JSON.stringify({
       channel: 'tickers',
       data: msg.data
         .filter((i) => i.s.endsWith('USDT'))
@@ -162,8 +163,7 @@ export async function broadCastMsg(msg: BianceWsMsg) {
         }),
     });
 
-    redisClient.publish('tickers', pubMsg);
-    pubMsg = null;
+    publisher.publish('tickers', pubMsg);
   }
 
   // kline msg body
@@ -204,12 +204,13 @@ export async function broadCastMsg(msg: BianceWsMsg) {
       data: [k.t, k.o, k.h, k.l, k.c, k.v, k.q] as WsFormatKline,
     });
 
-    redisClient.publish('klines', pubMsg);
-    pubMsg = null;
+    publisher.publish('klines', pubMsg);
   }
 }
 
 async function setupWsClient() {
+  publisher = redisClient.duplicate();
+
   // const intervals = ['15m', '1h', '4h'];
   const intervals = ['15m', '1h'];
 

@@ -1,9 +1,6 @@
-// import Redis from 'ioredis';
-const Redis = require('ioredis');
-
-const redisClient = new Redis({
-  host: '8.210.170.98',
-  port: 6371,
+import { createClient } from 'redis';
+const client = createClient({
+  url: '8.210.170.98:6371',
   password: '%Uwy0Pf8m:i&',
 });
 

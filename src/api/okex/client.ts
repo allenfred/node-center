@@ -23,6 +23,7 @@ import {
 import redisClient from '../../redis/client';
 
 const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
+let publisher = null;
 
 const OkxIntervalBar = {
   300: '5m',
@@ -248,7 +249,7 @@ export async function broadCastMsg(msg: OkxWsMsg) {
   }
 
   if (msg.arg.channel === 'tickers') {
-    let pubMsg = JSON.stringify({
+    const pubMsg = JSON.stringify({
       channel: 'tickers',
       data: msg.data.map((i) => {
         // [exchange, instrument_id, last, chg_24h, chg_rate_24h, volume_24h]
@@ -271,30 +272,22 @@ export async function broadCastMsg(msg: OkxWsMsg) {
       }),
     });
 
-    let wm = new WeakMap();
-    let b = new Object();
-    wm.set(b, pubMsg);
-    redisClient.publish('tickers', pubMsg);
-    pubMsg = null;
-    b = null;
+    publisher.publish('tickers', pubMsg);
   }
 
   if (msg.arg.channel.includes('candle')) {
-    let pubMsg = JSON.stringify({
+    const pubMsg = JSON.stringify({
       channel: getChannelIndex(msg.arg),
       data: msg.data[0] as WsFormatKline,
     });
 
-    let wm = new WeakMap();
-    let b = new Object();
-    wm.set(b, pubMsg);
-    redisClient.publish('klines', pubMsg);
-    pubMsg = null;
-    b = null;
+    publisher.publish('klines', pubMsg);
   }
 }
 
 async function setupWsClient() {
+  publisher = redisClient.duplicate();
+
   const wsClient = new OkxWsClient(OKEX_WS_HOST);
   wsClient.connect();
 

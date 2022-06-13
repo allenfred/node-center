@@ -19,7 +19,7 @@ server.listen(3002);
   logger.info('----- crypto-server start -----');
   //连接数据库
   await connectMongo();
-  // await redisClient.connect();
+  await redisClient.connect();
   setupWsserver();
 })();
 
