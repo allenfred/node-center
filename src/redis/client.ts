@@ -1,7 +1,7 @@
-import { createClient } from 'redis';
-const client = createClient({
-  url: '8.210.170.98:6371',
-  password: '%Uwy0Pf8m:i&',
+const redis = require('redis');
+
+const client = redis.createClient({
+  url: 'redis://:Uwy0Pf8mi@8.210.170.98:6371',
 });
 
-export default redisClient;
+export default client;
