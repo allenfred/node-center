@@ -21,6 +21,7 @@ import {
   InstrumentKlineDao,
 } from '../../dao';
 import redisClient from '../../redis/client';
+import connect from '../../database/connection';
 
 const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
 let publisher = null;
@@ -287,6 +288,7 @@ export async function broadCastMsg(msg: OkxWsMsg) {
 
 async function setupWsClient() {
   publisher = redisClient.duplicate();
+  await publisher.connect();
 
   const wsClient = new OkxWsClient(OKEX_WS_HOST);
   wsClient.connect();

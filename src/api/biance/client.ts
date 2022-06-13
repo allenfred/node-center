@@ -210,6 +210,7 @@ export async function broadCastMsg(msg: BianceWsMsg) {
 
 async function setupWsClient() {
   publisher = redisClient.duplicate();
+  await publisher.connect();
 
   // const intervals = ['15m', '1h', '4h'];
   const intervals = ['15m', '1h'];
