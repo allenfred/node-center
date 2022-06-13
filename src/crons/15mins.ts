@@ -17,8 +17,8 @@ export const startJob = async () => {
 
   await connectMongo();
 
-  // 15 minutes. (exclude: xx:00)
-  if (minuteNow !== 0 && minuteNow % 15 === 0) {
+  // 15 minutes.
+  if (minuteNow % 15 === 0) {
     await execJob(Job_Granularity.FifteenMins);
   }
 
