@@ -232,12 +232,12 @@ export async function handleMsg(message: OkxWsMsg) {
     new Date().getMinutes() % 15 === 0 &&
     new Date().getSeconds() < 30
   ) {
-    // handleTickers(message);
+    handleTickers(message);
   }
 
   //  每30秒 更新K线数据
   if (new Date().getSeconds() % 30 === 0 && isKlineMsg(message)) {
-    // handleKlines(message);
+    handleKlines(message);
   }
 }
 
@@ -326,7 +326,7 @@ async function setupWsClient() {
       // 公共频道消息
       if (eventType == undefined) {
         broadCastMsg(obj);
-        // handleMsg(obj);
+        handleMsg(obj);
       }
     } catch (e) {
       logger.error('handleMessage catch err: ', e);

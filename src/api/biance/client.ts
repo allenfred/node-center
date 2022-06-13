@@ -251,7 +251,7 @@ async function setupWsClient() {
         // console.log(data);
         // }
         broadCastMsg(JSON.parse(data));
-        // handleMsg(JSON.parse(data));
+        handleMsg(JSON.parse(data));
       },
     },
   );
