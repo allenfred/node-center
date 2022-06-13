@@ -22,7 +22,6 @@
   "dependencies": {
     "@binance/connector": "^1.8.1",
     "@okfe/okex-node": "0.0.52",
-    "@types/redis": "^4.0.11",
     "bluebird": "^3.5.5",
     "jest": "^24.9.0",
     "log4js": "^5.1.0",
