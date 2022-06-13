@@ -115,9 +115,7 @@ function isKlineMsg(message: BianceWsMsg) {
   return false;
 }
 
-export async function handleMsg(message: BianceWsMsg, clients: any[]) {
-  broadCastMsg(message, clients);
-
+export async function handleMsg(message: BianceWsMsg) {
   // 每15min更新一次Ticker
   if (
     isTickerMsg(message) &&
@@ -137,7 +135,7 @@ function getSubChannel(interval: string, instId: string) {
   return `biance:candle${KlineInterval['candle' + interval]}:${instId}`;
 }
 
-export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
+export async function broadCastMsg(msg: BianceWsMsg) {
   if (msg.stream === '!ticker@arr' || msg.stream === '!miniTicker@arr') {
     let pubMsg = JSON.stringify({
       channel: 'tickers',
@@ -163,12 +161,9 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
           // };
         }),
     });
-    let wm = new WeakMap();
-    let b = new Object();
-    wm.set(b, pubMsg);
+
     redisClient.publish('tickers', pubMsg);
     pubMsg = null;
-    b = null;
   }
 
   // kline msg body
@@ -209,16 +204,12 @@ export async function broadCastMsg(msg: BianceWsMsg, clients: any[]) {
       data: [k.t, k.o, k.h, k.l, k.c, k.v, k.q] as WsFormatKline,
     });
 
-    let wm = new WeakMap();
-    let b = new Object();
-    wm.set(b, pubMsg);
     redisClient.publish('klines', pubMsg);
     pubMsg = null;
-    b = null;
   }
 }
 
-async function setupWsClient(clients: any) {
+async function setupWsClient() {
   // const intervals = ['15m', '1h', '4h'];
   const intervals = ['15m', '1h'];
 
@@ -258,8 +249,8 @@ async function setupWsClient(clients: any) {
         // if (jsonData.stream !== '!ticker@arr') {
         // console.log(data);
         // }
-        // broadCastMsg(JSON.parse(data), clients);
-        handleMsg(JSON.parse(data), clients);
+        broadCastMsg(JSON.parse(data));
+        // handleMsg(JSON.parse(data));
       },
     },
   );

@@ -224,9 +224,7 @@ function isTickerMsg(message: any) {
   return false;
 }
 
-export async function handleMsg(message: OkxWsMsg, clients?: any[]) {
-  broadCastMsg(message, clients);
-
+export async function handleMsg(message: OkxWsMsg) {
   // 每15min更新一次Ticker
   if (
     isTickerMsg(message) &&
@@ -242,7 +240,7 @@ export async function handleMsg(message: OkxWsMsg, clients?: any[]) {
   }
 }
 
-export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
+export async function broadCastMsg(msg: OkxWsMsg) {
   function getChannelIndex(arg: any) {
     return `okex:candle${KlineInterval[arg.channel.toLowerCase()]}:${
       arg.instId
@@ -296,7 +294,7 @@ export async function broadCastMsg(msg: OkxWsMsg, clients: any[]) {
   }
 }
 
-async function setupWsClient(clients: any[]) {
+async function setupWsClient() {
   const wsClient = new OkxWsClient(OKEX_WS_HOST);
   wsClient.connect();
 
@@ -334,7 +332,8 @@ async function setupWsClient(clients: any[]) {
 
       // 公共频道消息
       if (eventType == undefined) {
-        handleMsg(obj, clients);
+        broadCastMsg(obj);
+        // handleMsg(obj);
       }
     } catch (e) {
       logger.error('handleMessage catch err: ', e);
