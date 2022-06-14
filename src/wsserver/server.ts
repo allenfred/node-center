@@ -14,12 +14,13 @@ enum ReadyState {
 }
 
 async function setupServer() {
-  wsServer = new WebSocket.Server({ host: '0.0.0.0', port: 8080 });
+  wsServer = new WebSocket.Server({ port: 8088 });
 
   // TODO: manager client ids request headers
   wsServer.on('connection', function connection(ws: any, req: any) {
     // console.log(ws._socket.address());
     // console.log(req.socket.remoteAddress);
+    // console.log(ws._header);
 
     ws.channels = [];
     if (
