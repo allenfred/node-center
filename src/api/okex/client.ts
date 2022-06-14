@@ -327,7 +327,7 @@ async function setupWsClient() {
 
       // 公共频道消息
       if (eventType == undefined) {
-        broadCastMsg(obj);
+        // broadCastMsg(obj);
         handleMsg(obj);
       }
     } catch (e) {

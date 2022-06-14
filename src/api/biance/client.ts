@@ -127,7 +127,7 @@ export async function handleMsg(message: BianceWsMsg) {
   }
 
   //  每30秒 更新K线数据
-  if (new Date().getSeconds() % 30 === 0 && isKlineMsg(message)) {
+  if (new Date().getSeconds() % 10 === 0 && isKlineMsg(message)) {
     handleKlines(message);
   }
 }
@@ -251,7 +251,7 @@ async function setupWsClient() {
         // if (jsonData.stream !== '!ticker@arr') {
         // console.log(data);
         // }
-        broadCastMsg(JSON.parse(data));
+        // broadCastMsg(JSON.parse(data));
         handleMsg(JSON.parse(data));
       },
     },
