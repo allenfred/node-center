@@ -14,7 +14,6 @@ const logger_1 = require("../logger");
 const Biance = require("../api/biance");
 const Okex = require("../api/okex");
 const ws = require('ws');
-let wsServer;
 const clients = [];
 var ReadyState;
 (function (ReadyState) {
@@ -25,10 +24,8 @@ var ReadyState;
 })(ReadyState || (ReadyState = {}));
 function setupServer(server) {
     return __awaiter(this, void 0, void 0, function* () {
-        // wsServer = new ws.Server({ port: 8088 });
         const wsServer = new ws.Server({ noServer: true });
         server.on('upgrade', function upgrade(request, socket, head) {
-            console.log('upgrade');
             wsServer.handleUpgrade(request, socket, head, function done(ws) {
                 wsServer.emit('connection', ws, request);
             });
