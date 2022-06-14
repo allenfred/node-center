@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'node-digger',
+      name: 'node-center',
       script: 'dist/main.js',
     },
     {
