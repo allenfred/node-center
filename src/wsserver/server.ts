@@ -14,7 +14,7 @@ enum ReadyState {
 }
 
 async function setupServer() {
-  wsServer = new WebSocket.Server({ port: 8080 });
+  wsServer = new WebSocket.Server({ host: '0.0.0.0', port: 8080 });
 
   // TODO: manager client ids request headers
   wsServer.on('connection', function connection(ws: any, req: any) {

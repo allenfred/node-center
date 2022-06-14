@@ -25,7 +25,7 @@ var ReadyState;
 })(ReadyState || (ReadyState = {}));
 function setupServer() {
     return __awaiter(this, void 0, void 0, function* () {
-        wsServer = new WebSocket.Server({ port: 8080 });
+        wsServer = new WebSocket.Server({ host: '0.0.0.0', port: 8080 });
         // TODO: manager client ids request headers
         wsServer.on('connection', function connection(ws, req) {
             // console.log(ws._socket.address());
