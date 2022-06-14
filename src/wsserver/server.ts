@@ -1,8 +1,8 @@
 import logger from '../logger';
 import * as Biance from '../api/biance';
 import * as Okex from '../api/okex';
+const ws = require('ws');
 
-const WebSocket = require('ws');
 let wsServer: any;
 const clients = [];
 
@@ -13,8 +13,16 @@ enum ReadyState {
   CLOSED = 3,
 }
 
-async function setupServer() {
-  wsServer = new WebSocket.Server({ port: 8088 });
+async function setupServer(server) {
+  // wsServer = new ws.Server({ port: 8088 });
+  const wsServer = new ws.Server({ noServer: true });
+
+  server.on('upgrade', function upgrade(request, socket, head) {
+    console.log('upgrade');
+    wsServer.handleUpgrade(request, socket, head, function done(ws) {
+      wsServer.emit('connection', ws, request);
+    });
+  });
 
   // TODO: manager client ids request headers
   wsServer.on('connection', function connection(ws: any, req: any) {
@@ -65,8 +73,8 @@ async function setupServer() {
   });
 }
 
-export async function setupWsserver() {
+export async function setupWsserver(server) {
   Okex.setupWsClient(clients);
   Biance.setupWsClient(clients);
-  setupServer();
+  setupServer(server);
 }

@@ -13,7 +13,7 @@ exports.setupWsserver = void 0;
 const logger_1 = require("../logger");
 const Biance = require("../api/biance");
 const Okex = require("../api/okex");
-const WebSocket = require('ws');
+const ws = require('ws');
 let wsServer;
 const clients = [];
 var ReadyState;
@@ -23,9 +23,16 @@ var ReadyState;
     ReadyState[ReadyState["CLOSING"] = 2] = "CLOSING";
     ReadyState[ReadyState["CLOSED"] = 3] = "CLOSED";
 })(ReadyState || (ReadyState = {}));
-function setupServer() {
+function setupServer(server) {
     return __awaiter(this, void 0, void 0, function* () {
-        wsServer = new WebSocket.Server({ port: 8088 });
+        // wsServer = new ws.Server({ port: 8088 });
+        const wsServer = new ws.Server({ noServer: true });
+        server.on('upgrade', function upgrade(request, socket, head) {
+            console.log('upgrade');
+            wsServer.handleUpgrade(request, socket, head, function done(ws) {
+                wsServer.emit('connection', ws, request);
+            });
+        });
         // TODO: manager client ids request headers
         wsServer.on('connection', function connection(ws, req) {
             // console.log(ws._socket.address());
@@ -65,11 +72,11 @@ function setupServer() {
         });
     });
 }
-function setupWsserver() {
+function setupWsserver(server) {
     return __awaiter(this, void 0, void 0, function* () {
         Okex.setupWsClient(clients);
         Biance.setupWsClient(clients);
-        setupServer();
+        setupServer(server);
     });
 }
 exports.setupWsserver = setupWsserver;

@@ -27,7 +27,7 @@ server.listen(3002);
         //连接数据库
         yield connection_1.default();
         // await redisClient.connect();
-        server_1.setupWsserver();
+        server_1.setupWsserver(server);
     });
 })();
 process.stdout.on('error', function (err) {

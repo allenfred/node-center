@@ -4832,7 +4832,7 @@
   dependencies:
     "async-limiter" "~1.0.0"
 
-"ws@^7.1.2", "ws@^7.5.0":
+"ws@^7.5.0", "ws@^7.5.8":
   "integrity" "sha512-ri1Id1WinAX5Jqn9HejiGb8crfRio0Qgu8+MtL36rlTA6RLsMdWt1Az/19A2Qij6uSHUMphEFaTKa4WG+UNHNw=="
   "resolved" "https://registry.npmjs.org/ws/-/ws-7.5.8.tgz"
   "version" "7.5.8"

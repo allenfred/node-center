@@ -20,7 +20,7 @@ server.listen(3002);
   //连接数据库
   await connectMongo();
   // await redisClient.connect();
-  setupWsserver();
+  setupWsserver(server);
 })();
 
 process.stdout.on('error', function (err) {
