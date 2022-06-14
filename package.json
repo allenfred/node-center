@@ -1,5 +1,5 @@
 {
-  "name": "crypto-server",
+  "name": "node-center",
   "version": "0.1.0",
   "description": "node server for crypto",
   "scripts": {
