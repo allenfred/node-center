@@ -1,4 +1,4 @@
 {
-  "name": "crypto-server",
+  "name": "node-center",
   "script": "dist/main.js"
 }
