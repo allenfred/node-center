@@ -6,6 +6,7 @@ import logger from '../../logger';
 import {
   Exchange,
   OkxWsMsg,
+  OkxWsTicker,
   Instrument,
   KlineInterval,
   OkxInst,
@@ -22,6 +23,7 @@ import {
 } from '../../dao';
 import redisClient from '../../redis/client';
 import connect from '../../database/connection';
+import { isKlineMsg, isTickerMsg, getKlineSubChannel } from './util';
 
 const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
 let publisher = null;
@@ -212,20 +214,6 @@ export async function handleKlines(message: OkxWsMsg) {
   await InstrumentKlineDao.upsertOne(klines[0]);
 }
 
-function isKlineMsg(message: any) {
-  if (message && message.arg && message.arg.channel.indexOf('candle') !== -1) {
-    return true;
-  }
-  return false;
-}
-
-function isTickerMsg(message: any) {
-  if (message && message.arg && message.arg.channel === 'tickers') {
-    return true;
-  }
-  return false;
-}
-
 export async function handleMsg(message: OkxWsMsg) {
   // 每15min更新一次Ticker
   if (
@@ -242,13 +230,52 @@ export async function handleMsg(message: OkxWsMsg) {
   }
 }
 
-export async function broadCastMsg(msg: OkxWsMsg) {
-  function getChannelIndex(arg: any) {
-    return `okex:candle${KlineInterval[arg.channel.toLowerCase()]}:${
-      arg.instId
-    }`;
+export async function broadCastByWS(msg: OkxWsMsg, clients: any[]) {
+  if (!clients.length) {
+    return;
   }
 
+  clients.map((client: any) => {
+    let pubMsg: any = null;
+
+    if (new Date().getSeconds() % 2 === 0 && msg.arg.channel === 'tickers') {
+      if (client.isApiServer || client.channels.includes('tickers')) {
+        pubMsg = JSON.stringify({
+          channel: 'tickers',
+          data: msg.data.map((i: OkxWsTicker) => {
+            // [exchange, instrument_id, last, chg_24h, chg_rate_24h, volume_24h]
+            return [
+              Exchange.Okex,
+              i.instId,
+              i.last,
+              i.last - i.open24h,
+              (((i.last - i.open24h) * 100) / i.open24h).toFixed(4),
+              i.vol24h,
+            ];
+          }),
+        });
+      }
+    }
+
+    if (isKlineMsg(msg)) {
+      if (
+        client.isApiServer ||
+        client.channels.includes(getKlineSubChannel(msg.arg))
+      ) {
+        pubMsg = JSON.stringify({
+          channel: getKlineSubChannel(msg.arg),
+          data: msg.data[0] as WsFormatKline,
+        });
+      }
+    }
+
+    if (pubMsg) {
+      client.send(pubMsg);
+    }
+  });
+}
+
+export async function broadCastByRedis(msg: OkxWsMsg) {
   if (msg.arg.channel === 'tickers') {
     const pubMsg = JSON.stringify({
       channel: 'tickers',
@@ -262,14 +289,6 @@ export async function broadCastMsg(msg: OkxWsMsg) {
           (((i.last - i.open24h) * 100) / i.open24h).toFixed(4),
           i.vol24h,
         ];
-        // return {
-        //   instrument_id: i.instId,
-        //   last: i.last, // 最新成交价格
-        //   chg_24h: i.last - i.open24h, // 24小时价格变化
-        //   chg_rate_24h: (((i.last - i.open24h) * 100) / i.open24h).toFixed(4), // 24小时价格变化(百分比)
-        //   volume_24h: i.vol24h, // 24小时成交量（按张数统计）
-        //   exchange: Exchange.Okex,
-        // };
       }),
     });
 
@@ -278,7 +297,7 @@ export async function broadCastMsg(msg: OkxWsMsg) {
 
   if (msg.arg.channel.includes('candle')) {
     const pubMsg = JSON.stringify({
-      channel: getChannelIndex(msg.arg),
+      channel: getKlineSubChannel(msg.arg),
       data: msg.data[0] as WsFormatKline,
     });
 
@@ -286,10 +305,7 @@ export async function broadCastMsg(msg: OkxWsMsg) {
   }
 }
 
-async function setupWsClient() {
-  publisher = redisClient.duplicate();
-  await publisher.connect();
-
+async function setupWsClient(clients: any[]) {
   const wsClient = new OkxWsClient(OKEX_WS_HOST);
   wsClient.connect();
 
@@ -328,6 +344,7 @@ async function setupWsClient() {
       // 公共频道消息
       if (eventType == undefined) {
         // broadCastMsg(obj);
+        broadCastByWS(obj, clients);
         handleMsg(obj);
       }
     } catch (e) {

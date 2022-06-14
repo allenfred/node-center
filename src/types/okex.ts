@@ -42,18 +42,18 @@ export enum OkxWsChannel {
 export interface OkxWsTicker {
   instId: string; // 合约ID，如 BTC-USD-180213 BTC-USD-SWAP
   instType: OkxInstType; // 产品类型
-  last: string; // 最新成交价
-  lastSz: string; // 最新成交的数量
-  askPx: string; // 卖一价
-  bidPx: string; // 买一价
-  open24h: string; // 24小时开盘价
-  high24h: string; // 24小时最高价
-  low24h: string; // 24小时最低价
-  vol24h: string; // 24小时成交量（按张数统计）如果是衍生品合约，数值为合约的张数. 如果是币币/币币杠杆，数值为交易货币的数量.
-  volCcy24h: string; // 24小时成交量（按币统计）
-  sodUtc0: string; // UTC 0 时开盘价
-  sodUtc8: string; // UTC+8 时开盘价
-  ts: string; // 数据产生时间，Unix时间戳的毫秒数格式，如 1597026383085
+  last: any; // 最新成交价
+  lastSz: any; // 最新成交的数量
+  askPx: any; // 卖一价
+  bidPx: any; // 买一价
+  open24h: any; // 24小时开盘价
+  high24h: any; // 24小时最高价
+  low24h: any; // 24小时最低价
+  vol24h: any; // 24小时成交量（按张数统计）如果是衍生品合约，数值为合约的张数. 如果是币币/币币杠杆，数值为交易货币的数量.
+  volCcy24h: any; // 24小时成交量（按币统计）
+  sodUtc0: any; // UTC 0 时开盘价
+  sodUtc8: any; // UTC+8 时开盘价
+  ts: any; // 数据产生时间，Unix时间戳的毫秒数格式，如 1597026383085
 }
 
 // *** 持仓总量频道 ***

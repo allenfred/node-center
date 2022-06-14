@@ -14,13 +14,27 @@ enum ReadyState {
 }
 
 async function setupServer() {
-  wsServer = new WebSocket.Server({ port: 8080 });
+  wsServer = new WebSocket.Server({ port: 8088 });
 
   // TODO: manager client ids request headers
-  wsServer.on('connection', function connection(ws: any) {
+  wsServer.on('connection', function connection(ws: any, req: any) {
+    // console.log(ws._socket.address());
+    // console.log(req.socket.remoteAddress);
+
     ws.channels = [];
+    if (
+      req.socket.remoteAddress.includes('121.4.15.211') ||
+      req.socket.remoteAddress.includes('::1') ||
+      req.socket.remoteAddress.includes('127.0.0.1')
+    ) {
+      ws.isApiServer = true;
+      logger.info('connected from quant-api.');
+    } else {
+      ws.isApiServer = false;
+      logger.info('connected from unknown client.');
+    }
+
     clients.push(ws);
-    logger.info('someone connected.');
 
     ws.on('message', function incoming(message: any) {
       logger.info(`received: ${message}`);
@@ -50,7 +64,7 @@ async function setupServer() {
 }
 
 export async function setupWsserver() {
-  Okex.setupWsClient();
-  Biance.setupWsClient();
-  // setupServer();
+  Okex.setupWsClient(clients);
+  Biance.setupWsClient(clients);
+  setupServer();
 }
