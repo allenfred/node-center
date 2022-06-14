@@ -3,7 +3,6 @@ import * as Biance from '../api/biance';
 import * as Okex from '../api/okex';
 const ws = require('ws');
 
-let wsServer: any;
 const clients = [];
 
 enum ReadyState {
@@ -13,13 +12,11 @@ enum ReadyState {
   CLOSED = 3,
 }
 
-async function setupServer(server) {
-  // wsServer = new ws.Server({ port: 8088 });
+async function setupServer(server: any) {
   const wsServer = new ws.Server({ noServer: true });
 
-  server.on('upgrade', function upgrade(request, socket, head) {
-    console.log('upgrade');
-    wsServer.handleUpgrade(request, socket, head, function done(ws) {
+  server.on('upgrade', function upgrade(request: any, socket: any, head: any) {
+    wsServer.handleUpgrade(request, socket, head, function done(ws: any) {
       wsServer.emit('connection', ws, request);
     });
   });
@@ -73,7 +70,7 @@ async function setupServer(server) {
   });
 }
 
-export async function setupWsserver(server) {
+export async function setupWsserver(server: any) {
   Okex.setupWsClient(clients);
   Biance.setupWsClient(clients);
   setupServer(server);
