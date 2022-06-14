@@ -34,7 +34,8 @@ function setupServer() {
             ws.channels = [];
             if (req.socket.remoteAddress.includes('121.4.15.211') ||
                 req.socket.remoteAddress.includes('::1') ||
-                req.socket.remoteAddress.includes('127.0.0.1')) {
+                req.socket.remoteAddress.includes('127.0.0.1') ||
+                req.socket.remoteAddress.includes('8.210.170.98')) {
                 ws.isApiServer = true;
                 logger_1.default.info('connected from quant-api.');
             }
