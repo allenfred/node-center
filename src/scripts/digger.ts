@@ -4,7 +4,8 @@ import { getExchangeInfo } from '../api/biance/client';
 import { InstrumentKlineDao } from '../dao';
 import logger from '../logger';
 import { Exchange } from '../types';
-import { getMemoryUsage } from '../util';
+import * as Okex from '../api/okex';
+import * as Biance from '../api/biance';
 
 const myArgs = process.argv.slice(2);
 
@@ -20,6 +21,15 @@ const startJob = async () => {
   await connectMongo();
 
   if (myArgs[0] === '-i') {
+    const data = await Biance.initInstruments();
+    data.map((i) => {
+      if (i.underlying_index === 'TLM') {
+        console.log(i);
+      }
+    });
+  }
+
+  if (myArgs[0] === '-e') {
     const data = await getExchangeInfo();
     console.log(data.rateLimits);
   }

@@ -352,38 +352,47 @@ async function getSwapInsts(): Promise<Array<Instrument>> {
   return client
     .publicRequest('GET', '/fapi/v1/exchangeInfo', {})
     .then((res: { data: BianceExchangeInfoResponse }) => {
-      return res.data.symbols
-        .filter((i: BianceSymbolInfo) => i.contractType === 'PERPETUAL')
-        .map((i) => {
-          let priceFilter: any;
-          let lotSize: any;
+      return (
+        res.data.symbols
+          // U本位永续合约
+          .filter((i: BianceSymbolInfo) => {
+            return (
+              i.contractType === 'PERPETUAL' &&
+              i.marginAsset === 'USDT' &&
+              i.status === 'TRADING'
+            );
+          })
+          .map((i) => {
+            let priceFilter: any;
+            let lotSize: any;
 
-          if (i.filters && i.filters.length) {
-            priceFilter = i.filters.filter(
-              (i) => i.filterType === FilterType.PRICE_FILTER,
-            )[0];
+            if (i.filters && i.filters.length) {
+              priceFilter = i.filters.filter(
+                (i) => i.filterType === FilterType.PRICE_FILTER,
+              )[0];
 
-            lotSize = i.filters.filter(
-              (i) => i.filterType === FilterType.LOT_SIZE,
-            )[0];
-          }
+              lotSize = i.filters.filter(
+                (i) => i.filterType === FilterType.LOT_SIZE,
+              )[0];
+            }
 
-          return {
-            instrument_id: i.symbol, // 合约ID，如BTCUSDT
-            underlying_index: i.baseAsset, // 交易货币币种，如：BTCUSDT中的BTC
-            quote_currency: i.quoteAsset, // 计价货币币种，如：BTCUSDT中的USDT
-            tick_size: priceFilter ? priceFilter.tickSize : '0', // 下单价格精度 0.01
-            contract_val: '0', // 合约面值 100
-            listing: i.onboardDate, // 创建时间 '2019-09-06'
-            delivery: '', // 结算时间 '2019-09-20'
-            trade_increment: '0', // futures 下单数量精度
-            size_increment: lotSize.stepSize, // swap 下单数量精度
-            alias: 'swap', // 本周 this_week 次周 next_week 季度 quarter 永续 swap
-            settlement_currency: i.marginAsset, // 盈亏结算和保证金币种，BTC
-            contract_val_currency: i.quoteAsset, // 合约面值计价币种
-            exchange: Exchange.Biance,
-          };
-        });
+            return {
+              instrument_id: i.symbol, // 合约ID，如BTCUSDT
+              underlying_index: i.baseAsset, // 交易货币币种，如：BTCUSDT中的BTC
+              quote_currency: i.quoteAsset, // 计价货币币种，如：BTCUSDT中的USDT
+              tick_size: priceFilter ? priceFilter.tickSize : '0', // 下单价格精度 0.01
+              contract_val: '0', // 合约面值 100
+              listing: i.onboardDate, // 创建时间 '2019-09-06'
+              delivery: '', // 结算时间 '2019-09-20'
+              trade_increment: '0', // futures 下单数量精度
+              size_increment: lotSize.stepSize, // swap 下单数量精度
+              alias: 'swap', // 本周 this_week 次周 next_week 季度 quarter 永续 swap
+              settlement_currency: i.marginAsset, // 盈亏结算和保证金币种，BTC
+              contract_val_currency: i.quoteAsset, // 合约面值计价币种
+              exchange: Exchange.Biance,
+            };
+          })
+      );
     })
     .catch((error: any) => {
       logger.error(error);
