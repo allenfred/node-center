@@ -24,7 +24,7 @@ exports.client = client;
 function handleTickers(message) {
     return __awaiter(this, void 0, void 0, function* () {
         yield dao_1.InstrumentTickerDao.upsert(message.data
-            .filter((i) => i.s.indexOf('USDT') !== -1)
+            .filter((i) => i.s.endsWith('USDT') !== -1)
             .map((i) => {
             return {
                 instrument_id: i.s,
