@@ -308,8 +308,13 @@ function getSwapInsts() {
         return client
             .publicRequest('GET', '/fapi/v1/exchangeInfo', {})
             .then((res) => {
-            return res.data.symbols
-                .filter((i) => i.contractType === 'PERPETUAL')
+            return (res.data.symbols
+                // U本位永续合约
+                .filter((i) => {
+                return (i.contractType === 'PERPETUAL' &&
+                    i.marginAsset === 'USDT' &&
+                    i.status === 'TRADING');
+            })
                 .map((i) => {
                 let priceFilter;
                 let lotSize;
@@ -332,7 +337,7 @@ function getSwapInsts() {
                     contract_val_currency: i.quoteAsset,
                     exchange: types_1.Exchange.Biance,
                 };
-            });
+            }));
         })
             .catch((error) => {
             logger_1.default.error(error);

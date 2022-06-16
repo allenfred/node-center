@@ -14,6 +14,7 @@ const commonAPI = require("../api/common");
 const client_1 = require("../api/biance/client");
 const logger_1 = require("../logger");
 const types_1 = require("../types");
+const Biance = require("../api/biance");
 const myArgs = process.argv.slice(2);
 const startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     if (!myArgs.length) {
@@ -24,6 +25,14 @@ const startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     const startTime = new Date().getTime();
     yield connection_1.default();
     if (myArgs[0] === '-i') {
+        const data = yield Biance.initInstruments();
+        data.map((i) => {
+            if (i.underlying_index === 'TLM') {
+                console.log(i);
+            }
+        });
+    }
+    if (myArgs[0] === '-e') {
         const data = yield client_1.getExchangeInfo();
         console.log(data.rateLimits);
     }
