@@ -221,3 +221,22 @@ export interface BianceWsMsg {
   stream: string; // !miniTicker@arr / <symbol>@kline_<interval>
   data: any[];
 }
+
+export interface BianceTicker {
+  symbol: string;
+  priceChange: any; //24小时价格变动
+  priceChangePercent: any; //24小时价格变动百分比
+  weightedAvgPrice: any; //加权平均价
+  lastPrice: any; //最近一次成交价
+  lastQty: any; //最近一次成交额
+  openPrice: any; //24小时内第一次成交的价格
+  highPrice: any; //24小时最高价
+  lowPrice: any; //24小时最低价
+  volume: any; //24小时成交量
+  quoteVolume: any; //24小时成交额
+  openTime: number; //24小时内，第一笔交易的发生时间
+  closeTime: number; //24小时内，最后一笔交易的发生时间
+  firstId: number; // 首笔成交id
+  lastId: number; // 末笔成交id
+  count: number; // 成交笔数
+}

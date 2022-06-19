@@ -18,14 +18,25 @@ async function find(opts?: any): Promise<any> {
   return await InstrumentInfo.find(opts);
 }
 
-async function deleteByIds(instIds: string[]) {
-  return await InstrumentInfo.deleteMany({ instrument_id: { $in: instIds } });
+async function findByTopVolume(opts: any) {
+  return await InstrumentInfo.find({ exchange: opts.exchange }, null, {
+    limit: opts.limit || 30,
+    sort: { volume_24h: -1 },
+  }).exec();
+}
+
+async function deleteByIds(instIds: string[], exchange: string) {
+  return await InstrumentInfo.deleteMany({
+    exchange,
+    instrument_id: { $in: instIds },
+  });
 }
 
 const InstrumentInfoDao = {
   upsert,
   find,
   deleteByIds,
+  findByTopVolume,
 };
 
 export { InstrumentInfoDao };

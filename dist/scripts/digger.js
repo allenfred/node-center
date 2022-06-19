@@ -27,7 +27,7 @@ const startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     if (myArgs[0] === '-i') {
         const data = yield Biance.initInstruments();
         data.map((i) => {
-            if (i.underlying_index === 'TLM') {
+            if (i.base_currency === 'TLM') {
                 console.log(i);
             }
         });

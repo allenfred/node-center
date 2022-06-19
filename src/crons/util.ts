@@ -4,6 +4,7 @@ import { InstrumentInfo } from '../database/models';
 import { Instrument, InstReqOptions, Exchange } from '../types';
 import * as Okex from '../api/okex';
 import * as Biance from '../api/biance';
+import * as Bybit from '../api/bybit';
 import { sortBy } from 'lodash';
 
 const Job_Granularity = {
@@ -37,7 +38,7 @@ async function execJob(granularity: number) {
 
   const customFilter = (i: Instrument) => {
     if (jobsForBtcOnly.includes(granularity)) {
-      return i.underlying_index === 'BTC';
+      return i.base_currency === 'BTC';
     } else {
       return i.quote_currency === 'USDT';
     }
@@ -67,6 +68,14 @@ async function execJob(granularity: number) {
     ),
     Biance.getHistoryKlines(
       validInsts.filter((i: any) => i.exchange === Exchange.Biance),
+      {
+        count,
+        delay: 500,
+        includeInterval: [granularity],
+      },
+    ),
+    Bybit.getHistoryKlines(
+      validInsts.filter((i: any) => i.exchange === Exchange.Bybit),
       {
         count,
         delay: 500,

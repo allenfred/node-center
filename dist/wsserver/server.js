@@ -73,6 +73,7 @@ function setupWsserver(server) {
     return __awaiter(this, void 0, void 0, function* () {
         Okex.setupWsClient(clients);
         Biance.setupWsClient(clients);
+        // Bybit.setupWsClient(clients);
         setupServer(server);
     });
 }

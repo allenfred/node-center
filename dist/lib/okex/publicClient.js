@@ -83,6 +83,11 @@ function PublicClient(apiUri = 'https://www.okex.com', timeout = 3000, axiosConf
                         return get(`/api/swap/v3/instruments${instrument_id ? `/${instrument_id}` : ''}/ticker`);
                     });
                 },
+                getTickers() {
+                    return __awaiter(this, void 0, void 0, function* () {
+                        return get(`/api/v5/market/tickers?instType=SWAP`);
+                    });
+                },
                 getTrades(instrument_id, params) {
                     return __awaiter(this, void 0, void 0, function* () {
                         return get(`/api/swap/v3/instruments/${instrument_id}/trades${params ? `?${querystring.stringify(params)}` : ''}`);

@@ -77,6 +77,9 @@ export default function PublicClient(
             }/ticker`,
           );
         },
+        async getTickers() {
+          return get(`/api/v5/market/tickers?instType=SWAP`);
+        },
         async getTrades(instrument_id, params) {
           return get(
             `/api/swap/v3/instruments/${instrument_id}/trades${

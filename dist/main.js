@@ -13,6 +13,7 @@ const connection_1 = require("./database/connection");
 const logger_1 = require("./logger");
 const http = require("http");
 const server_1 = require("./wsserver/server");
+// import redisClient from './redis/client';
 const server = http.createServer((req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/plain' });
     res.end('ok');

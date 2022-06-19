@@ -6,6 +6,7 @@ import logger from '../../logger';
 import {
   Exchange,
   OkxWsMsg,
+  OkxTicker,
   OkxWsTicker,
   Instrument,
   KlineInterval,
@@ -16,16 +17,14 @@ import {
   OkxWsKline,
   WsFormatKline,
 } from '../../types';
-import {
-  InstrumentInfoDao,
-  InstrumentTickerDao,
-  InstrumentKlineDao,
-} from '../../dao';
+import { InstrumentInfoDao, InstrumentKlineDao } from '../../dao';
 import redisClient from '../../redis/client';
 import connect from '../../database/connection';
 import { isKlineMsg, isTickerMsg, getKlineSubChannel } from './util';
+import { getInstrumentAlias } from '../../util';
 
 const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
+const client = pClient.swap();
 let publisher = null;
 
 const OkxIntervalBar = {
@@ -45,27 +44,41 @@ interface SimpleIntrument {
   instrument_id: string;
 }
 
-async function getSwapInsts(): Promise<Array<Instrument>> {
-  const data: { code: string; data: Array<OkxInst> } = await pClient
-    .swap()
-    .getInstruments();
+async function getInstruments(): Promise<Array<Instrument>> {
+  const tickers: { code: string; data: Array<OkxTicker> } =
+    await client.getTickers();
+  const data: { code: string; data: Array<OkxInst> } =
+    await client.getInstruments();
+
   if (+data.code === 0) {
     return data.data
       .filter((i) => i.state === 'live')
       .map((i) => {
+        const ticker = tickers.data.find((j) => j.instId === i.instId);
+
         return {
           instrument_id: i.instId, // 合约ID，如BTC-USDT-SWAP
-          underlying_index: i.ctValCcy, // 交易货币币种，如：BTC-USDT-SWAP中的BTC
+          base_currency: i.ctValCcy, // 交易货币币种，如：BTC-USDT-SWAP中的BTC
           quote_currency: i.settleCcy, // 计价货币币种，如：BTC-USDT-SWAP中的USDT
           tick_size: i.tickSz, // 下单价格精度 0.01
           contract_val: i.ctVal, // 合约面值 100
           listing: i.listTime, // 创建时间 '2019-09-06'
           delivery: i.expTime, // 结算时间 '2019-09-20'
-          trade_increment: i.lotSz, // futures 下单数量精度
-          size_increment: i.lotSz, // swap 下单数量精度
+          size_increment: +i.lotSz, // swap 下单数量精度
           alias: i.alias, // 本周 this_week 次周 next_week 季度 quarter 永续 swap
-          settlement_currency: i.settleCcy, // 盈亏结算和保证金币种，BTC
-          contract_val_currency: i.ctValCcy, // 合约面值计价币种
+          last: ticker.last, // 最新成交价格
+          chg_24h: ticker.last - ticker.open24h, // 24小时价格变化
+          chg_rate_24h: (
+            ((ticker.last - ticker.open24h) * 100) /
+            ticker.open24h
+          ).toFixed(4), // 24小时价格变化(百分比)
+          high_24h: ticker.high24h, // 24小时最高价
+          low_24h: ticker.low24h, // 24小时最低价
+          volume_24h: ticker.vol24h, // 24小时成交量（按张数统计）
+          timestamp: ticker.ts, // 系统时间 ISO_8601
+          open_interest: 0, // 持仓量
+          open_24h: ticker.open24h, // 24小时开盘价
+          volume_token_24h: ticker.volCcy24h, // 	成交量（按币统计）
           exchange: Exchange.Okex,
         };
       });
@@ -168,7 +181,7 @@ function getBasicArgs(instruments: Instrument[]): Array<string> {
 */
 
 export async function handleTickers(message: OkxWsMsg) {
-  await InstrumentTickerDao.upsert(
+  await InstrumentInfoDao.upsert(
     message.data
       .filter((i) => i.instId.indexOf('USDT') !== -1)
       .map((i) => {
@@ -185,7 +198,7 @@ export async function handleTickers(message: OkxWsMsg) {
           open_24h: i.open24h, // 24小时开盘价
           volume_token_24h: i.volCcy24h, // 	成交量（按币统计）
           exchange: Exchange.Okex,
-        };
+        } as any;
       }),
   );
 }
@@ -353,4 +366,4 @@ async function setupWsClient(clients: any[]) {
   });
 }
 
-export { setupWsClient, getSwapInsts, getKlines };
+export { setupWsClient, getInstruments, getKlines };

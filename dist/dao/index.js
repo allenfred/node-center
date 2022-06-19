@@ -12,5 +12,4 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./instrumentInfo"), exports);
 __exportStar(require("./instrumentKline"), exports);
-__exportStar(require("./instrumentTicker"), exports);
 //# sourceMappingURL=index.js.map

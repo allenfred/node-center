@@ -9,13 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getKlinesReqParams = exports.getOkexKlines = exports.getBianceKlines = exports.getKlines = exports.getKlinesWithLimited = void 0;
+exports.getKlinesReqParams = exports.getBybitKlines = exports.getOkexKlines = exports.getBianceKlines = exports.getKlines = exports.getKlinesWithLimited = void 0;
 const bluebird = require("bluebird");
 const types_1 = require("../types");
 const dao_1 = require("../dao");
 const util_1 = require("../util");
 const Biance = require("./biance/client");
 const Okex = require("./okex/client");
+const Bybit = require("./bybit/client");
 const logger_1 = require("../logger");
 const BianceKlineInterval = {
     300: '5m',
@@ -28,6 +29,18 @@ const BianceKlineInterval = {
     43200: '12h',
     86400: '1d',
     604800: '1w',
+};
+const BybitKlineInterval = {
+    300: '5',
+    900: '15',
+    1800: '30',
+    3600: '60',
+    7200: '120',
+    14400: '240',
+    21600: '360',
+    43200: '720',
+    86400: 'D',
+    604800: 'W',
 };
 function getKlinesWithLimited(options, updateOperate = dao_1.InstrumentKlineDao.upsertMany) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -154,6 +167,48 @@ function getBianceKlines(options, updateOperate = dao_1.InstrumentKlineDao.upser
     });
 }
 exports.getBianceKlines = getBianceKlines;
+function getBybitKlines(options, updateOperate = dao_1.InstrumentKlineDao.upsertMany) {
+    return __awaiter(this, void 0, void 0, function* () {
+        //设置系统限速规则 (bybit官方API 限速规则：20次/s)
+        return bluebird.map(options, (option) => __awaiter(this, void 0, void 0, function* () {
+            const { exchange, instrument_id, granularity } = option;
+            return Bybit.getKlines({
+                symbol: instrument_id,
+                interval: BybitKlineInterval[granularity],
+                from: Math.round(new Date(option.start).valueOf() / 1000),
+                limit: 200,
+            })
+                .then((data) => {
+                let klines = [];
+                klines = data.map((kline) => {
+                    return {
+                        instrument_id,
+                        underlying_index: instrument_id.replace('USDT', ''),
+                        timestamp: new Date(+kline.start_at * 1000),
+                        open: kline.open,
+                        high: kline.high,
+                        low: kline.low,
+                        close: kline.close,
+                        volume: kline.turnover,
+                        currency_volume: kline.volume,
+                        granularity,
+                        exchange,
+                    };
+                });
+                return updateOperate({
+                    exchange,
+                    instrument_id,
+                    granularity,
+                }, klines);
+            })
+                .then(() => {
+                logger_1.default.info(`[Bybit/${instrument_id}/${types_1.KlineInterval[+granularity]}] K线 Done.`);
+                return Promise.resolve();
+            });
+        }), { concurrency: 2 });
+    });
+}
+exports.getBybitKlines = getBybitKlines;
 function getOkexKlines(options, updateOperate = dao_1.InstrumentKlineDao.upsertMany) {
     return __awaiter(this, void 0, void 0, function* () {
         //设置系统限速规则 (Okex官方API 限速规则：20次/2s)

@@ -5,6 +5,7 @@ import logger from '../logger';
 import { Exchange } from '../types';
 import * as Okex from '../api/okex';
 import * as Biance from '../api/biance';
+import * as Bybit from '../api/bybit';
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 // */5 * * * * At every 5 minute.
@@ -48,6 +49,7 @@ export const startJob = async () => {
   if (hourNow % 12 === 0 && minuteNow === 0) {
     await Okex.initInstruments();
     await Biance.initInstruments();
+    await Bybit.initInstruments();
     await execJob(Job_Granularity.TwelveHour);
   }
 

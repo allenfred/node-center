@@ -22,7 +22,7 @@ const util_1 = require("../../util");
 function initInstruments() {
     return __awaiter(this, void 0, void 0, function* () {
         //获取全量永续合约信息
-        let instruments = yield client_1.getSwapInsts();
+        let instruments = yield client_1.getInstruments();
         // BTC合约及其他USDT本位合约
         instruments = instruments.filter((i) => i.instrument_id.endsWith('USDT'));
         logger_1.default.info(`Biance[永续合约] - 获取公共合约全量信息成功，共: ${instruments.length} 条 ...`);
@@ -36,18 +36,9 @@ function initInstruments() {
         const invalidInsts = _.differenceBy(oldInsts, instruments, 'instrument_id');
         if (invalidInsts.length) {
             logger_1.default.info(_.map(invalidInsts, 'instrument_id'));
-            yield dao_1.InstrumentInfoDao.deleteByIds(_.map(invalidInsts, 'instrument_id')).then((result) => {
+            yield dao_1.InstrumentInfoDao.deleteByIds(_.map(invalidInsts, 'instrument_id'), types_1.Exchange.Biance).then((result) => {
                 if (result.ok === 1) {
                     logger_1.default.info(`Biance[永续合约] - 删除下架合约，共: ${result.deletedCount} 条 ...`);
-                }
-            });
-            const oldTickers = yield dao_1.InstrumentTickerDao.find({
-                exchange: types_1.Exchange.Biance,
-            });
-            const invalidTickers = _.differenceBy(oldTickers, instruments, 'instrument_id');
-            yield dao_1.InstrumentTickerDao.deleteByIds(_.map(invalidTickers, 'instrument_id')).then((result) => {
-                if (result.ok === 1) {
-                    logger_1.default.info(`Biance[永续合约] - 删除下架合约 Tickers，共: ${result.deletedCount} 条 ...`);
                 }
             });
         }

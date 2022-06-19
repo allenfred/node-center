@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getKlines = exports.setupWsClient = exports.getSwapInsts = exports.getExchangeInfo = exports.client = exports.broadCastMsgByRedis = exports.broadCastByWS = exports.handleMsg = exports.handleKlines = exports.handleTickers = void 0;
+exports.getKlines = exports.setupWsClient = exports.getInstruments = exports.getExchangeInfo = exports.client = exports.broadCastMsgByRedis = exports.broadCastByWS = exports.handleMsg = exports.handleKlines = exports.handleTickers = void 0;
 const { Spot } = require('@binance/connector');
 const types_1 = require("../../types");
 const logger_1 = require("../../logger");
@@ -23,7 +23,7 @@ const client = new Spot('', '', {
 exports.client = client;
 function handleTickers(message) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield dao_1.InstrumentTickerDao.upsert(message.data
+        yield dao_1.InstrumentInfoDao.upsert(message.data
             .filter((i) => i.s.endsWith('USDT') !== -1)
             .map((i) => {
             return {
@@ -75,7 +75,7 @@ function handleMsg(message) {
             handleTickers(message);
         }
         //  每30秒 更新K线数据
-        if (new Date().getSeconds() % 10 === 0 && util_1.isKlineMsg(message)) {
+        if (new Date().getSeconds() % 20 === 0 && util_1.isKlineMsg(message)) {
             handleKlines(message);
         }
     });
@@ -229,7 +229,7 @@ function setupWsClient(clients) {
         // const intervals = ['15m', '1h', '4h'];
         const intervals = ['15m', '1h'];
         // support combined stream, e.g.
-        const instruments = yield dao_1.InstrumentTickerDao.findByTopVolume({
+        const instruments = yield dao_1.InstrumentInfoDao.findByTopVolume({
             exchange: types_1.Exchange.Biance,
             limit: 80,
         });
@@ -260,7 +260,7 @@ function setupWsClient(clients) {
                 // if (jsonData.stream !== '!ticker@arr') {
                 // console.log(data);
                 // }
-                broadCastByWS(JSON.parse(data), clients);
+                // broadCastByWS(JSON.parse(data), clients);
                 handleMsg(JSON.parse(data));
             },
         });
@@ -303,8 +303,10 @@ function getExchangeInfo() {
     });
 }
 exports.getExchangeInfo = getExchangeInfo;
-function getSwapInsts() {
+function getInstruments() {
     return __awaiter(this, void 0, void 0, function* () {
+        const tickersData = yield client.publicRequest('GET', '/fapi/v1/ticker/24hr');
+        console.log(tickersData.data.length);
         return client
             .publicRequest('GET', '/fapi/v1/exchangeInfo', {})
             .then((res) => {
@@ -318,23 +320,31 @@ function getSwapInsts() {
                 .map((i) => {
                 let priceFilter;
                 let lotSize;
+                const ticker = tickersData.data.find((j) => j.symbol === i.symbol);
                 if (i.filters && i.filters.length) {
                     priceFilter = i.filters.filter((i) => i.filterType === types_1.FilterType.PRICE_FILTER)[0];
                     lotSize = i.filters.filter((i) => i.filterType === types_1.FilterType.LOT_SIZE)[0];
                 }
                 return {
                     instrument_id: i.symbol,
-                    underlying_index: i.baseAsset,
+                    base_currency: i.baseAsset,
                     quote_currency: i.quoteAsset,
                     tick_size: priceFilter ? priceFilter.tickSize : '0',
                     contract_val: '0',
                     listing: i.onboardDate,
                     delivery: '',
-                    trade_increment: '0',
                     size_increment: lotSize.stepSize,
                     alias: 'swap',
-                    settlement_currency: i.marginAsset,
-                    contract_val_currency: i.quoteAsset,
+                    last: +ticker.lastPrice,
+                    chg_24h: +ticker.priceChange,
+                    chg_rate_24h: +ticker.priceChangePercent,
+                    high_24h: ticker.highPrice,
+                    low_24h: ticker.lowPrice,
+                    volume_24h: ticker.quoteVolume,
+                    timestamp: ticker.closeTime,
+                    open_interest: '',
+                    open_24h: ticker.openPrice,
+                    volume_token_24h: ticker.volume,
                     exchange: types_1.Exchange.Biance,
                 };
             }));
@@ -345,7 +355,7 @@ function getSwapInsts() {
         });
     });
 }
-exports.getSwapInsts = getSwapInsts;
+exports.getInstruments = getInstruments;
 let status = 1;
 function getKlines(params) {
     return __awaiter(this, void 0, void 0, function* () {

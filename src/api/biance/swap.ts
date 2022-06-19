@@ -2,19 +2,15 @@ import * as bluebird from 'bluebird';
 import * as _ from 'lodash';
 import logger from '../../logger';
 import { Exchange, Instrument, HistoryKlinesJobsOpts } from '../../types';
-import {
-  InstrumentInfoDao,
-  InstrumentKlineDao,
-  InstrumentTickerDao,
-} from '../../dao';
+import { InstrumentInfoDao, InstrumentKlineDao } from '../../dao';
 import { InstrumentInfo } from '../../database/models';
-import { getSwapInsts } from './client';
+import { getInstruments } from './client';
 import { getBianceKlines } from './../common';
 import { getTimestamp } from '../../util';
 
 export async function initInstruments(): Promise<Instrument[]> {
   //获取全量永续合约信息
-  let instruments: Array<Instrument> = await getSwapInsts();
+  let instruments: Array<Instrument> = await getInstruments();
 
   // BTC合约及其他USDT本位合约
   instruments = instruments.filter((i) => i.instrument_id.endsWith('USDT'));
@@ -38,30 +34,11 @@ export async function initInstruments(): Promise<Instrument[]> {
 
     await InstrumentInfoDao.deleteByIds(
       _.map(invalidInsts, 'instrument_id'),
+      Exchange.Biance,
     ).then((result: any) => {
       if (result.ok === 1) {
         logger.info(
           `Biance[永续合约] - 删除下架合约，共: ${result.deletedCount} 条 ...`,
-        );
-      }
-    });
-
-    const oldTickers: any = await InstrumentTickerDao.find({
-      exchange: Exchange.Biance,
-    });
-
-    const invalidTickers = _.differenceBy(
-      oldTickers,
-      instruments,
-      'instrument_id',
-    );
-
-    await InstrumentTickerDao.deleteByIds(
-      _.map(invalidTickers, 'instrument_id'),
-    ).then((result: any) => {
-      if (result.ok === 1) {
-        logger.info(
-          `Biance[永续合约] - 删除下架合约 Tickers，共: ${result.deletedCount} 条 ...`,
         );
       }
     });

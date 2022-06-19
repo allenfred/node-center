@@ -15,6 +15,7 @@ const models_1 = require("../database/models");
 const types_1 = require("../types");
 const Okex = require("../api/okex");
 const Biance = require("../api/biance");
+const Bybit = require("../api/bybit");
 const lodash_1 = require("lodash");
 const Job_Granularity = {
     FiveMins: 60 * 5,
@@ -46,7 +47,7 @@ function execJob(granularity) {
         ];
         const customFilter = (i) => {
             if (jobsForBtcOnly.includes(granularity)) {
-                return i.underlying_index === 'BTC';
+                return i.base_currency === 'BTC';
             }
             else {
                 return i.quote_currency === 'USDT';
@@ -66,6 +67,11 @@ function execJob(granularity) {
         yield Promise.all([
             Okex.getHistoryKlines(validInsts.filter((i) => i.exchange === types_1.Exchange.Okex), { count, includeInterval: [granularity] }),
             Biance.getHistoryKlines(validInsts.filter((i) => i.exchange === types_1.Exchange.Biance), {
+                count,
+                delay: 500,
+                includeInterval: [granularity],
+            }),
+            Bybit.getHistoryKlines(validInsts.filter((i) => i.exchange === types_1.Exchange.Bybit), {
                 count,
                 delay: 500,
                 includeInterval: [granularity],

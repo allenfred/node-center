@@ -12,11 +12,13 @@ import {
   KlineInterval,
   WsFormatKline,
   BianceWsKline,
+  BianceTicker,
 } from '../../types';
 import logger from '../../logger';
-import { InstrumentTickerDao, InstrumentKlineDao } from '../../dao';
+import { InstrumentKlineDao, InstrumentInfoDao } from '../../dao';
 import redisClient from '../../redis/client';
 import { isKlineMsg, isTickerMsg, getKlineSubChannel } from './util';
+import { getInstrumentAlias } from '../../util';
 
 let publisher = null;
 
@@ -59,7 +61,7 @@ interface Ticker {
 }
 
 export async function handleTickers(message: BianceWsMsg) {
-  await InstrumentTickerDao.upsert(
+  await InstrumentInfoDao.upsert(
     message.data
       .filter((i) => i.s.endsWith('USDT') !== -1)
       .map((i: MiniTicker) => {
@@ -78,7 +80,7 @@ export async function handleTickers(message: BianceWsMsg) {
           open_24h: i.o, // 24小时开盘价
           volume_token_24h: i.v, // 	成交量（按币统计）
           exchange: Exchange.Biance,
-        };
+        } as any;
       }),
   );
 }
@@ -112,7 +114,7 @@ export async function handleMsg(message: BianceWsMsg) {
   }
 
   //  每30秒 更新K线数据
-  if (new Date().getSeconds() % 10 === 0 && isKlineMsg(message)) {
+  if (new Date().getSeconds() % 20 === 0 && isKlineMsg(message)) {
     handleKlines(message);
   }
 }
@@ -272,7 +274,7 @@ async function setupWsClient(clients: any[]) {
   const intervals = ['15m', '1h'];
 
   // support combined stream, e.g.
-  const instruments: Instrument[] = await InstrumentTickerDao.findByTopVolume({
+  const instruments: Instrument[] = await InstrumentInfoDao.findByTopVolume({
     exchange: Exchange.Biance,
     limit: 80,
   });
@@ -307,7 +309,7 @@ async function setupWsClient(clients: any[]) {
         // if (jsonData.stream !== '!ticker@arr') {
         // console.log(data);
         // }
-        broadCastByWS(JSON.parse(data), clients);
+        // broadCastByWS(JSON.parse(data), clients);
         handleMsg(JSON.parse(data));
       },
     },
@@ -348,7 +350,12 @@ async function getExchangeInfo() {
     });
 }
 
-async function getSwapInsts(): Promise<Array<Instrument>> {
+async function getInstruments(): Promise<Array<Instrument>> {
+  const tickersData: { data: BianceTicker[] } = await client.publicRequest(
+    'GET',
+    '/fapi/v1/ticker/24hr',
+  );
+  console.log(tickersData.data.length);
   return client
     .publicRequest('GET', '/fapi/v1/exchangeInfo', {})
     .then((res: { data: BianceExchangeInfoResponse }) => {
@@ -366,6 +373,8 @@ async function getSwapInsts(): Promise<Array<Instrument>> {
             let priceFilter: any;
             let lotSize: any;
 
+            const ticker = tickersData.data.find((j) => j.symbol === i.symbol);
+
             if (i.filters && i.filters.length) {
               priceFilter = i.filters.filter(
                 (i) => i.filterType === FilterType.PRICE_FILTER,
@@ -378,17 +387,24 @@ async function getSwapInsts(): Promise<Array<Instrument>> {
 
             return {
               instrument_id: i.symbol, // 合约ID，如BTCUSDT
-              underlying_index: i.baseAsset, // 交易货币币种，如：BTCUSDT中的BTC
+              base_currency: i.baseAsset, // 交易货币币种，如：BTCUSDT中的BTC
               quote_currency: i.quoteAsset, // 计价货币币种，如：BTCUSDT中的USDT
               tick_size: priceFilter ? priceFilter.tickSize : '0', // 下单价格精度 0.01
               contract_val: '0', // 合约面值 100
               listing: i.onboardDate, // 创建时间 '2019-09-06'
               delivery: '', // 结算时间 '2019-09-20'
-              trade_increment: '0', // futures 下单数量精度
               size_increment: lotSize.stepSize, // swap 下单数量精度
               alias: 'swap', // 本周 this_week 次周 next_week 季度 quarter 永续 swap
-              settlement_currency: i.marginAsset, // 盈亏结算和保证金币种，BTC
-              contract_val_currency: i.quoteAsset, // 合约面值计价币种
+              last: +ticker.lastPrice, // 最新成交价格
+              chg_24h: +ticker.priceChange, // 24小时价格变化
+              chg_rate_24h: +ticker.priceChangePercent, // 24小时价格变化(百分比)
+              high_24h: ticker.highPrice, // 24小时最高价
+              low_24h: ticker.lowPrice, // 24小时最低价
+              volume_24h: ticker.quoteVolume, // 24小时成交量（按张数统计）
+              timestamp: ticker.closeTime, // 系统时间 ISO_8601
+              open_interest: '', // 持仓量
+              open_24h: ticker.openPrice, // 24小时开盘价
+              volume_token_24h: ticker.volume, // 	成交量（按币统计）
               exchange: Exchange.Biance,
             };
           })
@@ -434,4 +450,4 @@ async function getKlines(params: BianceKlineApiOpts) {
     });
 }
 
-export { client, getExchangeInfo, getSwapInsts, setupWsClient, getKlines };
+export { client, getExchangeInfo, getInstruments, setupWsClient, getKlines };

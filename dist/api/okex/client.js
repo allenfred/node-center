@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getKlines = exports.getSwapInsts = exports.setupWsClient = exports.broadCastByRedis = exports.broadCastByWS = exports.handleMsg = exports.handleKlines = exports.handleTickers = void 0;
+exports.getKlines = exports.getInstruments = exports.setupWsClient = exports.broadCastByRedis = exports.broadCastByWS = exports.handleMsg = exports.handleKlines = exports.handleTickers = void 0;
 const publicClient_1 = require("../../lib/okex/publicClient");
 const okex_node_1 = require("@okfe/okex-node");
 const config_1 = require("../../config");
@@ -18,6 +18,7 @@ const types_1 = require("../../types");
 const dao_1 = require("../../dao");
 const util_1 = require("./util");
 const pClient = publicClient_1.default(config_1.OKEX_HTTP_HOST, 10000);
+const client = pClient.swap();
 let publisher = null;
 const OkxIntervalBar = {
     300: '5m',
@@ -31,28 +32,36 @@ const OkxIntervalBar = {
     86400: '1D',
     604800: '1W',
 };
-function getSwapInsts() {
+function getInstruments() {
     return __awaiter(this, void 0, void 0, function* () {
-        const data = yield pClient
-            .swap()
-            .getInstruments();
+        const tickers = yield client.getTickers();
+        const data = yield client.getInstruments();
         if (+data.code === 0) {
             return data.data
                 .filter((i) => i.state === 'live')
                 .map((i) => {
+                const ticker = tickers.data.find((j) => j.instId === i.instId);
                 return {
                     instrument_id: i.instId,
-                    underlying_index: i.ctValCcy,
+                    base_currency: i.ctValCcy,
                     quote_currency: i.settleCcy,
                     tick_size: i.tickSz,
                     contract_val: i.ctVal,
                     listing: i.listTime,
                     delivery: i.expTime,
-                    trade_increment: i.lotSz,
-                    size_increment: i.lotSz,
+                    size_increment: +i.lotSz,
                     alias: i.alias,
-                    settlement_currency: i.settleCcy,
-                    contract_val_currency: i.ctValCcy,
+                    last: ticker.last,
+                    chg_24h: ticker.last - ticker.open24h,
+                    chg_rate_24h: (((ticker.last - ticker.open24h) * 100) /
+                        ticker.open24h).toFixed(4),
+                    high_24h: ticker.high24h,
+                    low_24h: ticker.low24h,
+                    volume_24h: ticker.vol24h,
+                    timestamp: ticker.ts,
+                    open_interest: 0,
+                    open_24h: ticker.open24h,
+                    volume_token_24h: ticker.volCcy24h,
                     exchange: types_1.Exchange.Okex,
                 };
             });
@@ -62,7 +71,7 @@ function getSwapInsts() {
         }
     });
 }
-exports.getSwapInsts = getSwapInsts;
+exports.getInstruments = getInstruments;
 // V5 获取合约K线数据
 function getKlines({ instrumentId, start, end, granularity, }) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -143,7 +152,7 @@ function getBasicArgs(instruments) {
 */
 function handleTickers(message) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield dao_1.InstrumentTickerDao.upsert(message.data
+        yield dao_1.InstrumentInfoDao.upsert(message.data
             .filter((i) => i.instId.indexOf('USDT') !== -1)
             .map((i) => {
             return {

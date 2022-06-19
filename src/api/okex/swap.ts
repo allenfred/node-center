@@ -7,15 +7,15 @@ import {
   KlineReqOpts,
   HistoryKlinesJobsOpts,
 } from '../../types';
-import { InstrumentInfoDao, InstrumentTickerDao } from '../../dao';
+import { InstrumentInfoDao } from '../../dao';
 import { InstrumentInfo } from '../../database/models';
-import { getSwapInsts } from './client';
+import { getInstruments } from './client';
 import { getOkexKlines } from './../common';
-import { getTimestamp, getMemoryUsage, wait } from '../../util';
+import { getTimestamp } from '../../util';
 
 export async function initInstruments(): Promise<Instrument[]> {
   //获取全量永续合约信息
-  let instruments: Array<Instrument> = await getSwapInsts();
+  let instruments: Array<Instrument> = await getInstruments();
 
   // BTC合约及其他USDT本位合约
   instruments = instruments.filter((i) =>
@@ -41,30 +41,13 @@ export async function initInstruments(): Promise<Instrument[]> {
 
     await InstrumentInfoDao.deleteByIds(
       _.map(invalidInsts, 'instrument_id'),
+      Exchange.Okex,
     ).then((result: any) => {
       if (result.ok === 1) {
         logger.info(
           `Okx[永续合约] - 删除下架合约，共: ${result.deletedCount} 条 ...`,
         );
       }
-    });
-
-    const oldTickers: any = await InstrumentTickerDao.find({
-      exchange: Exchange.Okex,
-    });
-
-    const invalidTickers = _.differenceBy(
-      oldTickers,
-      instruments,
-      'instrument_id',
-    );
-
-    await InstrumentTickerDao.deleteByIds(
-      _.map(invalidTickers, 'instrument_id'),
-    ).then((result: any) => {
-      logger.info(
-        `Okx[永续合约] - 删除下架合约 Tickers，共: ${result.deletedCount} 条 ...`,
-      );
     });
   }
   // *************************

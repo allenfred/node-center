@@ -12,7 +12,9 @@ import { InstrumentKlineDao } from '../dao';
 import { getTimestamp, getMemoryUsage, sleep, wait } from '../util';
 import * as Biance from './biance/client';
 import * as Okex from './okex/client';
+import * as Bybit from './bybit/client';
 import logger from '../logger';
+import { BybitKline } from '../types/bybit';
 
 const BianceKlineInterval = {
   300: '5m',
@@ -25,6 +27,19 @@ const BianceKlineInterval = {
   43200: '12h',
   86400: '1d',
   604800: '1w',
+};
+
+const BybitKlineInterval = {
+  300: '5',
+  900: '15',
+  1800: '30',
+  3600: '60',
+  7200: '120',
+  14400: '240',
+  21600: '360',
+  43200: '720',
+  86400: 'D',
+  604800: 'W',
 };
 
 async function getKlinesWithLimited(
@@ -170,6 +185,60 @@ async function getBianceKlines(
             `[Biance/${instrument_id}/${
               KlineInterval[+granularity]
             }] K线 Done.`,
+          );
+          return Promise.resolve();
+        });
+    },
+    { concurrency: 2 },
+  );
+}
+
+async function getBybitKlines(
+  options: Array<InstReqOptions>,
+  updateOperate: any = InstrumentKlineDao.upsertMany,
+): Promise<any> {
+  //设置系统限速规则 (bybit官方API 限速规则：20次/s)
+
+  return bluebird.map(
+    options,
+    async (option: any) => {
+      const { exchange, instrument_id, granularity } = option;
+      return Bybit.getKlines({
+        symbol: instrument_id,
+        interval: BybitKlineInterval[granularity],
+        from: Math.round(new Date(option.start).valueOf() / 1000), // 秒
+        limit: 200, // default
+      })
+        .then((data: Array<any>) => {
+          let klines = [];
+          klines = data.map((kline: BybitKline) => {
+            return {
+              instrument_id,
+              underlying_index: instrument_id.replace('USDT', ''),
+              timestamp: new Date(+kline.start_at * 1000),
+              open: kline.open,
+              high: kline.high,
+              low: kline.low,
+              close: kline.close,
+              volume: kline.turnover, // 成交额 USD
+              currency_volume: kline.volume,
+              granularity,
+              exchange,
+            };
+          });
+
+          return updateOperate(
+            {
+              exchange,
+              instrument_id,
+              granularity,
+            },
+            klines,
+          );
+        })
+        .then(() => {
+          logger.info(
+            `[Bybit/${instrument_id}/${KlineInterval[+granularity]}] K线 Done.`,
           );
           return Promise.resolve();
         });
@@ -376,5 +445,6 @@ export {
   getKlines,
   getBianceKlines,
   getOkexKlines,
+  getBybitKlines,
   getKlinesReqParams,
 };

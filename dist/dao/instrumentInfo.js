@@ -29,15 +29,27 @@ function find(opts) {
         return yield models_1.InstrumentInfo.find(opts);
     });
 }
-function deleteByIds(instIds) {
+function findByTopVolume(opts) {
     return __awaiter(this, void 0, void 0, function* () {
-        return yield models_1.InstrumentInfo.deleteMany({ instrument_id: { $in: instIds } });
+        return yield models_1.InstrumentInfo.find({ exchange: opts.exchange }, null, {
+            limit: opts.limit || 30,
+            sort: { volume_24h: -1 },
+        }).exec();
+    });
+}
+function deleteByIds(instIds, exchange) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return yield models_1.InstrumentInfo.deleteMany({
+            exchange,
+            instrument_id: { $in: instIds },
+        });
     });
 }
 const InstrumentInfoDao = {
     upsert,
     find,
     deleteByIds,
+    findByTopVolume,
 };
 exports.InstrumentInfoDao = InstrumentInfoDao;
 //# sourceMappingURL=instrumentInfo.js.map

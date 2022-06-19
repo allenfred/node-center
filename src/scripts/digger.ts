@@ -23,7 +23,7 @@ const startJob = async () => {
   if (myArgs[0] === '-i') {
     const data = await Biance.initInstruments();
     data.map((i) => {
-      if (i.underlying_index === 'TLM') {
+      if (i.base_currency === 'TLM') {
         console.log(i);
       }
     });
