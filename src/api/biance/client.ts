@@ -63,7 +63,7 @@ interface Ticker {
 export async function handleTickers(message: BianceWsMsg) {
   await InstrumentInfoDao.upsert(
     message.data
-      .filter((i) => i.s.endsWith('USDT') !== -1)
+      .filter((i) => i.s.endsWith('USDT'))
       .map((i: MiniTicker) => {
         return {
           instrument_id: i.s, // symbol
