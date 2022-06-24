@@ -37,7 +37,7 @@ async function upsertMany(opts: any, klines: InstKline[]) {
     return;
   }
 
-  if (klines.length < 20) {
+  if (klines.length <= 30) {
     return upsert(klines);
   }
 
@@ -77,7 +77,7 @@ async function reinsertMany(opts: any, klines: InstKline[]) {
     return;
   }
 
-  if (klines.length < 20) {
+  if (klines.length <= 30) {
     return upsert(klines);
   }
 

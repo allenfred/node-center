@@ -4,6 +4,8 @@ import { initInstruments, getHistoryKlines } from '../api/bybit';
 import { SymbolIntervalFromLimitParam } from 'bybit-api';
 import logger from '../logger';
 const { LinearClient } = require('bybit-api');
+import { getCommandOpts } from './util';
+
 const args = process.argv.slice(2);
 
 const API_KEY = null;
@@ -24,14 +26,7 @@ const client = new LinearClient(
 export const startJob = async () => {
   logger.info('---- Init Bybit Klines Job Start Executing ----');
   const startTime = new Date().getTime();
-  const opt: any = {};
-  if (args.includes('-i') && args.length > args.indexOf('-i') + 1) {
-    opt.includeInst = [args[args.indexOf('-i') + 1]];
-  }
-
-  if (args.includes('-g') && args.length > args.indexOf('-g') + 1) {
-    opt.includeInterval = [+args[args.indexOf('-g') + 1]];
-  }
+  const opt = getCommandOpts(args);
 
   await connectMongo();
   const insts = await initInstruments();

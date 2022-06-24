@@ -6,6 +6,7 @@ import * as Okex from '../api/okex';
 import * as Biance from '../api/biance';
 import * as Bybit from '../api/bybit';
 import { sortBy } from 'lodash';
+import { openStdin } from 'process';
 
 const Job_Granularity = {
   FiveMins: 60 * 5,
@@ -99,4 +100,24 @@ async function execJob(granularity: number) {
   // );
 }
 
-export { Job_Granularity, execJob };
+function getCommandOpts(args: any) {
+  const opt: any = {};
+  // param for instrument_id
+  if (args.includes('-i') && args.length > args.indexOf('-i') + 1) {
+    opt.includeInst = [args[args.indexOf('-i') + 1]];
+  }
+
+  // param for gran
+  if (args.includes('-g') && args.length > args.indexOf('-g') + 1) {
+    opt.includeInterval = [+args[args.indexOf('-g') + 1]];
+  }
+
+  // param for count
+  if (args.includes('-n') && args.length > args.indexOf('-n') + 1) {
+    opt.count = [+args[args.indexOf('-n') + 1]];
+  }
+
+  return opt;
+}
+
+export { Job_Granularity, execJob, getCommandOpts };

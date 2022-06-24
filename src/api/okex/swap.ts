@@ -141,6 +141,12 @@ function getReqOptions(
     );
   }
 
+  if (opts && opts.includeInst && opts.includeInst.length) {
+    reqOptions = reqOptions.filter((i) =>
+      opts.includeInst.includes(i.instrument_id),
+    );
+  }
+
   return reqOptions;
 }
 

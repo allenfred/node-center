@@ -170,6 +170,12 @@ function getReqOptions(instId: string, opts: HistoryKlinesJobsOpts = {}) {
     );
   }
 
+  if (opts && opts.includeInst && opts.includeInst.length) {
+    reqOptions = reqOptions.filter((i) =>
+      opts.includeInst.includes(i.instrument_id),
+    );
+  }
+
   return reqOptions;
 }
 

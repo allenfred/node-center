@@ -14,8 +14,8 @@ import redisClient from '../../redis/client';
 import { isKlineMsg, isTickerMsg, getKlineSubChannel } from './util';
 import { BybitKline } from '../../types/bybit';
 
-const API_KEY = null;
-const PRIVATE_KEY = null;
+const API_KEY = 'mbcEkFhTDDb6nMtWCK';
+const PRIVATE_KEY = 'sDebFOPwH0Hn9bPl8j7WPXrlw1DIYHMF6yCS';
 const useLivenet = false;
 
 const client = new LinearClient(
@@ -29,7 +29,7 @@ const client = new LinearClient(
 
 async function setupWsClient(clients: any[]) {
   // const intervals = ['15m', '1h', '4h'];
-  const intervals = ['15m', '1h'];
+  const intervals = ['15', '1'];
 
   // support combined stream, e.g.
   const instruments: Instrument[] = await InstrumentInfoDao.findByTopVolume({
@@ -43,16 +43,14 @@ async function setupWsClient(clients: any[]) {
     })
     .forEach((e) => {
       intervals.forEach((i) => {
-        klineStreams.push(
-          e.instrument_id.replace('-', '').toLowerCase() + '@kline_' + i,
-        );
+        klineStreams.push(`candle.${i}.${e.instrument_id}`);
       });
     });
 
   const wsClient = new WebsocketClient(
     {
-      // key: key,
-      // secret: secret,
+      key: API_KEY,
+      secret: PRIVATE_KEY,
       market: 'linear',
       linear: true,
       livenet: true,
@@ -63,24 +61,25 @@ async function setupWsClient(clients: any[]) {
   wsClient.connectPublic();
 
   wsClient.on('update', (data) => {
-    console.log('raw message received ', JSON.stringify(data, null, 2));
+    logger.info('raw message received: ' + JSON.stringify(data));
   });
 
   wsClient.on('open', (data) => {
-    console.log('connection opened open:', data.wsKey);
-    wsClient.subscribe('candle.15.BTCUSDT');
+    logger.info('connection opened open:' + data.wsKey);
+    // wsClient.subscribe('candle.15.BTCUSDT');
+    wsClient.subscribe(klineStreams);
   });
 
   wsClient.on('response', (data) => {
-    console.log('log response: ', JSON.stringify(data, null, 2));
+    logger.info('log response: ' + JSON.stringify(data));
   });
 
   wsClient.on('reconnect', ({ wsKey }) => {
-    console.log('ws automatically reconnecting.... ', wsKey);
+    logger.info('ws automatically reconnecting.... ' + wsKey);
   });
 
   wsClient.on('reconnected', (data) => {
-    console.log('ws has reconnected ', data?.wsKey);
+    logger.info('ws has reconnected ' + data?.wsKey);
   });
 }
 

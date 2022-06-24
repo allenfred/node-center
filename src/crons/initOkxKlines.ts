@@ -2,6 +2,8 @@ import connectMongo from '../database/connection';
 import { initInstruments, getHistoryKlines } from '../api/okex';
 import * as _ from 'lodash';
 import logger from '../logger';
+import { getCommandOpts } from './util';
+
 const args = process.argv.slice(2);
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
@@ -9,14 +11,7 @@ const args = process.argv.slice(2);
 export const startJob = async () => {
   logger.info('---- Init Okex Klines Job Start Executing ----');
   const startTime = new Date().getTime();
-  const opt: any = {};
-  if (args.includes('-i') && args.length > args.indexOf('-i') + 1) {
-    opt.includeInst = [args[args.indexOf('-i') + 1]];
-  }
-
-  if (args.includes('-g') && args.length > args.indexOf('-g') + 1) {
-    opt.includeInterval = [+args[args.indexOf('-g') + 1]];
-  }
+  const opt = getCommandOpts(args);
 
   await connectMongo();
   const insts = await initInstruments();
