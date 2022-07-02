@@ -21,6 +21,7 @@ export const startJob = async () => {
   // 15 minutes.
   if (minuteNow % 15 === 0) {
     await execJob(Job_Granularity.FifteenMins);
+    await Bybit.initInstruments();
   }
 
   // hourly

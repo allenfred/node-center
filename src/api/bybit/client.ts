@@ -167,4 +167,29 @@ async function getKlines(param: SymbolIntervalFromLimitParam) {
     });
 }
 
+export async function getTickers() {
+  const tickers: APIResponse<BybitTicker[]> = await client.getTickers();
+  // U本位永续合约
+  return tickers.result
+    .filter((i: BybitTicker) => {
+      return i.symbol === 'USDT';
+    })
+    .map((ticker: BybitTicker) => {
+      return {
+        instrument_id: ticker.symbol, // 合约ID，如BTCUSDT
+        last: +ticker.last_price, // 最新成交价格
+        chg_24h: +ticker.last_price - +ticker.prev_price_24h, // 24小时价格变化
+        chg_rate_24h: +ticker.price_24h_pcnt, // 24小时价格变化(百分比)
+        high_24h: +ticker.high_price_24h, // 24小时最高价
+        low_24h: +ticker.low_price_24h, // 24小时最低价
+        volume_24h: +ticker.turnover_24h, // 24小时成交量（按张数统计）
+        timestamp: null, // 系统时间 ISO_8601
+        open_interest: ticker.open_interest, // 持仓量
+        open_24h: +ticker.prev_price_24h, // 24小时开盘价
+        volume_token_24h: ticker.volume_24h, // 	成交量（按币统计）
+        exchange: Exchange.Bybit,
+      };
+    });
+}
+
 export { client, getInstruments, setupWsClient, getKlines };

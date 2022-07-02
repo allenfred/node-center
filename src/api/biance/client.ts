@@ -16,8 +16,12 @@ import {
 } from '../../types';
 import logger from '../../logger';
 import { InstrumentKlineDao, InstrumentInfoDao } from '../../dao';
-import redisClient from '../../redis/client';
-import { isKlineMsg, isTickerMsg, getKlineSubChannel } from './util';
+import {
+  isKlineMsg,
+  isTickerMsg,
+  isKlineFinish,
+  getKlineSubChannel,
+} from './util';
 import { getInstrumentAlias } from '../../util';
 
 let publisher = null;
@@ -114,7 +118,10 @@ export async function handleMsg(message: BianceWsMsg) {
   }
 
   //  每30秒 更新K线数据
-  if (new Date().getSeconds() % 20 === 0 && isKlineMsg(message)) {
+  if (
+    isKlineMsg(message) &&
+    (new Date().getSeconds() % 20 === 0 || isKlineFinish(message))
+  ) {
     handleKlines(message);
   }
 }

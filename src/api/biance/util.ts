@@ -17,6 +17,13 @@ export function isKlineMsg(message: BianceWsMsg) {
   return false;
 }
 
+export function isKlineFinish(message: BianceWsMsg) {
+  if (message.data.k.x) {
+    return true;
+  }
+  return false;
+}
+
 export function getKlineSubChannel(interval: string, instId: string) {
   return `biance:candle${KlineInterval['candle' + interval]}:${instId}`;
 }

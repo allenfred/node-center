@@ -39,7 +39,7 @@ function upsertMany(opts, klines) {
         if (!klines.length) {
             return;
         }
-        if (klines.length < 20) {
+        if (klines.length <= 30) {
             return upsert(klines);
         }
         const filter = Object.assign(opts, {
@@ -73,7 +73,7 @@ function reinsertMany(opts, klines) {
         if (!klines.length) {
             return;
         }
-        if (klines.length < 20) {
+        if (klines.length <= 30) {
             return upsert(klines);
         }
         const filter = Object.assign(opts, {

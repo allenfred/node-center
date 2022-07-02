@@ -9,14 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getKlines = exports.setupWsClient = exports.getInstruments = exports.client = void 0;
+exports.getKlines = exports.setupWsClient = exports.getInstruments = exports.client = exports.getTickers = void 0;
 const { LinearClient } = require('bybit-api');
 const bybit_api_1 = require("bybit-api");
 const types_1 = require("../../types");
 const logger_1 = require("../../logger");
 const dao_1 = require("../../dao");
-const API_KEY = null;
-const PRIVATE_KEY = null;
+const API_KEY = 'mbcEkFhTDDb6nMtWCK';
+const PRIVATE_KEY = 'sDebFOPwH0Hn9bPl8j7WPXrlw1DIYHMF6yCS';
 const useLivenet = false;
 const client = new LinearClient(API_KEY, PRIVATE_KEY, 
 // optional, uses testnet by default. Set to 'true' to use livenet.
@@ -25,7 +25,7 @@ exports.client = client;
 function setupWsClient(clients) {
     return __awaiter(this, void 0, void 0, function* () {
         // const intervals = ['15m', '1h', '4h'];
-        const intervals = ['15m', '1h'];
+        const intervals = ['15', '1'];
         // support combined stream, e.g.
         const instruments = yield dao_1.InstrumentInfoDao.findByTopVolume({
             exchange: types_1.Exchange.Bybit,
@@ -38,32 +38,33 @@ function setupWsClient(clients) {
         })
             .forEach((e) => {
             intervals.forEach((i) => {
-                klineStreams.push(e.instrument_id.replace('-', '').toLowerCase() + '@kline_' + i);
+                klineStreams.push(`candle.${i}.${e.instrument_id}`);
             });
         });
         const wsClient = new bybit_api_1.WebsocketClient({
-            // key: key,
-            // secret: secret,
+            key: API_KEY,
+            secret: PRIVATE_KEY,
             market: 'linear',
             linear: true,
             livenet: true,
         }, logger_1.default);
         wsClient.connectPublic();
         wsClient.on('update', (data) => {
-            console.log('raw message received ', JSON.stringify(data, null, 2));
+            logger_1.default.info('raw message received: ' + JSON.stringify(data));
         });
         wsClient.on('open', (data) => {
-            console.log('connection opened open:', data.wsKey);
-            wsClient.subscribe('candle.15.BTCUSDT');
+            logger_1.default.info('connection opened open:' + data.wsKey);
+            // wsClient.subscribe('candle.15.BTCUSDT');
+            wsClient.subscribe(klineStreams);
         });
         wsClient.on('response', (data) => {
-            console.log('log response: ', JSON.stringify(data, null, 2));
+            logger_1.default.info('log response: ' + JSON.stringify(data));
         });
         wsClient.on('reconnect', ({ wsKey }) => {
-            console.log('ws automatically reconnecting.... ', wsKey);
+            logger_1.default.info('ws automatically reconnecting.... ' + wsKey);
         });
         wsClient.on('reconnected', (data) => {
-            console.log('ws has reconnected ', data === null || data === void 0 ? void 0 : data.wsKey);
+            logger_1.default.info('ws has reconnected ' + (data === null || data === void 0 ? void 0 : data.wsKey));
         });
     });
 }
@@ -150,4 +151,31 @@ function getKlines(param) {
     });
 }
 exports.getKlines = getKlines;
+function getTickers() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tickers = yield client.getTickers();
+        // U本位永续合约
+        return tickers.result
+            .filter((i) => {
+            return i.symbol === 'USDT';
+        })
+            .map((ticker) => {
+            return {
+                instrument_id: ticker.symbol,
+                last: +ticker.last_price,
+                chg_24h: +ticker.last_price - +ticker.prev_price_24h,
+                chg_rate_24h: +ticker.price_24h_pcnt,
+                high_24h: +ticker.high_price_24h,
+                low_24h: +ticker.low_price_24h,
+                volume_24h: +ticker.turnover_24h,
+                timestamp: null,
+                open_interest: ticker.open_interest,
+                open_24h: +ticker.prev_price_24h,
+                volume_token_24h: ticker.volume_24h,
+                exchange: types_1.Exchange.Bybit,
+            };
+        });
+    });
+}
+exports.getTickers = getTickers;
 //# sourceMappingURL=client.js.map

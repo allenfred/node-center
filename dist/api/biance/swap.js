@@ -114,6 +114,9 @@ function getReqOptions(instId, opts = {}) {
     if (opts && opts.includeInterval && opts.includeInterval.length) {
         reqOptions = reqOptions.filter((i) => opts.includeInterval.includes(i.granularity));
     }
+    if (opts && opts.includeInst && opts.includeInst.length) {
+        reqOptions = reqOptions.filter((i) => opts.includeInst.includes(i.instrument_id));
+    }
     return reqOptions;
 }
 function getHistoryKlines(instruments, options) {

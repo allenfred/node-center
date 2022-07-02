@@ -13,19 +13,14 @@ exports.startJob = void 0;
 const connection_1 = require("../database/connection");
 const biance_1 = require("../api/biance");
 const logger_1 = require("../logger");
+const util_1 = require("./util");
 const args = process.argv.slice(2);
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 // */5 * * * * At every 5 minute.
 exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     logger_1.default.info('---- Init Biance Klines Job Start Executing ----');
     const startTime = new Date().getTime();
-    const opt = {};
-    if (args.includes('-i') && args.length > args.indexOf('-i') + 1) {
-        opt.includeInst = [args[args.indexOf('-i') + 1]];
-    }
-    if (args.includes('-g') && args.length > args.indexOf('-g') + 1) {
-        opt.includeInterval = [+args[args.indexOf('-g') + 1]];
-    }
+    const opt = util_1.getCommandOpts(args);
     yield connection_1.default();
     const insts = yield biance_1.initInstruments();
     yield biance_1.getHistoryKlines(insts, opt);

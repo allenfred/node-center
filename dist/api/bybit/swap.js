@@ -46,7 +46,7 @@ function initInstruments() {
         //更新永续合约信息
         yield dao_1.InstrumentInfoDao.upsert(instruments);
         let data = yield dao_1.InstrumentInfoDao.find({ exchange: types_1.Exchange.Bybit });
-        data = data.filter((i) => i.klines !== 1);
+        // data = data.filter((i: Instrument) => i.klines !== 1);
         logger_1.default.info(`Bybit[永续合约] - 待初始化K线的合约数量 ${data.length} ...`);
         return _.sortBy(data, ['instrument_id']);
     });
@@ -112,6 +112,9 @@ function getReqOptions(instId, opts = {}) {
     }
     if (opts && opts.includeInterval && opts.includeInterval.length) {
         reqOptions = reqOptions.filter((i) => opts.includeInterval.includes(i.granularity));
+    }
+    if (opts && opts.includeInst && opts.includeInst.length) {
+        reqOptions = reqOptions.filter((i) => opts.includeInst.includes(i.instrument_id));
     }
     return reqOptions;
 }

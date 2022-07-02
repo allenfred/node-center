@@ -28,6 +28,7 @@ exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     // 15 minutes.
     if (minuteNow % 15 === 0) {
         yield util_1.execJob(util_1.Job_Granularity.FifteenMins);
+        yield Bybit.initInstruments();
     }
     // hourly
     if (minuteNow === 0) {

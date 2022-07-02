@@ -219,7 +219,7 @@ export interface BianceKlineApiOpts {
 
 export interface BianceWsMsg {
   stream: string; // !miniTicker@arr / <symbol>@kline_<interval>
-  data: any[];
+  data: any | any[];
 }
 
 export interface BianceTicker {

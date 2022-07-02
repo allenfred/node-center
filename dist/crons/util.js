@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.execJob = exports.Job_Granularity = void 0;
+exports.getCommandOpts = exports.execJob = exports.Job_Granularity = void 0;
 const util_1 = require("../util");
 const models_1 = require("../database/models");
 const types_1 = require("../types");
@@ -92,4 +92,21 @@ function execJob(granularity) {
     });
 }
 exports.execJob = execJob;
+function getCommandOpts(args) {
+    const opt = {};
+    // param for instrument_id
+    if (args.includes('-i') && args.length > args.indexOf('-i') + 1) {
+        opt.includeInst = [args[args.indexOf('-i') + 1]];
+    }
+    // param for gran
+    if (args.includes('-g') && args.length > args.indexOf('-g') + 1) {
+        opt.includeInterval = [+args[args.indexOf('-g') + 1]];
+    }
+    // param for count
+    if (args.includes('-n') && args.length > args.indexOf('-n') + 1) {
+        opt.count = [+args[args.indexOf('-n') + 1]];
+    }
+    return opt;
+}
+exports.getCommandOpts = getCommandOpts;
 //# sourceMappingURL=util.js.map
