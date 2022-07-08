@@ -189,8 +189,8 @@ function getBybitKlines(options, updateOperate = dao_1.InstrumentKlineDao.upsert
                         high: kline.high,
                         low: kline.low,
                         close: kline.close,
-                        volume: kline.turnover,
-                        currency_volume: kline.volume,
+                        volume: kline.volume,
+                        currency_volume: kline.turnover,
                         granularity,
                         exchange,
                     };

@@ -17,6 +17,9 @@ const schema = new Schema({
     granularity: Number,
     exchange: { type: String, default: 'okex' },
 });
+schema.index({ exchange: 1, instrument_id: 1 });
+schema.index({ instrument_id: 1, granularity: 1 });
+schema.index({ exchange: 1, instrument_id: 1, granularity: 1 });
 schema.index({ instrument_id: 1, timestamp: 1, granularity: 1, exchange: 1 }, { unique: true });
 exports.UsdtSwapKline = mongoose.model('usdt_swap_klines', schema);
 //# sourceMappingURL=usdtSwapKline.js.map

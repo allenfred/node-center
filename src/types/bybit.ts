@@ -93,6 +93,6 @@ export interface BybitKlineApiOpts {
 }
 
 export interface BybitWsMsg {
-  stream: string; // !miniTicker@arr / <symbol>@kline_<interval>
+  topic: string; // candle.15.BTCUSDT
   data: any[];
 }

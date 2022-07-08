@@ -74,6 +74,6 @@ async function setupServer(server: any) {
 export async function setupWsserver(server: any) {
   Okex.setupWsClient(clients);
   Biance.setupWsClient(clients);
-  // Bybit.setupWsClient(clients);
+  Bybit.setupWsClient(clients);
   setupServer(server);
 }

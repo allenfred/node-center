@@ -117,11 +117,8 @@ export async function handleMsg(message: BianceWsMsg) {
     handleTickers(message);
   }
 
-  //  每30秒 更新K线数据
-  if (
-    isKlineMsg(message) &&
-    (new Date().getSeconds() % 20 === 0 || isKlineFinish(message))
-  ) {
+  // 当K线完结 更新K线数据
+  if (isKlineMsg(message) && isKlineFinish(message)) {
     handleKlines(message);
   }
 }

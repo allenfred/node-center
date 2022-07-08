@@ -6,17 +6,21 @@ import {
   APIResponseWithTime,
   WebsocketClient,
 } from 'bybit-api';
-import * as moment from 'moment';
-import { Instrument, Exchange, BybitTicker } from '../../types';
+import {
+  Instrument,
+  Exchange,
+  BybitTicker,
+  BybitKline,
+  BybitWsKline,
+  BybitWsMsg,
+} from '../../types';
 import logger from '../../logger';
 import { InstrumentInfoDao, InstrumentKlineDao } from '../../dao';
-import redisClient from '../../redis/client';
 import { isKlineMsg, isTickerMsg, getKlineSubChannel } from './util';
-import { BybitKline } from '../../types/bybit';
 
 const API_KEY = 'mbcEkFhTDDb6nMtWCK';
 const PRIVATE_KEY = 'sDebFOPwH0Hn9bPl8j7WPXrlw1DIYHMF6yCS';
-const useLivenet = false;
+const useLivenet = true;
 
 const client = new LinearClient(
   API_KEY,
@@ -29,12 +33,13 @@ const client = new LinearClient(
 
 async function setupWsClient(clients: any[]) {
   // const intervals = ['15m', '1h', '4h'];
-  const intervals = ['15', '1'];
+  // const intervals = ['15', '60'];
+  const intervals = ['60'];
 
   // support combined stream, e.g.
   const instruments: Instrument[] = await InstrumentInfoDao.findByTopVolume({
     exchange: Exchange.Bybit,
-    limit: 80,
+    limit: 20,
   });
   const klineStreams = [];
   instruments
@@ -61,25 +66,47 @@ async function setupWsClient(clients: any[]) {
   wsClient.connectPublic();
 
   wsClient.on('update', (data) => {
-    logger.info('raw message received: ' + JSON.stringify(data));
+    if (data.topic.includes('candle') && data.data[0].confirm) {
+      handleKlines(data);
+    }
   });
 
   wsClient.on('open', (data) => {
-    logger.info('connection opened open:' + data.wsKey);
-    // wsClient.subscribe('candle.15.BTCUSDT');
-    wsClient.subscribe(klineStreams);
+    logger.info('[Bybit] ws open:' + data.wsKey);
+    // wsClient.subscribe(klineStreams);
+    wsClient.subscribe(['candle.60.BTCUSDT']);
   });
 
   wsClient.on('response', (data) => {
-    logger.info('log response: ' + JSON.stringify(data));
+    logger.info('[Bybit] ws response: ' + JSON.stringify(data));
   });
 
   wsClient.on('reconnect', ({ wsKey }) => {
-    logger.info('ws automatically reconnecting.... ' + wsKey);
+    logger.info('[Bybit] ws automatically reconnecting.... ' + wsKey);
   });
 
   wsClient.on('reconnected', (data) => {
-    logger.info('ws has reconnected ' + data?.wsKey);
+    logger.info('[Bybit] ws has reconnected ' + data?.wsKey);
+  });
+}
+
+export async function handleKlines(msg: BybitWsMsg) {
+  const splitStr = msg.topic.split('.');
+  const symbol = splitStr[2];
+  const k: BybitWsKline = msg.data[0];
+  await InstrumentKlineDao.upsertOne({
+    instrument_id: symbol,
+    underlying_index: symbol.replace('USDT', ''),
+    quote_currency: 'USDT',
+    timestamp: k.start,
+    open: +k.open,
+    high: +k.high,
+    low: +k.low,
+    close: +k.close,
+    volume: +k.volume, // 成交量
+    currency_volume: +k.turnover, // 成交额 以USDT计价
+    granularity: +splitStr[1] * 60,
+    exchange: Exchange.Bybit,
   });
 }
 

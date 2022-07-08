@@ -220,8 +220,8 @@ async function getBybitKlines(
               high: kline.high,
               low: kline.low,
               close: kline.close,
-              volume: kline.turnover, // 成交额 USD
-              currency_volume: kline.volume,
+              volume: kline.volume,
+              currency_volume: kline.turnover, // 成交额 USD
               granularity,
               exchange,
             };

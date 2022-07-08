@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupWsserver = void 0;
 const logger_1 = require("../logger");
 const Biance = require("../api/biance");
+const Bybit = require("../api/bybit");
 const Okex = require("../api/okex");
 const ws = require('ws');
 const clients = [];
@@ -73,7 +74,7 @@ function setupWsserver(server) {
     return __awaiter(this, void 0, void 0, function* () {
         Okex.setupWsClient(clients);
         Biance.setupWsClient(clients);
-        // Bybit.setupWsClient(clients);
+        Bybit.setupWsClient(clients);
         setupServer(server);
     });
 }

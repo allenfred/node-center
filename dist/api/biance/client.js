@@ -74,9 +74,8 @@ function handleMsg(message) {
             new Date().getSeconds() < 30) {
             handleTickers(message);
         }
-        //  每30秒 更新K线数据
-        if (util_1.isKlineMsg(message) &&
-            (new Date().getSeconds() % 20 === 0 || util_1.isKlineFinish(message))) {
+        // 当K线完结 更新K线数据
+        if (util_1.isKlineMsg(message) && util_1.isKlineFinish(message)) {
             handleKlines(message);
         }
     });

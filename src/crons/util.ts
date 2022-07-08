@@ -6,7 +6,6 @@ import * as Okex from '../api/okex';
 import * as Biance from '../api/biance';
 import * as Bybit from '../api/bybit';
 import { sortBy } from 'lodash';
-import { openStdin } from 'process';
 
 const Job_Granularity = {
   FiveMins: 60 * 5,

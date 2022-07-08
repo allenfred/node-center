@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getKlines = exports.setupWsClient = exports.getInstruments = exports.client = exports.getTickers = void 0;
+exports.getKlines = exports.setupWsClient = exports.getInstruments = exports.client = exports.getTickers = exports.handleKlines = void 0;
 const { LinearClient } = require('bybit-api');
 const bybit_api_1 = require("bybit-api");
 const types_1 = require("../../types");
@@ -17,7 +17,7 @@ const logger_1 = require("../../logger");
 const dao_1 = require("../../dao");
 const API_KEY = 'mbcEkFhTDDb6nMtWCK';
 const PRIVATE_KEY = 'sDebFOPwH0Hn9bPl8j7WPXrlw1DIYHMF6yCS';
-const useLivenet = false;
+const useLivenet = true;
 const client = new LinearClient(API_KEY, PRIVATE_KEY, 
 // optional, uses testnet by default. Set to 'true' to use livenet.
 useLivenet);
@@ -25,11 +25,12 @@ exports.client = client;
 function setupWsClient(clients) {
     return __awaiter(this, void 0, void 0, function* () {
         // const intervals = ['15m', '1h', '4h'];
-        const intervals = ['15', '1'];
+        // const intervals = ['15', '60'];
+        const intervals = ['60'];
         // support combined stream, e.g.
         const instruments = yield dao_1.InstrumentInfoDao.findByTopVolume({
             exchange: types_1.Exchange.Bybit,
-            limit: 80,
+            limit: 20,
         });
         const klineStreams = [];
         instruments
@@ -50,25 +51,49 @@ function setupWsClient(clients) {
         }, logger_1.default);
         wsClient.connectPublic();
         wsClient.on('update', (data) => {
-            logger_1.default.info('raw message received: ' + JSON.stringify(data));
+            if (data.topic.includes('candle') && data.data[0].confirm) {
+                handleKlines(data);
+            }
         });
         wsClient.on('open', (data) => {
-            logger_1.default.info('connection opened open:' + data.wsKey);
-            // wsClient.subscribe('candle.15.BTCUSDT');
-            wsClient.subscribe(klineStreams);
+            logger_1.default.info('[Bybit] ws open:' + data.wsKey);
+            // wsClient.subscribe(klineStreams);
+            wsClient.subscribe(['candle.60.BTCUSDT']);
         });
         wsClient.on('response', (data) => {
-            logger_1.default.info('log response: ' + JSON.stringify(data));
+            logger_1.default.info('[Bybit] ws response: ' + JSON.stringify(data));
         });
         wsClient.on('reconnect', ({ wsKey }) => {
-            logger_1.default.info('ws automatically reconnecting.... ' + wsKey);
+            logger_1.default.info('[Bybit] ws automatically reconnecting.... ' + wsKey);
         });
         wsClient.on('reconnected', (data) => {
-            logger_1.default.info('ws has reconnected ' + (data === null || data === void 0 ? void 0 : data.wsKey));
+            logger_1.default.info('[Bybit] ws has reconnected ' + (data === null || data === void 0 ? void 0 : data.wsKey));
         });
     });
 }
 exports.setupWsClient = setupWsClient;
+function handleKlines(msg) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const splitStr = msg.topic.split('.');
+        const symbol = splitStr[2];
+        const k = msg.data[0];
+        yield dao_1.InstrumentKlineDao.upsertOne({
+            instrument_id: symbol,
+            underlying_index: symbol.replace('USDT', ''),
+            quote_currency: 'USDT',
+            timestamp: k.start,
+            open: +k.open,
+            high: +k.high,
+            low: +k.low,
+            close: +k.close,
+            volume: +k.volume,
+            currency_volume: +k.turnover,
+            granularity: +splitStr[1] * 60,
+            exchange: types_1.Exchange.Bybit,
+        });
+    });
+}
+exports.handleKlines = handleKlines;
 /* // API访问的限制
 [
   {

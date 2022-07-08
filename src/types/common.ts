@@ -36,13 +36,13 @@ export interface InstKline {
   instrument_id: string; // 	合约ID (如果是交割合约：BTC-USDT-190322)
   underlying_index?: string; // 交易货币币种，如：BTC-USD-190322 中的BTC
   quote_currency?: string; // 计价货币币种，如：BTC-USD-190322 中的USD
-  timestamp: Date; // 开始时间 ISO_8601
+  timestamp: any; // 开始时间 ISO_8601
   open: number; // 开盘价
   high: number; // 最高价格
   low: number; // 	最低价格
   close: number; // 收盘价格
   volume: number; // 	交易量(张)
-  currency_volume?: number; // 按币种折算的交易量
+  currency_volume?: number; // 按USDT计价的交易额
   alias?: string; // 本周 this_week 次周 next_week 季度 quarter 永续 swap
   granularity: number; // 60 180 300 900 1800 3600 7200 14400 21600 43200 86400 604800
   exchange: string; // okex / biance
