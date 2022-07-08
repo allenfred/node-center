@@ -25,8 +25,7 @@ exports.client = client;
 function setupWsClient(clients) {
     return __awaiter(this, void 0, void 0, function* () {
         // const intervals = ['15m', '1h', '4h'];
-        // const intervals = ['15', '60'];
-        const intervals = ['60'];
+        const intervals = ['15', '60'];
         // support combined stream, e.g.
         const instruments = yield dao_1.InstrumentInfoDao.findByTopVolume({
             exchange: types_1.Exchange.Bybit,
@@ -57,8 +56,7 @@ function setupWsClient(clients) {
         });
         wsClient.on('open', (data) => {
             logger_1.default.info('[Bybit] ws open:' + data.wsKey);
-            // wsClient.subscribe(klineStreams);
-            wsClient.subscribe(['candle.60.BTCUSDT']);
+            wsClient.subscribe(klineStreams);
         });
         wsClient.on('response', (data) => {
             logger_1.default.info('[Bybit] ws response: ' + JSON.stringify(data));

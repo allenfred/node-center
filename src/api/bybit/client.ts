@@ -33,8 +33,7 @@ const client = new LinearClient(
 
 async function setupWsClient(clients: any[]) {
   // const intervals = ['15m', '1h', '4h'];
-  // const intervals = ['15', '60'];
-  const intervals = ['60'];
+  const intervals = ['15', '60'];
 
   // support combined stream, e.g.
   const instruments: Instrument[] = await InstrumentInfoDao.findByTopVolume({
@@ -73,8 +72,7 @@ async function setupWsClient(clients: any[]) {
 
   wsClient.on('open', (data) => {
     logger.info('[Bybit] ws open:' + data.wsKey);
-    // wsClient.subscribe(klineStreams);
-    wsClient.subscribe(['candle.60.BTCUSDT']);
+    wsClient.subscribe(klineStreams);
   });
 
   wsClient.on('response', (data) => {
