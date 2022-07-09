@@ -47,7 +47,7 @@ async function execJob(granularity: number) {
   const validInsts = sortBy(insts.filter(customFilter), ['instrument_id']);
 
   // 最近 4 条K线数据
-  let count = 8;
+  let count = 4;
 
   if (minuteNow === 0 && granularity === Job_Granularity.FifteenMins) {
     count = 8;
@@ -78,7 +78,7 @@ async function execJob(granularity: number) {
       validInsts.filter((i: any) => i.exchange === Exchange.Bybit),
       {
         count,
-        delay: 500,
+        delay: 200,
         includeInterval: [granularity],
       },
     ),

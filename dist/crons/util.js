@@ -55,7 +55,7 @@ function execJob(granularity) {
         };
         const validInsts = lodash_1.sortBy(insts.filter(customFilter), ['instrument_id']);
         // 最近 4 条K线数据
-        let count = 8;
+        let count = 4;
         if (minuteNow === 0 && granularity === Job_Granularity.FifteenMins) {
             count = 8;
         }
@@ -73,7 +73,7 @@ function execJob(granularity) {
             }),
             Bybit.getHistoryKlines(validInsts.filter((i) => i.exchange === types_1.Exchange.Bybit), {
                 count,
-                delay: 500,
+                delay: 200,
                 includeInterval: [granularity],
             }),
         ]);

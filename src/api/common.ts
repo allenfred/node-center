@@ -243,7 +243,7 @@ async function getBybitKlines(
           return Promise.resolve();
         });
     },
-    { concurrency: 2 },
+    { concurrency: 5 },
   );
 }
 

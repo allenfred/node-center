@@ -25,7 +25,7 @@ function connect() {
         yield mongoose.connect(`mongodb://${username}:${password}@${host}:${port}/${db}`, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            poolSize: 10,
+            poolSize: 30,
         });
     });
 }

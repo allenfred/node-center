@@ -205,7 +205,7 @@ function getBybitKlines(options, updateOperate = dao_1.InstrumentKlineDao.upsert
                 logger_1.default.info(`[Bybit/${instrument_id}/${types_1.KlineInterval[+granularity]}] K线 Done.`);
                 return Promise.resolve();
             });
-        }), { concurrency: 2 });
+        }), { concurrency: 5 });
     });
 }
 exports.getBybitKlines = getBybitKlines;
