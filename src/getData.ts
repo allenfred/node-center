@@ -72,12 +72,12 @@ import * as _ from 'lodash';
   //   },
   // ).exec();
   // console.log(klines);
-  // await UsdtSwapKline.deleteMany({
-  //   exchange: 'okex',
-  //   instrument_id: 'KNCUSDT',
-  // }).then((res) => {
-  //   console.log(res);
-  // });
+  await UsdtSwapKline.deleteMany({
+    exchange: 'bybit',
+    // instrument_id: 'KNCUSDT',
+  }).then((res) => {
+    console.log(res);
+  });
 
   process.exit();
   // await InstrumentInfo.aggregate([

@@ -162,7 +162,7 @@ async function getInstruments(): Promise<Array<Instrument>> {
         alias: 'swap', // 本周 this_week 次周 next_week 季度 quarter 永续 swap
         last: +ticker.last_price, // 最新成交价格
         chg_24h: +ticker.last_price - +ticker.prev_price_24h, // 24小时价格变化
-        chg_rate_24h: +ticker.price_24h_pcnt, // 24小时价格变化(百分比)
+        chg_rate_24h: +ticker.price_24h_pcnt * 100, // 24小时价格变化(百分比)
         high_24h: +ticker.high_price_24h, // 24小时最高价
         low_24h: +ticker.low_price_24h, // 24小时最低价
         volume_24h: +ticker.turnover_24h, // 24小时成交量（按张数统计）

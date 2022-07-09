@@ -143,7 +143,7 @@ function getInstruments() {
                 alias: 'swap',
                 last: +ticker.last_price,
                 chg_24h: +ticker.last_price - +ticker.prev_price_24h,
-                chg_rate_24h: +ticker.price_24h_pcnt,
+                chg_rate_24h: +ticker.price_24h_pcnt * 100,
                 high_24h: +ticker.high_price_24h,
                 low_24h: +ticker.low_price_24h,
                 volume_24h: +ticker.turnover_24h,
