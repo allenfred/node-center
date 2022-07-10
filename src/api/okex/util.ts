@@ -30,7 +30,6 @@ export function getKlineSubChannel(arg: { channel: string; instId: string }) {
 }
 
 export function isApiServer(req: any) {
-  // console.log(ws._socket.address());
   try {
     return req && req.socket.remoteAddress == '121.4.15.211';
   } catch (e) {

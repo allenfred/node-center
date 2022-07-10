@@ -21,7 +21,6 @@ function getKlineSubChannel(arg) {
 }
 exports.getKlineSubChannel = getKlineSubChannel;
 function isApiServer(req) {
-    // console.log(ws._socket.address());
     try {
         return req && req.socket.remoteAddress == '121.4.15.211';
     }

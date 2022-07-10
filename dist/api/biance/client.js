@@ -306,7 +306,6 @@ exports.getExchangeInfo = getExchangeInfo;
 function getInstruments() {
     return __awaiter(this, void 0, void 0, function* () {
         const tickersData = yield client.publicRequest('GET', '/fapi/v1/ticker/24hr');
-        console.log(tickersData.data.length);
         return client
             .publicRequest('GET', '/fapi/v1/exchangeInfo', {})
             .then((res) => {

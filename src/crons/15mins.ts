@@ -59,20 +59,6 @@ export const startJob = async () => {
     await execJob(Job_Granularity.OneDay);
   }
 
-  // At 00:15.
-  if (hourNow === 0 && minuteNow === 15) {
-    // await commonAPI.getKlines({
-    //   exchange: Exchange.Okex,
-    //   instId: 'BTC-USDT-SWAP',
-    //   count: 500,
-    // });
-    // await commonAPI.getKlines({
-    //   exchange: Exchange.Biance,
-    //   instId: 'BTCUSDT',
-    //   count: 500,
-    // });
-  }
-
   // At minute 15 on Monday.
   if (dayNow === 1 && hourNow === 0 && minuteNow === 15) {
     await execJob(Job_Granularity.Weekly);

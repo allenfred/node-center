@@ -42,7 +42,7 @@ function upsertMany(opts, klines) {
         const filter = Object.assign(opts, {
             timestamp: { $in: _.map(klines, 'timestamp') },
         });
-        const data = yield models_1.UsdtSwapKline.find(filter, 'timestamp', {
+        const data = yield models_1.UsdtSwapKline.find(filter, 'timestamp open high low close', {
             limit: klines.length,
             sort: { timestamp: 1 },
         }).exec();
@@ -61,20 +61,22 @@ function upsertMany(opts, klines) {
                         kline.low !== o.low ||
                         kline.close !== o.close));
             });
-            return !res;
+            return !!res;
         });
         if (insertNeeded.length) {
             logger_1.default.info(`[${klines[0].exchange}/${opts.instrument_id}/${klines[0].granularity}] 新增K线 ${insertNeeded.length} 条.`);
-            return models_1.UsdtSwapKline.insertMany(insertNeeded, {
+            yield models_1.UsdtSwapKline.insertMany(insertNeeded, {
                 ordered: false,
                 lean: true,
             });
         }
         if (updateNeeded.length) {
             logger_1.default.info(`[${klines[0].exchange}/${opts.instrument_id}/${klines[0].granularity}] 更新K线 ${updateNeeded.length} 条.`);
-            return upsert(updateNeeded);
+            yield upsert(updateNeeded);
         }
-        logger_1.default.info(`[${klines[0].exchange}/${opts.instrument_id}/${klines[0].granularity}] 无需更新.`);
+        if (!insertNeeded.length && !updateNeeded.length) {
+            logger_1.default.info(`[${klines[0].exchange}/${opts.instrument_id}/${klines[0].granularity}] 无需更新.`);
+        }
     });
 }
 // for init jobs

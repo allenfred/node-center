@@ -70,7 +70,7 @@ async function execJob(granularity: number) {
       validInsts.filter((i: any) => i.exchange === Exchange.Biance),
       {
         count,
-        delay: 500,
+        delay: 300,
         includeInterval: [granularity],
       },
     ),

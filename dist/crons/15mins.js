@@ -59,19 +59,6 @@ exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     if (hourNow === 0 && minuteNow === 0) {
         yield util_1.execJob(util_1.Job_Granularity.OneDay);
     }
-    // At 00:15.
-    if (hourNow === 0 && minuteNow === 15) {
-        // await commonAPI.getKlines({
-        //   exchange: Exchange.Okex,
-        //   instId: 'BTC-USDT-SWAP',
-        //   count: 500,
-        // });
-        // await commonAPI.getKlines({
-        //   exchange: Exchange.Biance,
-        //   instId: 'BTCUSDT',
-        //   count: 500,
-        // });
-    }
     // At minute 15 on Monday.
     if (dayNow === 1 && hourNow === 0 && minuteNow === 15) {
         yield util_1.execJob(util_1.Job_Granularity.Weekly);

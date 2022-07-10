@@ -41,10 +41,14 @@ async function upsertMany(opts: any, klines: InstKline[]) {
     timestamp: { $in: _.map(klines, 'timestamp') },
   });
 
-  const data = await UsdtSwapKline.find(filter, 'timestamp', {
-    limit: klines.length,
-    sort: { timestamp: 1 },
-  }).exec();
+  const data = await UsdtSwapKline.find(
+    filter,
+    'timestamp open high low close',
+    {
+      limit: klines.length,
+      sort: { timestamp: 1 },
+    },
+  ).exec();
 
   const insertNeeded = klines.filter((kline) => {
     const res = _.find(data, (o: any) => {
@@ -66,14 +70,15 @@ async function upsertMany(opts: any, klines: InstKline[]) {
           kline.close !== o.close)
       );
     });
-    return !res;
+
+    return !!res;
   });
 
   if (insertNeeded.length) {
     logger.info(
       `[${klines[0].exchange}/${opts.instrument_id}/${klines[0].granularity}] 新增K线 ${insertNeeded.length} 条.`,
     );
-    return UsdtSwapKline.insertMany(insertNeeded, {
+    await UsdtSwapKline.insertMany(insertNeeded, {
       ordered: false,
       lean: true,
     });
@@ -83,12 +88,14 @@ async function upsertMany(opts: any, klines: InstKline[]) {
     logger.info(
       `[${klines[0].exchange}/${opts.instrument_id}/${klines[0].granularity}] 更新K线 ${updateNeeded.length} 条.`,
     );
-    return upsert(updateNeeded);
+    await upsert(updateNeeded);
   }
 
-  logger.info(
-    `[${klines[0].exchange}/${opts.instrument_id}/${klines[0].granularity}] 无需更新.`,
-  );
+  if (!insertNeeded.length && !updateNeeded.length) {
+    logger.info(
+      `[${klines[0].exchange}/${opts.instrument_id}/${klines[0].granularity}] 无需更新.`,
+    );
+  }
 }
 
 // for init jobs

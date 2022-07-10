@@ -211,7 +211,7 @@ function getBybitKlines(options, updateOperate = dao_1.InstrumentKlineDao.upsert
                 // );
                 return Promise.resolve();
             });
-        }), { concurrency: 5 });
+        }), { concurrency: 3 });
     });
 }
 exports.getBybitKlines = getBybitKlines;

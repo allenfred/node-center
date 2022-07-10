@@ -68,7 +68,7 @@ function execJob(granularity) {
             Okex.getHistoryKlines(validInsts.filter((i) => i.exchange === types_1.Exchange.Okex), { count, includeInterval: [granularity] }),
             Biance.getHistoryKlines(validInsts.filter((i) => i.exchange === types_1.Exchange.Biance), {
                 count,
-                delay: 500,
+                delay: 300,
                 includeInterval: [granularity],
             }),
             Bybit.getHistoryKlines(validInsts.filter((i) => i.exchange === types_1.Exchange.Bybit), {

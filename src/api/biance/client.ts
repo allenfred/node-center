@@ -359,7 +359,6 @@ async function getInstruments(): Promise<Array<Instrument>> {
     'GET',
     '/fapi/v1/ticker/24hr',
   );
-  console.log(tickersData.data.length);
   return client
     .publicRequest('GET', '/fapi/v1/exchangeInfo', {})
     .then((res: { data: BianceExchangeInfoResponse }) => {
