@@ -58,54 +58,55 @@ function getReqOptions(instId, opts = {}) {
     const count = opts.count || 200;
     let reqOptions = [];
     const times = count % 200 === 0 ? count / 200 : Math.round(count / 200) + 1;
+    const limit = times === 1 ? count : 200;
     for (let i = 0; i < times; i++) {
         reqOptions.push({
             instrument_id: instrumentId,
-            start: util_1.getTimestamp((i + 1) * 15 * -200, 'm'),
-            end: util_1.getTimestamp(i * 15 * -200, 'm'),
+            start: util_1.getTimestamp((i + 1) * 15 * -limit, 'm'),
+            end: util_1.getTimestamp(i * 15 * -limit, 'm'),
             granularity: 900,
         });
         reqOptions.push({
             instrument_id: instrumentId,
-            start: util_1.getTimestamp((i + 1) * -200, 'h'),
-            end: util_1.getTimestamp(i * -200, 'h'),
+            start: util_1.getTimestamp((i + 1) * -limit, 'h'),
+            end: util_1.getTimestamp(i * -limit, 'h'),
             granularity: 3600,
         });
         reqOptions.push({
             instrument_id: instrumentId,
-            start: util_1.getTimestamp((i + 1) * 4 * -200, 'h'),
-            end: util_1.getTimestamp(i * 4 * -200, 'h'),
+            start: util_1.getTimestamp((i + 1) * 4 * -limit, 'h'),
+            end: util_1.getTimestamp(i * 4 * -limit, 'h'),
             granularity: 14400,
         });
         reqOptions.push({
             instrument_id: instrumentId,
-            start: util_1.getTimestamp((i + 1) * 24 * -200, 'h'),
-            end: util_1.getTimestamp(i * 24 * -200, 'h'),
+            start: util_1.getTimestamp((i + 1) * 24 * -limit, 'h'),
+            end: util_1.getTimestamp(i * 24 * -limit, 'h'),
             granularity: 86400,
         });
         if (instrumentId.indexOf('BTC') !== -1) {
             reqOptions.push({
                 instrument_id: instrumentId,
-                start: util_1.getTimestamp((i + 1) * 30 * -200, 'm'),
-                end: util_1.getTimestamp(i * 30 * -200, 'm'),
+                start: util_1.getTimestamp((i + 1) * 30 * -limit, 'm'),
+                end: util_1.getTimestamp(i * 30 * -limit, 'm'),
                 granularity: 1800,
             });
             reqOptions.push({
                 instrument_id: instrumentId,
-                start: util_1.getTimestamp((i + 1) * 2 * -200, 'h'),
-                end: util_1.getTimestamp(i * 2 * -200, 'h'),
+                start: util_1.getTimestamp((i + 1) * 2 * -limit, 'h'),
+                end: util_1.getTimestamp(i * 2 * -limit, 'h'),
                 granularity: 7200,
             });
             reqOptions.push({
                 instrument_id: instrumentId,
-                start: util_1.getTimestamp((i + 1) * 6 * -200, 'h'),
-                end: util_1.getTimestamp(i * 6 * -200, 'h'),
+                start: util_1.getTimestamp((i + 1) * 6 * -limit, 'h'),
+                end: util_1.getTimestamp(i * 6 * -limit, 'h'),
                 granularity: 21600,
             });
             reqOptions.push({
                 instrument_id: instrumentId,
-                start: util_1.getTimestamp((i + 1) * 12 * -200, 'h'),
-                end: util_1.getTimestamp(i * 12 * -200, 'h'),
+                start: util_1.getTimestamp((i + 1) * 12 * -limit, 'h'),
+                end: util_1.getTimestamp(i * 12 * -limit, 'h'),
                 granularity: 43200,
             });
         }
@@ -132,7 +133,7 @@ function getHistoryKlines(instruments, options) {
                 .then(() => {
                 return common_1.getBybitKlines(getReqOptions(instrument_id, opts).map((opt) => {
                     return Object.assign({}, opt, { exchange: types_1.Exchange.Bybit });
-                }), dao_1.InstrumentKlineDao.reinsertMany);
+                }));
             })
                 .then(() => {
                 return models_1.InstrumentInfo.updateOne({ exchange: types_1.Exchange.Bybit, instrument_id }, { klines: 1 });

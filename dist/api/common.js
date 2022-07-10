@@ -160,7 +160,11 @@ function getBianceKlines(options, updateOperate = dao_1.InstrumentKlineDao.upser
                 }, klines);
             })
                 .then(() => {
-                logger_1.default.info(`[Biance/${instrument_id}/${types_1.KlineInterval[+granularity]}] K线 Done.`);
+                // logger.info(
+                //   `[Biance/${instrument_id}/${
+                //     KlineInterval[+granularity]
+                //   }] K线 Done.`,
+                // );
                 return Promise.resolve();
             });
         }), { concurrency: 2 });
@@ -202,7 +206,9 @@ function getBybitKlines(options, updateOperate = dao_1.InstrumentKlineDao.upsert
                 }, klines);
             })
                 .then(() => {
-                logger_1.default.info(`[Bybit/${instrument_id}/${types_1.KlineInterval[+granularity]}] K线 Done.`);
+                // logger.info(
+                //   `[Bybit/${instrument_id}/${KlineInterval[+granularity]}] K线 Done.`,
+                // );
                 return Promise.resolve();
             });
         }), { concurrency: 5 });
@@ -245,7 +251,9 @@ function getOkexKlines(options, updateOperate = dao_1.InstrumentKlineDao.upsertM
                 }, klines);
             })
                 .then(() => {
-                logger_1.default.info(`[Okex/${instrument_id}/${types_1.KlineInterval[+granularity]}] K线 Done.`);
+                // logger.info(
+                //   `[Okex/${instrument_id}/${KlineInterval[+granularity]}] K线 Done.`,
+                // );
                 return Promise.resolve();
             });
         }), { concurrency: 5 });

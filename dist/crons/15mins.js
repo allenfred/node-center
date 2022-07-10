@@ -25,6 +25,7 @@ exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     const hourNow = new Date().getHours();
     const minuteNow = new Date().getMinutes();
     yield connection_1.default();
+    yield util_1.execJob(util_1.Job_Granularity.OneHour);
     // 15 minutes.
     if (minuteNow % 15 === 0) {
         yield util_1.execJob(util_1.Job_Granularity.FifteenMins);

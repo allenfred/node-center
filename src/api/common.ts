@@ -181,11 +181,11 @@ async function getBianceKlines(
           );
         })
         .then(() => {
-          logger.info(
-            `[Biance/${instrument_id}/${
-              KlineInterval[+granularity]
-            }] K线 Done.`,
-          );
+          // logger.info(
+          //   `[Biance/${instrument_id}/${
+          //     KlineInterval[+granularity]
+          //   }] K线 Done.`,
+          // );
           return Promise.resolve();
         });
     },
@@ -237,9 +237,9 @@ async function getBybitKlines(
           );
         })
         .then(() => {
-          logger.info(
-            `[Bybit/${instrument_id}/${KlineInterval[+granularity]}] K线 Done.`,
-          );
+          // logger.info(
+          //   `[Bybit/${instrument_id}/${KlineInterval[+granularity]}] K线 Done.`,
+          // );
           return Promise.resolve();
         });
     },
@@ -292,9 +292,9 @@ async function getOkexKlines(
           );
         })
         .then(() => {
-          logger.info(
-            `[Okex/${instrument_id}/${KlineInterval[+granularity]}] K线 Done.`,
-          );
+          // logger.info(
+          //   `[Okex/${instrument_id}/${KlineInterval[+granularity]}] K线 Done.`,
+          // );
           return Promise.resolve();
         });
     },

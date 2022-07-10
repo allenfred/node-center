@@ -37,19 +37,16 @@ async function upsertMany(opts: any, klines: InstKline[]) {
     return;
   }
 
-  if (klines.length <= 30) {
-    return upsert(klines);
-  }
-
   const filter = Object.assign(opts, {
     timestamp: { $in: _.map(klines, 'timestamp') },
   });
+
   const data = await UsdtSwapKline.find(filter, 'timestamp', {
     limit: klines.length,
     sort: { timestamp: 1 },
   }).exec();
 
-  const filteredKlines = klines.filter((kline) => {
+  const insertNeeded = klines.filter((kline) => {
     const res = _.find(data, (o: any) => {
       return (
         new Date(o.timestamp).valueOf() === new Date(kline.timestamp).valueOf()
@@ -58,17 +55,40 @@ async function upsertMany(opts: any, klines: InstKline[]) {
     return !res;
   });
 
-  if (filteredKlines.length) {
-    // return upsert(filteredKlines);
-    return UsdtSwapKline.insertMany(filteredKlines, {
+  const updateNeeded = klines.filter((kline) => {
+    const res = _.find(data, (o: any) => {
+      return (
+        new Date(o.timestamp).valueOf() ===
+          new Date(kline.timestamp).valueOf() &&
+        (kline.open !== o.open ||
+          kline.high !== o.high ||
+          kline.low !== o.low ||
+          kline.close !== o.close)
+      );
+    });
+    return !res;
+  });
+
+  if (insertNeeded.length) {
+    logger.info(
+      `[${klines[0].exchange}/${opts.instrument_id}/${klines[0].granularity}] 新增K线 ${insertNeeded.length} 条.`,
+    );
+    return UsdtSwapKline.insertMany(insertNeeded, {
       ordered: false,
       lean: true,
     });
-  } else {
-    logger.info(
-      `[${opts.instrument_id}/${klines[0].granularity}] 数据已经ready, 无需更新...`,
-    );
   }
+
+  if (updateNeeded.length) {
+    logger.info(
+      `[${klines[0].exchange}/${opts.instrument_id}/${klines[0].granularity}] 更新K线 ${updateNeeded.length} 条.`,
+    );
+    return upsert(updateNeeded);
+  }
+
+  logger.info(
+    `[${klines[0].exchange}/${opts.instrument_id}/${klines[0].granularity}] 无需更新.`,
+  );
 }
 
 // for init jobs
