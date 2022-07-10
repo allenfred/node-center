@@ -77,18 +77,6 @@ function execJob(granularity) {
                 includeInterval: [granularity],
             }),
         ]);
-        // await Okex.getHistoryKlines(
-        //   validInsts.filter((i: any) => i.exchange === Exchange.Okex),
-        //   { count, includeInterval: [granularity] },
-        // );
-        // await Biance.getHistoryKlines(
-        //   validInsts.filter((i: any) => i.exchange === Exchange.Biance),
-        //   {
-        //     count,
-        //     delay: 1000,
-        //     includeInterval: [granularity],
-        //   },
-        // );
     });
 }
 exports.execJob = execJob;

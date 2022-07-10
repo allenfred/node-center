@@ -356,9 +356,8 @@ async function setupWsClient(clients: any[]) {
 
       // 公共频道消息
       if (eventType == undefined) {
-        // broadCastMsg(obj);
-        broadCastByWS(obj, clients);
-        handleMsg(obj);
+        // broadCastByWS(obj, clients);
+        // handleMsg(obj);
       }
     } catch (e) {
       logger.error('handleMessage catch err: ', e);
