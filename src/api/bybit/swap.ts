@@ -167,6 +167,7 @@ export async function getHistoryKlines(
           getReqOptions(instrument_id, opts).map((opt: any) => {
             return Object.assign({}, opt, { exchange: Exchange.Bybit });
           }),
+          options.updateFunc || InstrumentKlineDao.upsertMany,
         );
       })
       .then(() => {

@@ -1,5 +1,7 @@
 import connectMongo from '../database/connection';
 import { initInstruments, getHistoryKlines } from '../api/okex';
+import { InstrumentInfoDao, InstrumentKlineDao } from '../dao';
+import { Exchange } from '../types';
 import * as _ from 'lodash';
 import logger from '../logger';
 import { getCommandOpts } from './util';
@@ -14,7 +16,10 @@ export const startJob = async () => {
   const opt = getCommandOpts(args);
 
   await connectMongo();
-  const insts = await initInstruments();
+  const insts = await InstrumentInfoDao.findAll().then((inst) => {
+    return inst.filter((i: any) => i.exchange === Exchange.Okex);
+  });
+
   await getHistoryKlines(insts, opt);
 
   const endTime = new Date().getTime();

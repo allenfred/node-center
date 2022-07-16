@@ -12,6 +12,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.startJob = void 0;
 const connection_1 = require("../database/connection");
 const okex_1 = require("../api/okex");
+const dao_1 = require("../dao");
+const types_1 = require("../types");
 const logger_1 = require("../logger");
 const util_1 = require("./util");
 const args = process.argv.slice(2);
@@ -22,7 +24,9 @@ exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     const startTime = new Date().getTime();
     const opt = util_1.getCommandOpts(args);
     yield connection_1.default();
-    const insts = yield okex_1.initInstruments();
+    const insts = yield dao_1.InstrumentInfoDao.findAll().then((inst) => {
+        return inst.filter((i) => i.exchange === types_1.Exchange.Okex);
+    });
     yield okex_1.getHistoryKlines(insts, opt);
     const endTime = new Date().getTime();
     const usedTime = ((endTime - startTime) / 1000).toFixed(1);

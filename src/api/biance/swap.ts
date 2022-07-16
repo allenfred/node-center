@@ -199,13 +199,16 @@ export async function getHistoryKlines(
           getReqOptions(instrument_id, opts).map((opt: any) => {
             return Object.assign({}, opt, { exchange: Exchange.Biance });
           }),
+          options.updateFunc || InstrumentKlineDao.upsertMany,
         );
       })
       .then(() => {
         return InstrumentInfo.updateOne(
           { exchange: Exchange.Biance, instrument_id },
           { klines: 1 },
-        );
+        ).catch((e: any) => {
+          logger.error('InstrumentInfo updateOne ' + e.message);
+        });
       })
       .then(() => {
         return;

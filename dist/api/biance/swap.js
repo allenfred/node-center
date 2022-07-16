@@ -133,10 +133,12 @@ function getHistoryKlines(instruments, options) {
                 .then(() => {
                 return common_1.getBianceKlines(getReqOptions(instrument_id, opts).map((opt) => {
                     return Object.assign({}, opt, { exchange: types_1.Exchange.Biance });
-                }));
+                }), options.updateFunc || dao_1.InstrumentKlineDao.upsertMany);
             })
                 .then(() => {
-                return models_1.InstrumentInfo.updateOne({ exchange: types_1.Exchange.Biance, instrument_id }, { klines: 1 });
+                return models_1.InstrumentInfo.updateOne({ exchange: types_1.Exchange.Biance, instrument_id }, { klines: 1 }).catch((e) => {
+                    logger_1.default.error('InstrumentInfo updateOne ' + e.message);
+                });
             })
                 .then(() => {
                 return;

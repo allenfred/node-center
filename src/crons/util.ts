@@ -1,5 +1,6 @@
 import { getKlinesWithLimited } from '../api/common';
 import { getTimestamp, getISOString, getCountByHoursAgo } from '../util';
+import { InstrumentInfoDao, InstrumentKlineDao } from '../dao';
 import { InstrumentInfo } from '../database/models';
 import { Instrument, InstReqOptions, Exchange } from '../types';
 import * as Okex from '../api/okex';
@@ -21,12 +22,14 @@ const Job_Granularity = {
 };
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
-async function execJob(granularity: number) {
+async function execJob(granularity: number, limit?: number) {
   const hourNow = new Date().getHours();
   const minuteNow = new Date().getMinutes();
 
   // 获取所有合约信息
-  const insts: Instrument[] = await InstrumentInfo.find({});
+  // const insts: Instrument[] = await InstrumentInfo.find({});
+  const insts: Instrument[] = await InstrumentInfoDao.findAll();
+
   // 5min / 30min / 2h / 6h / 1w
   const jobsForBtcOnly = [
     Job_Granularity.FiveMins,
@@ -47,7 +50,7 @@ async function execJob(granularity: number) {
   const validInsts = sortBy(insts.filter(customFilter), ['instrument_id']);
 
   // 最近 4 条K线数据
-  let count = 4;
+  let count = limit || 4;
 
   if (minuteNow === 0 && granularity === Job_Granularity.FifteenMins) {
     count = 8;
@@ -64,7 +67,10 @@ async function execJob(granularity: number) {
   await Promise.all([
     Okex.getHistoryKlines(
       validInsts.filter((i: any) => i.exchange === Exchange.Okex),
-      { count, includeInterval: [granularity] },
+      {
+        count,
+        includeInterval: [granularity],
+      },
     ),
     Biance.getHistoryKlines(
       validInsts.filter((i: any) => i.exchange === Exchange.Biance),

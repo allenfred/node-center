@@ -91,4 +91,5 @@ export interface HistoryKlinesJobsOpts {
   excludeInst?: string[];
   includeInterval?: number[];
   excludeInterval?: number[];
+  updateFunc?: any;
 }

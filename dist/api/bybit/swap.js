@@ -133,7 +133,7 @@ function getHistoryKlines(instruments, options) {
                 .then(() => {
                 return common_1.getBybitKlines(getReqOptions(instrument_id, opts).map((opt) => {
                     return Object.assign({}, opt, { exchange: types_1.Exchange.Bybit });
-                }));
+                }), options.updateFunc || dao_1.InstrumentKlineDao.upsertMany);
             })
                 .then(() => {
                 return models_1.InstrumentInfo.updateOne({ exchange: types_1.Exchange.Bybit, instrument_id }, { klines: 1 });

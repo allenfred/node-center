@@ -1,4 +1,5 @@
 import connectMongo from '../database/connection';
+import { InstrumentInfoDao, InstrumentKlineDao } from '../dao';
 import { initInstruments, getHistoryKlines } from '../api/biance';
 import logger from '../logger';
 import { getCommandOpts } from './util';

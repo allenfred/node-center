@@ -1,7 +1,7 @@
-import * as _ from 'lodash';
 import connectMongo from '../database/connection';
-import { initInstruments, getHistoryKlines } from '../api/bybit';
-import { SymbolIntervalFromLimitParam } from 'bybit-api';
+import { InstrumentInfoDao } from '../dao';
+import { getHistoryKlines } from '../api/bybit';
+import { Exchange } from '../types';
 import logger from '../logger';
 const { LinearClient } = require('bybit-api');
 import { getCommandOpts } from './util';
@@ -29,7 +29,10 @@ export const startJob = async () => {
   const opt = getCommandOpts(args);
 
   await connectMongo();
-  const insts = await initInstruments();
+  const insts = await InstrumentInfoDao.findAll().then((inst) => {
+    return inst.filter((i: any) => i.exchange === Exchange.Bybit);
+  });
+
   await getHistoryKlines(insts, opt);
 
   const endTime = new Date().getTime();

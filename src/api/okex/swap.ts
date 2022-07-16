@@ -7,7 +7,7 @@ import {
   KlineReqOpts,
   HistoryKlinesJobsOpts,
 } from '../../types';
-import { InstrumentInfoDao } from '../../dao';
+import { InstrumentInfoDao, InstrumentKlineDao } from '../../dao';
 import { InstrumentInfo } from '../../database/models';
 import { getInstruments } from './client';
 import { getOkexKlines } from './../common';
@@ -168,6 +168,7 @@ export async function getHistoryKlines(
           getReqOptions(instrument_id, opts).map((opt: any) => {
             return Object.assign({}, opt, { exchange: Exchange.Okex });
           }),
+          options.updateFunc || InstrumentKlineDao.upsertMany,
         );
       })
       .then(() => {

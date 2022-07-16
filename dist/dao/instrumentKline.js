@@ -28,9 +28,11 @@ function upsert(klines) {
             yield models_1.UsdtSwapKline.updateOne(uniqueCondition, kline, {
                 upsert: true,
             }).catch((err) => {
-                logger_1.default.error(`[UpdateKline:${kline.exchange}/${kline.instrument_id}/${kline.granularity}] CatchError: ${err.stack.substring(0, 100)}`);
+                logger_1.default.error(`[UpdateKline:${kline.exchange}/${kline.instrument_id}/${kline.granularity
+                // }] CatchError: ${err.stack.substring(0, 1000)}`,
+                }] CatchError: ${err.message}`);
             });
-        }), { concurrency: 5 });
+        }), { concurrency: 1 });
     });
 }
 // for daily cron jobs
@@ -68,6 +70,8 @@ function upsertMany(opts, klines) {
             yield models_1.UsdtSwapKline.insertMany(insertNeeded, {
                 ordered: false,
                 lean: true,
+            }).catch((err) => {
+                logger_1.default.error(`[insertMany:${insertNeeded[0].exchange}/${insertNeeded[0].instrument_id}/${insertNeeded[0].granularity}] CatchError: ${err.message}`);
             });
         }
         if (updateNeeded.length) {

@@ -17,7 +17,7 @@ async function connect() {
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      poolSize: 30,
+      poolSize: 50,
     },
   );
 }

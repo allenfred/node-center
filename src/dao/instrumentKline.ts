@@ -23,11 +23,12 @@ async function upsert(klines: InstKline[]) {
         logger.error(
           `[UpdateKline:${kline.exchange}/${kline.instrument_id}/${
             kline.granularity
-          }] CatchError: ${err.stack.substring(0, 100)}`,
+            // }] CatchError: ${err.stack.substring(0, 1000)}`,
+          }] CatchError: ${err.message}`,
         );
       });
     },
-    { concurrency: 5 },
+    { concurrency: 1 },
   );
 }
 
@@ -78,9 +79,14 @@ async function upsertMany(opts: any, klines: InstKline[]) {
     logger.info(
       `[${klines[0].exchange}/${opts.instrument_id}/${klines[0].granularity}] 新增K线 ${insertNeeded.length} 条.`,
     );
+
     await UsdtSwapKline.insertMany(insertNeeded, {
       ordered: false,
       lean: true,
+    }).catch((err: any) => {
+      logger.error(
+        `[insertMany:${insertNeeded[0].exchange}/${insertNeeded[0].instrument_id}/${insertNeeded[0].granularity}] CatchError: ${err.message}`,
+      );
     });
   }
 

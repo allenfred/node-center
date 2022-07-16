@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCommandOpts = exports.execJob = exports.Job_Granularity = void 0;
 const util_1 = require("../util");
-const models_1 = require("../database/models");
+const dao_1 = require("../dao");
 const types_1 = require("../types");
 const Okex = require("../api/okex");
 const Biance = require("../api/biance");
@@ -31,12 +31,13 @@ const Job_Granularity = {
 };
 exports.Job_Granularity = Job_Granularity;
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
-function execJob(granularity) {
+function execJob(granularity, limit) {
     return __awaiter(this, void 0, void 0, function* () {
         const hourNow = new Date().getHours();
         const minuteNow = new Date().getMinutes();
         // 获取所有合约信息
-        const insts = yield models_1.InstrumentInfo.find({});
+        // const insts: Instrument[] = await InstrumentInfo.find({});
+        const insts = yield dao_1.InstrumentInfoDao.findAll();
         // 5min / 30min / 2h / 6h / 1w
         const jobsForBtcOnly = [
             Job_Granularity.FiveMins,
@@ -55,7 +56,7 @@ function execJob(granularity) {
         };
         const validInsts = lodash_1.sortBy(insts.filter(customFilter), ['instrument_id']);
         // 最近 4 条K线数据
-        let count = 4;
+        let count = limit || 4;
         if (minuteNow === 0 && granularity === Job_Granularity.FifteenMins) {
             count = 8;
         }
@@ -65,7 +66,10 @@ function execJob(granularity) {
             count = util_1.getCountByHoursAgo(24, granularity);
         }
         yield Promise.all([
-            Okex.getHistoryKlines(validInsts.filter((i) => i.exchange === types_1.Exchange.Okex), { count, includeInterval: [granularity] }),
+            Okex.getHistoryKlines(validInsts.filter((i) => i.exchange === types_1.Exchange.Okex), {
+                count,
+                includeInterval: [granularity],
+            }),
             Biance.getHistoryKlines(validInsts.filter((i) => i.exchange === types_1.Exchange.Biance), {
                 count,
                 delay: 300,

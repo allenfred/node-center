@@ -132,7 +132,7 @@ function getHistoryKlines(instruments, options) {
                 .then(() => {
                 return common_1.getOkexKlines(getReqOptions(instrument_id, opts).map((opt) => {
                     return Object.assign({}, opt, { exchange: types_1.Exchange.Okex });
-                }));
+                }), options.updateFunc || dao_1.InstrumentKlineDao.upsertMany);
             })
                 .then(() => {
                 return models_1.InstrumentInfo.updateOne({ exchange: types_1.Exchange.Okex, instrument_id }, { klines: 1 });
