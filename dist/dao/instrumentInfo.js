@@ -48,7 +48,6 @@ function deleteByIds(instIds, exchange) {
 function findAll() {
     return __awaiter(this, void 0, void 0, function* () {
         // 获取所有合约信息
-        // const insts: Instrument[] = await InstrumentInfo.find({});
         const insts = yield models_1.InstrumentInfo.aggregate([
             { $sort: { exchange: 1 } },
             {

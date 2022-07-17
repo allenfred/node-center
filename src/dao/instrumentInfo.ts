@@ -34,7 +34,6 @@ async function deleteByIds(instIds: string[], exchange: string) {
 
 async function findAll() {
   // 获取所有合约信息
-  // const insts: Instrument[] = await InstrumentInfo.find({});
   const insts: Instrument[] = await InstrumentInfo.aggregate([
     { $sort: { exchange: 1 } },
     {

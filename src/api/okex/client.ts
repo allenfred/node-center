@@ -74,7 +74,7 @@ async function getInstruments(): Promise<Array<Instrument>> {
           ).toFixed(4), // 24小时价格变化(百分比)
           high_24h: ticker.high24h, // 24小时最高价
           low_24h: ticker.low24h, // 24小时最低价
-          volume_24h: ticker.vol24h, // 24小时成交量（按张数统计）
+          volume_24h: ticker.vol24h * ticker.last * +i.ctVal, // 24小时成交量（按张数统计）
           timestamp: ticker.ts, // 系统时间 ISO_8601
           open_interest: 0, // 持仓量
           open_24h: ticker.open24h, // 24小时开盘价

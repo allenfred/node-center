@@ -57,7 +57,7 @@ function getInstruments() {
                         ticker.open24h).toFixed(4),
                     high_24h: ticker.high24h,
                     low_24h: ticker.low24h,
-                    volume_24h: ticker.vol24h,
+                    volume_24h: ticker.vol24h * ticker.last * +i.ctVal,
                     timestamp: ticker.ts,
                     open_interest: 0,
                     open_24h: ticker.open24h,
