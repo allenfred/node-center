@@ -71,9 +71,19 @@ function findAll() {
                 },
             },
         ]);
+        insts.forEach((i) => {
+            console.log(i.exchange, i.base_currency);
+        });
         return insts;
     });
 }
+// async function findAll() {
+//   // 获取所有合约信息
+//   let insts = await InstrumentInfo.find().exec();
+//   insts = _.orderBy(insts, ['volume_24h'], ['desc']);
+//   insts = _.uniqBy(insts, 'base_currency');
+//   return insts;
+// }
 const InstrumentInfoDao = {
     upsert,
     find,

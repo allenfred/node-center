@@ -1,6 +1,7 @@
 import * as bluebird from 'bluebird';
 import { InstrumentInfo } from '../database/models';
 import { Instrument } from '../types';
+import * as _ from 'lodash';
 
 async function upsert(instruments: Instrument[]): Promise<any> {
   return bluebird.map(instruments, async (item: Instrument) => {
@@ -34,29 +35,9 @@ async function deleteByIds(instIds: string[], exchange: string) {
 
 async function findAll() {
   // 获取所有合约信息
-  const insts: Instrument[] = await InstrumentInfo.aggregate([
-    { $sort: { exchange: 1 } },
-    {
-      $group: {
-        _id: '$base_currency',
-        base_currency: { $first: '$base_currency' },
-        quote_currency: { $first: '$quote_currency' },
-        exchange: { $first: '$exchange' },
-        volume_24h: { $first: '$volume_24h' },
-        instrument_id: { $first: '$instrument_id' },
-      },
-    },
-    { $sort: { volume_24h: -1 } },
-    {
-      $project: {
-        instrument_id: '$instrument_id',
-        base_currency: '$base_currency',
-        quote_currency: '$quote_currency',
-        exchange: '$exchange',
-        volume_24h: '$volume_24h',
-      },
-    },
-  ]);
+  let insts = await InstrumentInfo.find().exec();
+  insts = _.orderBy(insts, ['volume_24h'], ['desc']);
+  insts = _.uniqBy(insts, 'base_currency');
 
   return insts;
 }
