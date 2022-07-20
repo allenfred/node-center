@@ -14,12 +14,12 @@ export const startJob = async () => {
   await connectMongo();
 
   const insts = await InstrumentInfoDao.findAll();
-  // const bianceInsts = insts.filter((i: any) => i.exchange === Exchange.Biance);
-  // const bybitInsts = insts.filter((i: any) => i.exchange === Exchange.Bybit);
+  const bianceInsts = insts.filter((i: any) => i.exchange === Exchange.Biance);
+  const bybitInsts = insts.filter((i: any) => i.exchange === Exchange.Bybit);
   const okexInsts = insts.filter((i: any) => i.exchange === Exchange.Okex);
 
-  // await biance.getHistoryKlines(bianceInsts, { count: 500 });
-  // await bybit.getHistoryKlines(bybitInsts, { count: 500 });
+  await biance.getHistoryKlines(bianceInsts, { count: 500 });
+  await bybit.getHistoryKlines(bybitInsts, { count: 500 });
   await okex.getHistoryKlines(okexInsts, { count: 500 });
 
   const endTime = new Date().getTime();

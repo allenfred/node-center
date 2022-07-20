@@ -1,13 +1,10 @@
 const mongoose = require('mongoose');
-// HK server
-// const hk_host = '8.210.170.98';
-// SH server
-const sh_host = '121.4.15.211';
+const sh_host = '81.68.80.59';
 const host = sh_host;
 const port = '27011';
 const db = 'crypto';
-const username = 'dev';
-const password = 'qazwsx123';
+const username = 'data_manager';
+const password = 'qazwsx123=-*';
 
 mongoose.set('useCreateIndex', true);
 
