@@ -48,6 +48,11 @@ function deleteByIds(instIds, exchange) {
 }
 function findAll() {
     return __awaiter(this, void 0, void 0, function* () {
+        return yield models_1.InstrumentInfo.find().exec();
+    });
+}
+function findUniqueAll() {
+    return __awaiter(this, void 0, void 0, function* () {
         // 获取所有合约信息
         let insts = yield models_1.InstrumentInfo.find().exec();
         insts = _.orderBy(insts, ['volume_24h'], ['desc']);
@@ -61,6 +66,7 @@ const InstrumentInfoDao = {
     deleteByIds,
     findByTopVolume,
     findAll,
+    findUniqueAll,
 };
 exports.InstrumentInfoDao = InstrumentInfoDao;
 //# sourceMappingURL=instrumentInfo.js.map

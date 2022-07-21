@@ -51,7 +51,7 @@ function setupWsClient(clients) {
         wsClient.connectPublic();
         wsClient.on('update', (data) => {
             if (data.topic.includes('candle') && data.data[0].confirm) {
-                // handleKlines(data);
+                handleKlines(data);
             }
         });
         wsClient.on('open', (data) => {

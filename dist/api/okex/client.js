@@ -201,7 +201,7 @@ function handleMsg(message) {
     return __awaiter(this, void 0, void 0, function* () {
         // 每15min更新一次Ticker
         if (util_1.isTickerMsg(message) &&
-            new Date().getMinutes() % 15 === 0 &&
+            new Date().getMinutes() % 10 === 0 &&
             new Date().getSeconds() < 30) {
             handleTickers(message);
         }
@@ -314,7 +314,7 @@ function setupWsClient(clients) {
                 // 公共频道消息
                 if (eventType == undefined) {
                     // broadCastByWS(obj, clients);
-                    // handleMsg(obj);
+                    handleMsg(obj);
                 }
             }
             catch (e) {

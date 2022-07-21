@@ -70,7 +70,7 @@ function handleMsg(message) {
     return __awaiter(this, void 0, void 0, function* () {
         // 每15min更新一次Ticker
         if (util_1.isTickerMsg(message) &&
-            new Date().getMinutes() % 15 === 0 &&
+            new Date().getMinutes() % 10 === 0 &&
             new Date().getSeconds() < 30) {
             handleTickers(message);
         }
@@ -256,10 +256,6 @@ function setupWsClient(clients) {
                 logger_1.default.error('!!! 与Biance wsserver断开连接 !!!');
             },
             message: (data) => {
-                // const jsonData = JSON.parse(data);
-                // if (jsonData.stream !== '!ticker@arr') {
-                // console.log(data);
-                // }
                 // broadCastByWS(JSON.parse(data), clients);
                 handleMsg(JSON.parse(data));
             },

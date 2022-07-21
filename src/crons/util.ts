@@ -27,8 +27,7 @@ async function execJob(granularity: number, limit?: number) {
   const minuteNow = new Date().getMinutes();
 
   // 获取所有合约信息
-  // const insts: Instrument[] = await InstrumentInfo.find({});
-  const insts: Instrument[] = await InstrumentInfoDao.findAll();
+  const insts: Instrument[] = await InstrumentInfo.find({});
 
   // 5min / 30min / 2h / 6h / 1w
   const jobsForBtcOnly = [

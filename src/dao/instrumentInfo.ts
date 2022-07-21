@@ -34,6 +34,10 @@ async function deleteByIds(instIds: string[], exchange: string) {
 }
 
 async function findAll() {
+  return await InstrumentInfo.find().exec();
+}
+
+async function findUniqueAll() {
   // 获取所有合约信息
   let insts = await InstrumentInfo.find().exec();
   insts = _.orderBy(insts, ['volume_24h'], ['desc']);
@@ -48,6 +52,7 @@ const InstrumentInfoDao = {
   deleteByIds,
   findByTopVolume,
   findAll,
+  findUniqueAll,
 };
 
 export { InstrumentInfoDao };

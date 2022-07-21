@@ -111,7 +111,7 @@ export async function handleMsg(message: BianceWsMsg) {
   // 每15min更新一次Ticker
   if (
     isTickerMsg(message) &&
-    new Date().getMinutes() % 15 === 0 &&
+    new Date().getMinutes() % 10 === 0 &&
     new Date().getSeconds() < 30
   ) {
     handleTickers(message);
@@ -309,10 +309,6 @@ async function setupWsClient(clients: any[]) {
         logger.error('!!! 与Biance wsserver断开连接 !!!');
       },
       message: (data: any) => {
-        // const jsonData = JSON.parse(data);
-        // if (jsonData.stream !== '!ticker@arr') {
-        // console.log(data);
-        // }
         // broadCastByWS(JSON.parse(data), clients);
         handleMsg(JSON.parse(data));
       },

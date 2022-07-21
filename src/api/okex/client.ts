@@ -231,7 +231,7 @@ export async function handleMsg(message: OkxWsMsg) {
   // 每15min更新一次Ticker
   if (
     isTickerMsg(message) &&
-    new Date().getMinutes() % 15 === 0 &&
+    new Date().getMinutes() % 10 === 0 &&
     new Date().getSeconds() < 30
   ) {
     handleTickers(message);
@@ -357,7 +357,7 @@ async function setupWsClient(clients: any[]) {
       // 公共频道消息
       if (eventType == undefined) {
         // broadCastByWS(obj, clients);
-        // handleMsg(obj);
+        handleMsg(obj);
       }
     } catch (e) {
       logger.error('handleMessage catch err: ', e);

@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getCommandOpts = exports.execJob = exports.Job_Granularity = void 0;
 const util_1 = require("../util");
-const dao_1 = require("../dao");
+const models_1 = require("../database/models");
 const types_1 = require("../types");
 const Okex = require("../api/okex");
 const Biance = require("../api/biance");
@@ -36,8 +36,7 @@ function execJob(granularity, limit) {
         const hourNow = new Date().getHours();
         const minuteNow = new Date().getMinutes();
         // 获取所有合约信息
-        // const insts: Instrument[] = await InstrumentInfo.find({});
-        const insts = yield dao_1.InstrumentInfoDao.findAll();
+        const insts = yield models_1.InstrumentInfo.find({});
         // 5min / 30min / 2h / 6h / 1w
         const jobsForBtcOnly = [
             Job_Granularity.FiveMins,

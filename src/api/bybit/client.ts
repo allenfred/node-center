@@ -66,7 +66,7 @@ async function setupWsClient(clients: any[]) {
 
   wsClient.on('update', (data) => {
     if (data.topic.includes('candle') && data.data[0].confirm) {
-      // handleKlines(data);
+      handleKlines(data);
     }
   });
 
