@@ -229,13 +229,13 @@ export async function handleKlines(message: OkxWsMsg) {
 
 export async function handleMsg(message: OkxWsMsg) {
   // 每15min更新一次Ticker
-  if (
-    isTickerMsg(message) &&
-    new Date().getMinutes() % 10 === 0 &&
-    new Date().getSeconds() < 30
-  ) {
-    handleTickers(message);
-  }
+  // if (
+  //   isTickerMsg(message) &&
+  //   new Date().getMinutes() % 10 === 0 &&
+  //   new Date().getSeconds() < 30
+  // ) {
+  //   handleTickers(message);
+  // }
 
   //  每30秒 更新K线数据
   if (new Date().getSeconds() % 30 === 0 && isKlineMsg(message)) {

@@ -109,13 +109,13 @@ export async function handleKlines(msg: BianceWsMsg) {
 
 export async function handleMsg(message: BianceWsMsg) {
   // 每15min更新一次Ticker
-  if (
-    isTickerMsg(message) &&
-    new Date().getMinutes() % 10 === 0 &&
-    new Date().getSeconds() < 30
-  ) {
-    handleTickers(message);
-  }
+  // if (
+  //   isTickerMsg(message) &&
+  //   new Date().getMinutes() % 10 === 0 &&
+  //   new Date().getSeconds() < 30
+  // ) {
+  //   handleTickers(message);
+  // }
 
   // 当K线完结 更新K线数据
   if (isKlineMsg(message) && isKlineFinish(message)) {
@@ -299,7 +299,8 @@ async function setupWsClient(clients: any[]) {
   // !miniTicker@arr 全市场的精简Ticker
   // !ticker@arr 全市场的完整Ticker
   const combinedStreams = client.combinedStreams(
-    klineStreams.concat(['!miniTicker@arr']),
+    klineStreams,
+    // klineStreams.concat(['!miniTicker@arr']),
     // ['!miniTicker@arr'],
     {
       open: () => {

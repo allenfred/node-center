@@ -200,11 +200,13 @@ exports.handleKlines = handleKlines;
 function handleMsg(message) {
     return __awaiter(this, void 0, void 0, function* () {
         // 每15min更新一次Ticker
-        if (util_1.isTickerMsg(message) &&
-            new Date().getMinutes() % 10 === 0 &&
-            new Date().getSeconds() < 30) {
-            handleTickers(message);
-        }
+        // if (
+        //   isTickerMsg(message) &&
+        //   new Date().getMinutes() % 10 === 0 &&
+        //   new Date().getSeconds() < 30
+        // ) {
+        //   handleTickers(message);
+        // }
         //  每30秒 更新K线数据
         if (new Date().getSeconds() % 30 === 0 && util_1.isKlineMsg(message)) {
             handleKlines(message);

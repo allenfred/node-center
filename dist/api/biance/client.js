@@ -69,11 +69,13 @@ exports.handleKlines = handleKlines;
 function handleMsg(message) {
     return __awaiter(this, void 0, void 0, function* () {
         // 每15min更新一次Ticker
-        if (util_1.isTickerMsg(message) &&
-            new Date().getMinutes() % 10 === 0 &&
-            new Date().getSeconds() < 30) {
-            handleTickers(message);
-        }
+        // if (
+        //   isTickerMsg(message) &&
+        //   new Date().getMinutes() % 10 === 0 &&
+        //   new Date().getSeconds() < 30
+        // ) {
+        //   handleTickers(message);
+        // }
         // 当K线完结 更新K线数据
         if (util_1.isKlineMsg(message) && util_1.isKlineFinish(message)) {
             handleKlines(message);
@@ -246,7 +248,8 @@ function setupWsClient(clients) {
         // stream名称中所有交易对均为小写
         // !miniTicker@arr 全市场的精简Ticker
         // !ticker@arr 全市场的完整Ticker
-        const combinedStreams = client.combinedStreams(klineStreams.concat(['!miniTicker@arr']), 
+        const combinedStreams = client.combinedStreams(klineStreams, 
+        // klineStreams.concat(['!miniTicker@arr']),
         // ['!miniTicker@arr'],
         {
             open: () => {
