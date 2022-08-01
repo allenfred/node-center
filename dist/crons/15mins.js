@@ -56,10 +56,6 @@ exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
         yield Bybit.initInstruments();
         yield util_1.execJob(util_1.Job_Granularity.TwelveHour);
     }
-    // At 00:00.
-    if (hourNow === 8 && minuteNow === 0) {
-        yield util_1.execJob(util_1.Job_Granularity.OneDay);
-    }
     // At minute 15 on Monday.
     if (dayNow === 1 && hourNow === 0 && minuteNow === 15) {
         yield util_1.execJob(util_1.Job_Granularity.Weekly);

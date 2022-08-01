@@ -55,11 +55,6 @@ export const startJob = async () => {
     await execJob(Job_Granularity.TwelveHour);
   }
 
-  // At 00:00.
-  if (hourNow === 8 && minuteNow === 0) {
-    await execJob(Job_Granularity.OneDay);
-  }
-
   // At minute 15 on Monday.
   if (dayNow === 1 && hourNow === 0 && minuteNow === 15) {
     await execJob(Job_Granularity.Weekly);
