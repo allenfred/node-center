@@ -43,6 +43,7 @@ exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     // 4hourly
     if (hourNow % 4 === 0 && minuteNow === 0) {
         yield util_1.execJob(util_1.Job_Granularity.FourHour);
+        yield util_1.execJob(util_1.Job_Granularity.OneDay);
     }
     // 6hourly
     if (hourNow % 6 === 0 && minuteNow === 0) {
@@ -56,7 +57,7 @@ exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
         yield util_1.execJob(util_1.Job_Granularity.TwelveHour);
     }
     // At 00:00.
-    if (hourNow === 0 && minuteNow === 0) {
+    if (hourNow === 8 && minuteNow === 0) {
         yield util_1.execJob(util_1.Job_Granularity.OneDay);
     }
     // At minute 15 on Monday.

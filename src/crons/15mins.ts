@@ -39,6 +39,7 @@ export const startJob = async () => {
   // 4hourly
   if (hourNow % 4 === 0 && minuteNow === 0) {
     await execJob(Job_Granularity.FourHour);
+    await execJob(Job_Granularity.OneDay);
   }
 
   // 6hourly
@@ -55,7 +56,7 @@ export const startJob = async () => {
   }
 
   // At 00:00.
-  if (hourNow === 0 && minuteNow === 0) {
+  if (hourNow === 8 && minuteNow === 0) {
     await execJob(Job_Granularity.OneDay);
   }
 
