@@ -4,7 +4,7 @@ import { InstrumentInfoDao, InstrumentKlineDao } from '../dao';
 import { InstrumentInfo } from '../database/models';
 import { Instrument, InstReqOptions, Exchange } from '../types';
 import * as Okex from '../api/okex';
-import * as Biance from '../api/biance';
+import * as Binance from '../api/binance';
 import * as Bybit from '../api/bybit';
 import { sortBy } from 'lodash';
 
@@ -71,8 +71,8 @@ async function execJob(granularity: number, limit?: number) {
         includeInterval: [granularity],
       },
     ),
-    Biance.getHistoryKlines(
-      validInsts.filter((i: any) => i.exchange === Exchange.Biance),
+    Binance.getHistoryKlines(
+      validInsts.filter((i: any) => i.exchange === Exchange.Binance),
       {
         count,
         delay: 300,

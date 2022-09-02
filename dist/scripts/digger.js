@@ -11,10 +11,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const connection_1 = require("../database/connection");
 const commonAPI = require("../api/common");
-const client_1 = require("../api/biance/client");
+const client_1 = require("../api/binance/client");
 const logger_1 = require("../logger");
 const types_1 = require("../types");
-const Biance = require("../api/biance");
+const Binance = require("../api/binance");
 const myArgs = process.argv.slice(2);
 const startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     if (!myArgs.length) {
@@ -25,7 +25,7 @@ const startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     const startTime = new Date().getTime();
     yield connection_1.default();
     if (myArgs[0] === '-i') {
-        const data = yield Biance.initInstruments();
+        const data = yield Binance.initInstruments();
         data.map((i) => {
             if (i.base_currency === 'TLM') {
                 console.log(i);
@@ -46,8 +46,8 @@ const startJob = () => __awaiter(void 0, void 0, void 0, function* () {
             });
         }
         if (instId.endsWith('USDT')) {
-            yield commonAPI.getBianceKlines(commonAPI.getKlinesReqParams({
-                exchange: types_1.Exchange.Biance,
+            yield commonAPI.getBinanceKlines(commonAPI.getKlinesReqParams({
+                exchange: types_1.Exchange.Binance,
                 instId,
                 count: 1500,
             }));

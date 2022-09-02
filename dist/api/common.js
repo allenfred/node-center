@@ -9,16 +9,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getKlinesReqParams = exports.getBybitKlines = exports.getOkexKlines = exports.getBianceKlines = exports.getKlines = exports.getKlinesWithLimited = void 0;
+exports.getKlinesReqParams = exports.getBybitKlines = exports.getOkexKlines = exports.getBinanceKlines = exports.getKlines = exports.getKlinesWithLimited = void 0;
 const bluebird = require("bluebird");
 const types_1 = require("../types");
 const dao_1 = require("../dao");
 const util_1 = require("../util");
-const Biance = require("./biance/client");
+const Binance = require("./binance/client");
 const Okex = require("./okex/client");
 const Bybit = require("./bybit/client");
 const logger_1 = require("../logger");
-const BianceKlineInterval = {
+const BinanceKlineInterval = {
     300: '5m',
     900: '15m',
     1800: '30m',
@@ -44,16 +44,16 @@ const BybitKlineInterval = {
 };
 function getKlinesWithLimited(options, updateOperate = dao_1.InstrumentKlineDao.upsertMany) {
     return __awaiter(this, void 0, void 0, function* () {
-        //设置系统限速规则 (biance官方API 限速规则：2400次/60s)
+        //设置系统限速规则 (binance官方API 限速规则：2400次/60s)
         //设置系统限速规则 (Okex官方API 限速规则：20次/2s)
         return bluebird.map(options, (option) => __awaiter(this, void 0, void 0, function* () {
             const { exchange, instrument_id, granularity } = option;
             Promise.resolve()
                 .then(() => {
-                if (exchange === types_1.Exchange.Biance) {
-                    return Biance.getKlines({
+                if (exchange === types_1.Exchange.Binance) {
+                    return Binance.getKlines({
                         symbol: option.instrument_id,
-                        interval: BianceKlineInterval[option.granularity],
+                        interval: BinanceKlineInterval[option.granularity],
                         startTime: new Date(option.start).valueOf(),
                         endTime: new Date(option.end).valueOf(),
                         limit: 1500,
@@ -89,7 +89,7 @@ function getKlinesWithLimited(options, updateOperate = dao_1.InstrumentKlineDao.
                         };
                     });
                 }
-                else if (exchange === types_1.Exchange.Biance) {
+                else if (exchange === types_1.Exchange.Binance) {
                     klines = data.map((kline) => {
                         return {
                             instrument_id: option.instrument_id,
@@ -102,7 +102,7 @@ function getKlinesWithLimited(options, updateOperate = dao_1.InstrumentKlineDao.
                             volume: +kline[5],
                             currency_volume: +kline[7],
                             granularity: option.granularity,
-                            exchange: types_1.Exchange.Biance,
+                            exchange: types_1.Exchange.Binance,
                         };
                     });
                 }
@@ -123,14 +123,14 @@ function getKlinesWithLimited(options, updateOperate = dao_1.InstrumentKlineDao.
     });
 }
 exports.getKlinesWithLimited = getKlinesWithLimited;
-function getBianceKlines(options, updateOperate = dao_1.InstrumentKlineDao.upsertMany) {
+function getBinanceKlines(options, updateOperate = dao_1.InstrumentKlineDao.upsertMany) {
     return __awaiter(this, void 0, void 0, function* () {
-        //设置系统限速规则 (biance官方API 限速规则：2400次/60s)
+        //设置系统限速规则 (binance官方API 限速规则：2400次/60s)
         return bluebird.map(options, (option) => __awaiter(this, void 0, void 0, function* () {
             const { exchange, instrument_id, granularity } = option;
-            return Biance.getKlines({
+            return Binance.getKlines({
                 symbol: instrument_id,
-                interval: BianceKlineInterval[granularity],
+                interval: BinanceKlineInterval[granularity],
                 startTime: new Date(option.start).valueOf(),
                 endTime: new Date(option.end).valueOf(),
                 limit: 1500,
@@ -161,7 +161,7 @@ function getBianceKlines(options, updateOperate = dao_1.InstrumentKlineDao.upser
             })
                 .then(() => {
                 // logger.info(
-                //   `[Biance/${instrument_id}/${
+                //   `[Binance/${instrument_id}/${
                 //     KlineInterval[+granularity]
                 //   }] K线 Done.`,
                 // );
@@ -170,7 +170,7 @@ function getBianceKlines(options, updateOperate = dao_1.InstrumentKlineDao.upser
         }), { concurrency: 2 });
     });
 }
-exports.getBianceKlines = getBianceKlines;
+exports.getBinanceKlines = getBinanceKlines;
 function getBybitKlines(options, updateOperate = dao_1.InstrumentKlineDao.upsertMany) {
     return __awaiter(this, void 0, void 0, function* () {
         //设置系统限速规则 (bybit官方API 限速规则：20次/s)

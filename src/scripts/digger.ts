@@ -1,11 +1,11 @@
 import connectMongo from '../database/connection';
 import * as commonAPI from '../api/common';
-import { getExchangeInfo } from '../api/biance/client';
+import { getExchangeInfo } from '../api/binance/client';
 import { InstrumentKlineDao } from '../dao';
 import logger from '../logger';
 import { Exchange } from '../types';
 import * as Okex from '../api/okex';
-import * as Biance from '../api/biance';
+import * as Binance from '../api/binance';
 
 const myArgs = process.argv.slice(2);
 
@@ -21,7 +21,7 @@ const startJob = async () => {
   await connectMongo();
 
   if (myArgs[0] === '-i') {
-    const data = await Biance.initInstruments();
+    const data = await Binance.initInstruments();
     data.map((i) => {
       if (i.base_currency === 'TLM') {
         console.log(i);
@@ -46,9 +46,9 @@ const startJob = async () => {
     }
 
     if (instId.endsWith('USDT')) {
-      await commonAPI.getBianceKlines(
+      await commonAPI.getBinanceKlines(
         commonAPI.getKlinesReqParams({
-          exchange: Exchange.Biance,
+          exchange: Exchange.Binance,
           instId,
           count: 1500,
         }),

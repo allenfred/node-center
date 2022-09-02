@@ -1,6 +1,6 @@
 import connectMongo from '../database/connection';
 import { InstrumentInfoDao } from '../dao';
-import * as biance from '../api/biance';
+import * as binance from '../api/binance';
 import * as bybit from '../api/bybit';
 import * as okex from '../api/okex';
 import { Exchange } from '../types';
@@ -14,11 +14,13 @@ export const startJob = async () => {
   await connectMongo();
 
   const insts = await InstrumentInfoDao.find({});
-  const bianceInsts = insts.filter((i: any) => i.exchange === Exchange.Biance);
+  const binanceInsts = insts.filter(
+    (i: any) => i.exchange === Exchange.Binance,
+  );
   const bybitInsts = insts.filter((i: any) => i.exchange === Exchange.Bybit);
   const okexInsts = insts.filter((i: any) => i.exchange === Exchange.Okex);
 
-  await biance.getHistoryKlines(bianceInsts, { count: 1000 });
+  await binance.getHistoryKlines(binanceInsts, { count: 1000 });
   await bybit.getHistoryKlines(bybitInsts, { count: 1000 });
   await okex.getHistoryKlines(okexInsts, { count: 1000 });
 

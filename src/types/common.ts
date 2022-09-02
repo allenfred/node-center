@@ -45,7 +45,7 @@ export interface InstKline {
   currency_volume?: number; // 按USDT计价的交易额
   alias?: string; // 本周 this_week 次周 next_week 季度 quarter 永续 swap
   granularity: number; // 60 180 300 900 1800 3600 7200 14400 21600 43200 86400 604800
-  exchange: string; // okex / biance
+  exchange: string; // okex / binance
 }
 
 export interface InstReqOptions extends Instrument {
@@ -58,7 +58,7 @@ export interface InstReqOptions extends Instrument {
 
 export enum Exchange {
   Okex = 'okex',
-  Biance = 'biance',
+  Binance = 'binance',
   Bybit = 'bybit',
 }
 

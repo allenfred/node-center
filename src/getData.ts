@@ -1,5 +1,9 @@
 import connectMongo from './database/connection';
-import { InstrumentInfo, UsdtSwapKline } from './database/models';
+import {
+  InstrumentInfo,
+  UsdtSwapKline,
+  UsdtSwapSignal,
+} from './database/models';
 import * as _ from 'lodash';
 
 (async function main() {
@@ -10,13 +14,29 @@ import * as _ from 'lodash';
   // await getMaxCandlesWithGranularity('ETH-USDT-SWAP', 86400);
   // process.exit();
   // await BtcSwapCandle.remove({ granularity: 43100 });
-  // await InstrumentInfo.find({ exchange: 'biance' }).then((res) => {
+  // await InstrumentInfo.find({ exchange: 'binance' }).then((res) => {
   //   console.log(res);
   // });
 
-  await InstrumentInfo.updateMany(
-    {},
-    { $set: { klines: 0 } },
+  // await InstrumentInfo.updateMany(
+  //   {},
+  //   { $set: { klines: 0 } },
+  //   // { multi: true },
+  // ).then((res) => {
+  //   console.log(res);
+  // });
+
+  // await UsdtSwapKline.updateMany(
+  //   { exchange: 'biance' },
+  //   { $set: { exchange: 'binance' } },
+  //   // { multi: true },
+  // ).then((res) => {
+  //   console.log(res);
+  // });
+
+  await UsdtSwapSignal.updateMany(
+    { exchange: 'biance' },
+    { $set: { exchange: 'binance' } },
     // { multi: true },
   ).then((res) => {
     console.log(res);
@@ -72,12 +92,12 @@ import * as _ from 'lodash';
   //   },
   // ).exec();
   // console.log(klines);
-  await UsdtSwapKline.deleteMany({
-    exchange: 'bybit',
-    // instrument_id: 'KNCUSDT',
-  }).then((res) => {
-    console.log(res);
-  });
+  // await UsdtSwapKline.deleteMany({
+  //   exchange: 'bybit',
+  //   // instrument_id: 'KNCUSDT',
+  // }).then((res) => {
+  //   console.log(res);
+  // });
 
   process.exit();
   // await InstrumentInfo.aggregate([

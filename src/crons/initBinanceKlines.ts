@@ -1,6 +1,6 @@
 import connectMongo from '../database/connection';
 import { InstrumentInfoDao, InstrumentKlineDao } from '../dao';
-import { initInstruments, getHistoryKlines } from '../api/biance';
+import { initInstruments, getHistoryKlines } from '../api/binance';
 import logger from '../logger';
 import { getCommandOpts } from './util';
 
@@ -9,7 +9,7 @@ const args = process.argv.slice(2);
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 // */5 * * * * At every 5 minute.
 export const startJob = async () => {
-  logger.info('---- Init Biance Klines Job Start Executing ----');
+  logger.info('---- Init Binance Klines Job Start Executing ----');
   const startTime = new Date().getTime();
   const opt = getCommandOpts(args);
 

@@ -1,6 +1,6 @@
-import { KlineInterval, BianceWsMsg } from '../../types';
+import { KlineInterval, BinanceWsMsg } from '../../types';
 
-export function isTickerMsg(message: BianceWsMsg) {
+export function isTickerMsg(message: BinanceWsMsg) {
   if (
     message &&
     (message.stream === '!ticker@arr' || message.stream === '!miniTicker@arr')
@@ -10,7 +10,7 @@ export function isTickerMsg(message: BianceWsMsg) {
   return false;
 }
 
-export function isKlineMsg(message: BianceWsMsg) {
+export function isKlineMsg(message: BinanceWsMsg) {
   if (message && message.stream.indexOf('@kline') !== -1) {
     return true;
   }
@@ -18,5 +18,5 @@ export function isKlineMsg(message: BianceWsMsg) {
 }
 
 export function getKlineSubChannel(interval: string, instId: string) {
-  return `biance:candle${KlineInterval['candle' + interval]}:${instId}`;
+  return `binance:candle${KlineInterval['candle' + interval]}:${instId}`;
 }

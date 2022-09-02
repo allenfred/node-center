@@ -14,7 +14,7 @@ const util_1 = require("../util");
 const models_1 = require("../database/models");
 const types_1 = require("../types");
 const Okex = require("../api/okex");
-const Biance = require("../api/biance");
+const Binance = require("../api/binance");
 const Bybit = require("../api/bybit");
 const lodash_1 = require("lodash");
 const Job_Granularity = {
@@ -69,7 +69,7 @@ function execJob(granularity, limit) {
                 count,
                 includeInterval: [granularity],
             }),
-            Biance.getHistoryKlines(validInsts.filter((i) => i.exchange === types_1.Exchange.Biance), {
+            Binance.getHistoryKlines(validInsts.filter((i) => i.exchange === types_1.Exchange.Binance), {
                 count,
                 delay: 300,
                 includeInterval: [granularity],

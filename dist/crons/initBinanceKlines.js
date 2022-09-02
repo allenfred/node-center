@@ -30,4 +30,4 @@ exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     process.exit(0);
 });
 exports.startJob();
-//# sourceMappingURL=initBianceKlines.js.map
+//# sourceMappingURL=initBinanceKlines.js.map

@@ -5,7 +5,7 @@ import { Exchange, Instrument, HistoryKlinesJobsOpts } from '../../types';
 import { InstrumentInfoDao, InstrumentKlineDao } from '../../dao';
 import { InstrumentInfo } from '../../database/models';
 import { getInstruments } from './client';
-import { getBianceKlines } from './../common';
+import { getBinanceKlines } from '../common';
 import { getTimestamp } from '../../util';
 
 export async function initInstruments(): Promise<Instrument[]> {
@@ -15,7 +15,7 @@ export async function initInstruments(): Promise<Instrument[]> {
   // BTC合约及其他USDT本位合约
   instruments = instruments.filter((i) => i.instrument_id.endsWith('USDT'));
   logger.info(
-    `Biance[永续合约] - 获取公共合约全量信息成功，共: ${instruments.length} 条 ...`,
+    `Binance[永续合约] - 获取公共合约全量信息成功，共: ${instruments.length} 条 ...`,
   );
 
   if (!instruments.length) {
@@ -24,7 +24,7 @@ export async function initInstruments(): Promise<Instrument[]> {
 
   // ****** 处理下架合约 ******
   const oldInsts: any = await InstrumentInfoDao.find({
-    exchange: Exchange.Biance,
+    exchange: Exchange.Binance,
   });
 
   const invalidInsts = _.differenceBy(oldInsts, instruments, 'instrument_id');
@@ -34,11 +34,11 @@ export async function initInstruments(): Promise<Instrument[]> {
 
     await InstrumentInfoDao.deleteByIds(
       _.map(invalidInsts, 'instrument_id'),
-      Exchange.Biance,
+      Exchange.Binance,
     ).then((result: any) => {
       if (result.ok === 1) {
         logger.info(
-          `Biance[永续合约] - 删除下架合约，共: ${result.deletedCount} 条 ...`,
+          `Binance[永续合约] - 删除下架合约，共: ${result.deletedCount} 条 ...`,
         );
       }
     });
@@ -47,10 +47,10 @@ export async function initInstruments(): Promise<Instrument[]> {
 
   //更新永续合约信息
   await InstrumentInfoDao.upsert(instruments);
-  let data: any = await InstrumentInfoDao.find({ exchange: Exchange.Biance });
+  let data: any = await InstrumentInfoDao.find({ exchange: Exchange.Binance });
   // data = data.filter((i: Instrument) => i.klines !== 1);
 
-  logger.info(`Biance[永续合约] - 待初始化K线的合约数量 ${data.length} ...`);
+  logger.info(`Binance[永续合约] - 待初始化K线的合约数量 ${data.length} ...`);
 
   return _.sortBy(data, ['instrument_id']);
 }
@@ -191,20 +191,20 @@ export async function getHistoryKlines(
   const delayMillseconds = opts && opts.delay ? opts.delay : 100;
 
   return bluebird.each(instruments, ({ instrument_id }: any) => {
-    //设置系统限速规则 (biance官方API 限速规则：2400次/60s)
+    //设置系统限速规则 (binance官方API 限速规则：2400次/60s)
     return bluebird
       .delay(delayMillseconds)
       .then(() => {
-        return getBianceKlines(
+        return getBinanceKlines(
           getReqOptions(instrument_id, opts).map((opt: any) => {
-            return Object.assign({}, opt, { exchange: Exchange.Biance });
+            return Object.assign({}, opt, { exchange: Exchange.Binance });
           }),
           options.updateFunc || InstrumentKlineDao.upsertMany,
         );
       })
       .then(() => {
         return InstrumentInfo.updateOne(
-          { exchange: Exchange.Biance, instrument_id },
+          { exchange: Exchange.Binance, instrument_id },
           { klines: 1 },
         ).catch((e: any) => {
           logger.error('InstrumentInfo updateOne ' + e.message);

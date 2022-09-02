@@ -4,7 +4,7 @@ const { String, Number, Date } = Schema.Types;
 
 // 公共-全量合约信息频道 https://www.okex.me/docs/zh/#futures_ws-order
 const schema = new Schema({
-  exchange: { type: String, default: 'okex' }, // okex/biance/bybit
+  exchange: { type: String, default: 'okex' }, // okex/binance/bybit
   instrument_id: String, // 合约ID，如BTC-USD-180213
   base_currency: String, // 交易货币币种，如：btc-usd中的btc
   quote_currency: String, // 计价货币币种，如：btc-usd中的usd

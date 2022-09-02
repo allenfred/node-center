@@ -9,7 +9,7 @@ import {
   currency_volume,
 } from './common';
 
-export type BianceKline = [
+export type BinanceKline = [
   openTime,
   open,
   high,
@@ -20,7 +20,7 @@ export type BianceKline = [
   currency_volume,
 ];
 
-export interface BianceWsKline {
+export interface BinanceWsKline {
   t: any; // 时间戳
   s: string; // symbol
   i: string; // interval 1h / 4h
@@ -113,7 +113,7 @@ export interface BianceWsKline {
     ]
  * 
 */
-export interface BianceSymbolInfo {
+export interface BinanceSymbolInfo {
   symbol: string; // 交易对
   pair: string; // 标的交易对
   contractType: string; // 合约类型  PERPETUAL / CURRENT_QUARTER
@@ -200,16 +200,16 @@ export interface Filter {
  * 
 */
 
-export interface BianceExchangeInfoResponse {
+export interface BinanceExchangeInfoResponse {
   exchangeFilters: any[];
   rateLimits: any[];
   serverTime: number; // 请忽略。如果需要获取当前系统时间，请查询接口 “GET /fapi/v1/time”
   assets: any[];
-  symbols: BianceSymbolInfo[];
+  symbols: BinanceSymbolInfo[];
   timezone: string;
 }
 
-export interface BianceKlineApiOpts {
+export interface BinanceKlineApiOpts {
   symbol: string;
   interval: string; // 1m 3m 5m ...
   startTime?: number; // LONG
@@ -217,12 +217,12 @@ export interface BianceKlineApiOpts {
   limit?: number; // 默认值:500 最大值:1500.
 }
 
-export interface BianceWsMsg {
+export interface BinanceWsMsg {
   stream: string; // !miniTicker@arr / <symbol>@kline_<interval>
   data: any | any[];
 }
 
-export interface BianceTicker {
+export interface BinanceTicker {
   symbol: string;
   priceChange: any; //24小时价格变动
   priceChangePercent: any; //24小时价格变动百分比

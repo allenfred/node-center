@@ -25,7 +25,7 @@ function isKlineFinish(message) {
 }
 exports.isKlineFinish = isKlineFinish;
 function getKlineSubChannel(interval, instId) {
-    return `biance:candle${types_1.KlineInterval['candle' + interval]}:${instId}`;
+    return `binance:candle${types_1.KlineInterval['candle' + interval]}:${instId}`;
 }
 exports.getKlineSubChannel = getKlineSubChannel;
 //# sourceMappingURL=util.js.map

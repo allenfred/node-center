@@ -1,4 +1,4 @@
 export * from './common';
 export * from './okex';
-export * from './biance';
+export * from './binance';
 export * from './bybit';

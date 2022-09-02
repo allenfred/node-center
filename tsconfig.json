@@ -16,7 +16,7 @@
   "files": [
     "src/main.ts",
     "src/crons/15mins.ts",
-    "src/crons/initBianceKlines.ts",
+    "src/crons/initBinanceKlines.ts",
     "src/crons/initOkxKlines.ts",
     "src/scripts/digger.ts"
   ],

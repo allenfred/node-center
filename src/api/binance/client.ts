@@ -3,16 +3,16 @@ import * as moment from 'moment';
 import {
   Instrument,
   Exchange,
-  BianceExchangeInfoResponse,
-  BianceSymbolInfo,
-  BianceKline,
-  BianceKlineApiOpts,
+  BinanceExchangeInfoResponse,
+  BinanceSymbolInfo,
+  BinanceKline,
+  BinanceKlineApiOpts,
   FilterType,
-  BianceWsMsg,
+  BinanceWsMsg,
   KlineInterval,
   WsFormatKline,
-  BianceWsKline,
-  BianceTicker,
+  BinanceWsKline,
+  BinanceTicker,
 } from '../../types';
 import logger from '../../logger';
 import { InstrumentKlineDao, InstrumentInfoDao } from '../../dao';
@@ -64,7 +64,7 @@ interface Ticker {
   n: number; // 24小时内成交数
 }
 
-export async function handleTickers(message: BianceWsMsg) {
+export async function handleTickers(message: BinanceWsMsg) {
   await InstrumentInfoDao.upsert(
     message.data
       .filter((i) => i.s.endsWith('USDT'))
@@ -83,14 +83,14 @@ export async function handleTickers(message: BianceWsMsg) {
           open_interest: '', // 持仓量
           open_24h: i.o, // 24小时开盘价
           volume_token_24h: i.v, // 	成交量（按币统计）
-          exchange: Exchange.Biance,
+          exchange: Exchange.Binance,
         } as any;
       }),
   );
 }
 
-export async function handleKlines(msg: BianceWsMsg) {
-  const k: BianceWsKline = msg.data['k'];
+export async function handleKlines(msg: BinanceWsMsg) {
+  const k: BinanceWsKline = msg.data['k'];
   await InstrumentKlineDao.upsertOne({
     instrument_id: k.s,
     underlying_index: k.s.replace('USDT', ''),
@@ -103,11 +103,11 @@ export async function handleKlines(msg: BianceWsMsg) {
     volume: +k.v, // 成交量
     currency_volume: +k.q, // 成交额 以USDT计价
     granularity: KlineInterval['candle' + k.i],
-    exchange: Exchange.Biance,
+    exchange: Exchange.Binance,
   });
 }
 
-export async function handleMsg(message: BianceWsMsg) {
+export async function handleMsg(message: BinanceWsMsg) {
   // 每15min更新一次Ticker
   // if (
   //   isTickerMsg(message) &&
@@ -123,7 +123,7 @@ export async function handleMsg(message: BianceWsMsg) {
   }
 }
 
-export async function broadCastByWS(msg: BianceWsMsg, clients: any[]) {
+export async function broadCastByWS(msg: BinanceWsMsg, clients: any[]) {
   if (!clients.length) {
     return;
   }
@@ -139,7 +139,7 @@ export async function broadCastByWS(msg: BianceWsMsg, clients: any[]) {
               .filter((i) => i.s.endsWith('USDT'))
               .map((i: Ticker) => {
                 return [
-                  Exchange.Biance,
+                  Exchange.Binance,
                   i.s,
                   i.c,
                   +i.c - +i.o,
@@ -198,7 +198,7 @@ export async function broadCastByWS(msg: BianceWsMsg, clients: any[]) {
   });
 }
 
-export async function broadCastMsgByRedis(msg: BianceWsMsg) {
+export async function broadCastMsgByRedis(msg: BinanceWsMsg) {
   if (msg.stream === '!ticker@arr' || msg.stream === '!miniTicker@arr') {
     const pubMsg = JSON.stringify({
       channel: 'tickers',
@@ -207,7 +207,7 @@ export async function broadCastMsgByRedis(msg: BianceWsMsg) {
         .map((i: Ticker) => {
           // [exchange, instrument_id, last, chg_24h, chg_rate_24h, volume_24h]
           return [
-            Exchange.Biance,
+            Exchange.Binance,
             i.s,
             i.c,
             +i.c - +i.o,
@@ -220,7 +220,7 @@ export async function broadCastMsgByRedis(msg: BianceWsMsg) {
           //   chg_24h: +i.c - +i.o, // 24小时价格变化
           //   chg_rate_24h: (((+i.c - +i.o) * 100) / +i.o).toFixed(4), // 24小时价格变化(百分比)
           //   volume_24h: i.q, // 24小时成交量（按张数统计）
-          //   exchange: Exchange.Biance,
+          //   exchange: Exchange.Binance,
           // };
         }),
     });
@@ -279,7 +279,7 @@ async function setupWsClient(clients: any[]) {
 
   // support combined stream, e.g.
   const instruments: Instrument[] = await InstrumentInfoDao.findByTopVolume({
-    exchange: Exchange.Biance,
+    exchange: Exchange.Binance,
     limit: 80,
   });
   const klineStreams = [];
@@ -304,10 +304,10 @@ async function setupWsClient(clients: any[]) {
     // ['!miniTicker@arr'],
     {
       open: () => {
-        logger.info('!!! 与Biance wsserver建立连接成功 !!!');
+        logger.info('!!! 与Binance wsserver建立连接成功 !!!');
       },
       close: () => {
-        logger.error('!!! 与Biance wsserver断开连接 !!!');
+        logger.error('!!! 与Binance wsserver断开连接 !!!');
       },
       message: (data: any) => {
         // broadCastByWS(JSON.parse(data), clients);
@@ -342,7 +342,7 @@ async function setupWsClient(clients: any[]) {
 async function getExchangeInfo() {
   return client
     .publicRequest('GET', '/fapi/v1/exchangeInfo', {})
-    .then((res: { data: BianceExchangeInfoResponse }) => {
+    .then((res: { data: BinanceExchangeInfoResponse }) => {
       return res.data;
     })
     .catch((error: any) => {
@@ -352,17 +352,17 @@ async function getExchangeInfo() {
 }
 
 async function getInstruments(): Promise<Array<Instrument>> {
-  const tickersData: { data: BianceTicker[] } = await client.publicRequest(
+  const tickersData: { data: BinanceTicker[] } = await client.publicRequest(
     'GET',
     '/fapi/v1/ticker/24hr',
   );
   return client
     .publicRequest('GET', '/fapi/v1/exchangeInfo', {})
-    .then((res: { data: BianceExchangeInfoResponse }) => {
+    .then((res: { data: BinanceExchangeInfoResponse }) => {
       return (
         res.data.symbols
           // U本位永续合约
-          .filter((i: BianceSymbolInfo) => {
+          .filter((i: BinanceSymbolInfo) => {
             return (
               i.contractType === 'PERPETUAL' &&
               i.marginAsset === 'USDT' &&
@@ -405,7 +405,7 @@ async function getInstruments(): Promise<Array<Instrument>> {
               open_interest: '', // 持仓量
               open_24h: ticker.openPrice, // 24小时开盘价
               volume_token_24h: ticker.volume, // 	成交量（按币统计）
-              exchange: Exchange.Biance,
+              exchange: Exchange.Binance,
             };
           })
       );
@@ -418,16 +418,16 @@ async function getInstruments(): Promise<Array<Instrument>> {
 
 let status = 1;
 
-async function getKlines(params: BianceKlineApiOpts) {
+async function getKlines(params: BinanceKlineApiOpts) {
   if (status !== 1) {
-    logger.error('[Biance] 接口受限 status code:' + status);
+    logger.error('[Binance] 接口受限 status code:' + status);
   }
 
   return client
     .publicRequest('GET', '/fapi/v1/klines', params)
-    .then((res: { data: Array<BianceKline> }) => {
+    .then((res: { data: Array<BinanceKline> }) => {
       // logger.info(
-      //   `获取 [Biance/${params.symbol}/${params.interval}] K线: ${moment(
+      //   `获取 [Binance/${params.symbol}/${params.interval}] K线: ${moment(
       //     params.startTime,
       //   ).format('YYYY-MM-DD HH:mm:ss')}至${moment(params.endTime).format(
       //     'MM-DD HH:mm:ss',
@@ -437,7 +437,7 @@ async function getKlines(params: BianceKlineApiOpts) {
     })
     .catch((e: any) => {
       logger.error(
-        `获取 [Biance/${params.symbol}/${params.interval}]: ${e.message}`,
+        `获取 [Binance/${params.symbol}/${params.interval}]: ${e.message}`,
       );
       if (e.message.indexOf('418') > -1) {
         status = 418;

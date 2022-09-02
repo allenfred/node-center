@@ -2,7 +2,7 @@ import connectMongo from '../database/connection';
 import * as commonAPI from '../api/common';
 import { Exchange } from '../types';
 import { UsdtSwapKline, BtcSwapKline } from '../database/models';
-import { initBianceInsts } from '../api/biance';
+import { initBinanceInsts } from '../api/binance';
 import { initOkxInsts } from '../api/okex';
 
 export const task = async () => {

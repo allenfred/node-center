@@ -4,7 +4,7 @@ import * as commonAPI from '../api/common';
 import logger from '../logger';
 import { Exchange } from '../types';
 import * as Okex from '../api/okex';
-import * as Biance from '../api/biance';
+import * as Binance from '../api/binance';
 import * as Bybit from '../api/bybit';
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
@@ -26,7 +26,7 @@ export const startJob = async () => {
   // hourly
   if (minuteNow === 0) {
     await Okex.initInstruments();
-    await Biance.initInstruments();
+    await Binance.initInstruments();
     await Bybit.initInstruments();
     await execJob(Job_Granularity.OneHour);
   }
@@ -50,7 +50,7 @@ export const startJob = async () => {
   // 12hourly
   if (hourNow % 12 === 0 && minuteNow === 0) {
     await Okex.initInstruments();
-    await Biance.initInstruments();
+    await Binance.initInstruments();
     await Bybit.initInstruments();
     await execJob(Job_Granularity.TwelveHour);
   }

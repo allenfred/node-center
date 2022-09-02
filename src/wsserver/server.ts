@@ -1,5 +1,5 @@
 import logger from '../logger';
-import * as Biance from '../api/biance';
+import * as Binance from '../api/binance';
 import * as Bybit from '../api/bybit';
 import * as Okex from '../api/okex';
 const ws = require('ws');
@@ -73,7 +73,7 @@ async function setupServer(server: any) {
 
 export async function setupWsserver(server: any) {
   Okex.setupWsClient(clients);
-  Biance.setupWsClient(clients);
+  Binance.setupWsClient(clients);
   Bybit.setupWsClient(clients);
   setupServer(server);
 }

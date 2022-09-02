@@ -40,7 +40,7 @@ function handleTickers(message) {
                 open_interest: '',
                 open_24h: i.o,
                 volume_token_24h: i.v,
-                exchange: types_1.Exchange.Biance,
+                exchange: types_1.Exchange.Binance,
             };
         }));
     });
@@ -61,7 +61,7 @@ function handleKlines(msg) {
             volume: +k.v,
             currency_volume: +k.q,
             granularity: types_1.KlineInterval['candle' + k.i],
-            exchange: types_1.Exchange.Biance,
+            exchange: types_1.Exchange.Binance,
         });
     });
 }
@@ -98,7 +98,7 @@ function broadCastByWS(msg, clients) {
                             .filter((i) => i.s.endsWith('USDT'))
                             .map((i) => {
                             return [
-                                types_1.Exchange.Biance,
+                                types_1.Exchange.Binance,
                                 i.s,
                                 i.c,
                                 +i.c - +i.o,
@@ -163,7 +163,7 @@ function broadCastMsgByRedis(msg) {
                     .map((i) => {
                     // [exchange, instrument_id, last, chg_24h, chg_rate_24h, volume_24h]
                     return [
-                        types_1.Exchange.Biance,
+                        types_1.Exchange.Binance,
                         i.s,
                         i.c,
                         +i.c - +i.o,
@@ -176,7 +176,7 @@ function broadCastMsgByRedis(msg) {
                     //   chg_24h: +i.c - +i.o, // 24小时价格变化
                     //   chg_rate_24h: (((+i.c - +i.o) * 100) / +i.o).toFixed(4), // 24小时价格变化(百分比)
                     //   volume_24h: i.q, // 24小时成交量（按张数统计）
-                    //   exchange: Exchange.Biance,
+                    //   exchange: Exchange.Binance,
                     // };
                 }),
             });
@@ -232,7 +232,7 @@ function setupWsClient(clients) {
         const intervals = ['15m', '1h'];
         // support combined stream, e.g.
         const instruments = yield dao_1.InstrumentInfoDao.findByTopVolume({
-            exchange: types_1.Exchange.Biance,
+            exchange: types_1.Exchange.Binance,
             limit: 80,
         });
         const klineStreams = [];
@@ -253,10 +253,10 @@ function setupWsClient(clients) {
         // ['!miniTicker@arr'],
         {
             open: () => {
-                logger_1.default.info('!!! 与Biance wsserver建立连接成功 !!!');
+                logger_1.default.info('!!! 与Binance wsserver建立连接成功 !!!');
             },
             close: () => {
-                logger_1.default.error('!!! 与Biance wsserver断开连接 !!!');
+                logger_1.default.error('!!! 与Binance wsserver断开连接 !!!');
             },
             message: (data) => {
                 // broadCastByWS(JSON.parse(data), clients);
@@ -343,7 +343,7 @@ function getInstruments() {
                     open_interest: '',
                     open_24h: ticker.openPrice,
                     volume_token_24h: ticker.volume,
-                    exchange: types_1.Exchange.Biance,
+                    exchange: types_1.Exchange.Binance,
                 };
             }));
         })
@@ -358,13 +358,13 @@ let status = 1;
 function getKlines(params) {
     return __awaiter(this, void 0, void 0, function* () {
         if (status !== 1) {
-            logger_1.default.error('[Biance] 接口受限 status code:' + status);
+            logger_1.default.error('[Binance] 接口受限 status code:' + status);
         }
         return client
             .publicRequest('GET', '/fapi/v1/klines', params)
             .then((res) => {
             // logger.info(
-            //   `获取 [Biance/${params.symbol}/${params.interval}] K线: ${moment(
+            //   `获取 [Binance/${params.symbol}/${params.interval}] K线: ${moment(
             //     params.startTime,
             //   ).format('YYYY-MM-DD HH:mm:ss')}至${moment(params.endTime).format(
             //     'MM-DD HH:mm:ss',
@@ -373,7 +373,7 @@ function getKlines(params) {
             return res.data;
         })
             .catch((e) => {
-            logger_1.default.error(`获取 [Biance/${params.symbol}/${params.interval}]: ${e.message}`);
+            logger_1.default.error(`获取 [Binance/${params.symbol}/${params.interval}]: ${e.message}`);
             if (e.message.indexOf('418') > -1) {
                 status = 418;
             }

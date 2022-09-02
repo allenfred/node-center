@@ -3,20 +3,20 @@ import {
   Exchange,
   Instrument,
   OkxKline,
-  BianceKline,
+  BinanceKline,
   InstReqOptions,
-  BianceKlineApiOpts,
+  BinanceKlineApiOpts,
   KlineInterval,
 } from '../types';
 import { InstrumentKlineDao } from '../dao';
 import { getTimestamp, getMemoryUsage, sleep, wait } from '../util';
-import * as Biance from './biance/client';
+import * as Binance from './binance/client';
 import * as Okex from './okex/client';
 import * as Bybit from './bybit/client';
 import logger from '../logger';
 import { BybitKline } from '../types/bybit';
 
-const BianceKlineInterval = {
+const BinanceKlineInterval = {
   300: '5m',
   900: '15m',
   1800: '30m',
@@ -46,7 +46,7 @@ async function getKlinesWithLimited(
   options: Array<InstReqOptions>,
   updateOperate: any = InstrumentKlineDao.upsertMany,
 ): Promise<any> {
-  //设置系统限速规则 (biance官方API 限速规则：2400次/60s)
+  //设置系统限速规则 (binance官方API 限速规则：2400次/60s)
   //设置系统限速规则 (Okex官方API 限速规则：20次/2s)
 
   return bluebird.map(
@@ -55,10 +55,10 @@ async function getKlinesWithLimited(
       const { exchange, instrument_id, granularity } = option;
       Promise.resolve()
         .then(() => {
-          if (exchange === Exchange.Biance) {
-            return Biance.getKlines({
+          if (exchange === Exchange.Binance) {
+            return Binance.getKlines({
               symbol: option.instrument_id,
-              interval: BianceKlineInterval[option.granularity],
+              interval: BinanceKlineInterval[option.granularity],
               startTime: new Date(option.start).valueOf(),
               endTime: new Date(option.end).valueOf(),
               limit: 1500,
@@ -92,8 +92,8 @@ async function getKlinesWithLimited(
                 exchange: Exchange.Okex,
               };
             });
-          } else if (exchange === Exchange.Biance) {
-            klines = data.map((kline: BianceKline) => {
+          } else if (exchange === Exchange.Binance) {
+            klines = data.map((kline: BinanceKline) => {
               return {
                 instrument_id: option.instrument_id,
                 underlying_index: option.instrument_id.replace('USDT', ''),
@@ -105,7 +105,7 @@ async function getKlinesWithLimited(
                 volume: +kline[5], //
                 currency_volume: +kline[7],
                 granularity: option.granularity,
-                exchange: Exchange.Biance,
+                exchange: Exchange.Binance,
               };
             });
           }
@@ -135,26 +135,26 @@ async function getKlinesWithLimited(
   );
 }
 
-async function getBianceKlines(
+async function getBinanceKlines(
   options: Array<InstReqOptions>,
   updateOperate: any = InstrumentKlineDao.upsertMany,
 ): Promise<any> {
-  //设置系统限速规则 (biance官方API 限速规则：2400次/60s)
+  //设置系统限速规则 (binance官方API 限速规则：2400次/60s)
 
   return bluebird.map(
     options,
     async (option: any) => {
       const { exchange, instrument_id, granularity } = option;
-      return Biance.getKlines({
+      return Binance.getKlines({
         symbol: instrument_id,
-        interval: BianceKlineInterval[granularity],
+        interval: BinanceKlineInterval[granularity],
         startTime: new Date(option.start).valueOf(),
         endTime: new Date(option.end).valueOf(),
         limit: 1500,
       })
         .then((data: Array<any>) => {
           let klines = [];
-          klines = data.map((candle: BianceKline) => {
+          klines = data.map((candle: BinanceKline) => {
             return {
               instrument_id,
               underlying_index: instrument_id.replace('USDT', ''),
@@ -182,7 +182,7 @@ async function getBianceKlines(
         })
         .then(() => {
           // logger.info(
-          //   `[Biance/${instrument_id}/${
+          //   `[Binance/${instrument_id}/${
           //     KlineInterval[+granularity]
           //   }] K线 Done.`,
           // );
@@ -443,7 +443,7 @@ async function getKlines(opts: {
 export {
   getKlinesWithLimited,
   getKlines,
-  getBianceKlines,
+  getBinanceKlines,
   getOkexKlines,
   getBybitKlines,
   getKlinesReqParams,

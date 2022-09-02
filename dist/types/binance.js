@@ -11,4 +11,4 @@ var FilterType;
     FilterType["MIN_NOTIONAL"] = "MIN_NOTIONAL";
     FilterType["PERCENT_PRICE"] = "PERCENT_PRICE";
 })(FilterType = exports.FilterType || (exports.FilterType = {}));
-//# sourceMappingURL=biance.js.map
+//# sourceMappingURL=binance.js.map
