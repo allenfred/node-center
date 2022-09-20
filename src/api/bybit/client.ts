@@ -18,8 +18,8 @@ import logger from '../../logger';
 import { InstrumentInfoDao, InstrumentKlineDao } from '../../dao';
 import { isKlineMsg, isTickerMsg, getKlineSubChannel } from './util';
 
-const API_KEY = 'mbcEkFhTDDb6nMtWCK';
-const PRIVATE_KEY = 'sDebFOPwH0Hn9bPl8j7WPXrlw1DIYHMF6yCS';
+const API_KEY = 'iS12CdTOC1SmCs5kQ0';
+const PRIVATE_KEY = 'Vz2L9UokimS6bz5ePwTHzWhcUXkd1qlul3MI';
 const useLivenet = true;
 
 const client = new LinearClient(

@@ -23,6 +23,10 @@ import connect from '../../database/connection';
 import { isKlineMsg, isTickerMsg, getKlineSubChannel } from './util';
 import { getInstrumentAlias } from '../../util';
 
+const API_KEY = '753285f2-3afb-402e-a468-9783c9ef7e5d';
+const PRIVATE_KEY = '4E5CC0FBF38D85827A520D5446F911A7';
+const pass_phrase = 'Qazwsx123=-';
+
 const pClient = PublicClient(OKEX_HTTP_HOST, 10000);
 const client = pClient.swap();
 let publisher = null;

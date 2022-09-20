@@ -26,6 +26,11 @@ import { getInstrumentAlias } from '../../util';
 
 let publisher = null;
 
+const API_KEY =
+  'MxUyyavVFOC2aWYZLtAG9hQkq9s4rpQAyvlND19gqqIG5iCyDJ15wtrLZhqbjBkT';
+const SECRET_KEY =
+  'I6eTFNu3YAFOiiWLm2XO27wFxkqjSfPls6OtRL83DZXaMbAkUlo6zSKpuSmC19pX';
+
 const client = new Spot('', '', {
   baseURL: 'https://fapi.binance.com',
   wsURL: 'wss://fstream.binance.com', // If optional base URL is not provided, wsURL defaults to wss://stream.binance.com:9443
