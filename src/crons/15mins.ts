@@ -6,6 +6,8 @@ import { Exchange } from '../types';
 import * as Okex from '../api/okex';
 import * as Binance from '../api/binance';
 import * as Bybit from '../api/bybit';
+import * as moment from 'moment';
+import { UsdtSwapSignal } from '../database/models';
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 // */5 * * * * At every 5 minute.
@@ -53,6 +55,16 @@ export const startJob = async () => {
     await Binance.initInstruments();
     await Bybit.initInstruments();
     await execJob(Job_Granularity.TwelveHour);
+  }
+
+  // At minute 0 on every day.
+  if (hourNow === 0 && minuteNow === 0) {
+    const daysAgo = moment().utc().add(-7, 'd').toDate();
+    await UsdtSwapSignal.deleteMany({
+      timestamp: { $lte: daysAgo },
+    }).then((res) => {
+      logger.info(res);
+    });
   }
 
   // At minute 15 on Monday.

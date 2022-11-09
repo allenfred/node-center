@@ -5,6 +5,7 @@ import {
   UsdtSwapSignal,
 } from './database/models';
 import * as _ from 'lodash';
+import * as moment from 'moment';
 
 (async function main() {
   //连接数据库
@@ -34,13 +35,13 @@ import * as _ from 'lodash';
   //   console.log(res);
   // });
 
-  await UsdtSwapSignal.updateMany(
-    { exchange: 'biance' },
-    { $set: { exchange: 'binance' } },
-    // { multi: true },
-  ).then((res) => {
-    console.log(res);
-  });
+  // await UsdtSwapSignal.updateMany(
+  //   { exchange: 'biance' },
+  //   { $set: { exchange: 'binance' } },
+  //   // { multi: true },
+  // ).then((res) => {
+  //   console.log(res);
+  // });
 
   // let flag = true;
   // const limit = 1000;
@@ -98,6 +99,14 @@ import * as _ from 'lodash';
   // }).then((res) => {
   //   console.log(res);
   // });
+
+  const monthAgo = moment().utc().add(-10, 'd').toDate();
+
+  await UsdtSwapSignal.deleteMany({
+    timestamp: { $lte: monthAgo },
+  }).then((res) => {
+    console.log(res);
+  });
 
   process.exit();
   // await InstrumentInfo.aggregate([

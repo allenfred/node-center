@@ -16,6 +16,8 @@ const logger_1 = require("../../logger");
 const dao_1 = require("../../dao");
 const util_1 = require("./util");
 let publisher = null;
+const API_KEY = 'MxUyyavVFOC2aWYZLtAG9hQkq9s4rpQAyvlND19gqqIG5iCyDJ15wtrLZhqbjBkT';
+const SECRET_KEY = 'I6eTFNu3YAFOiiWLm2XO27wFxkqjSfPls6OtRL83DZXaMbAkUlo6zSKpuSmC19pX';
 const client = new Spot('', '', {
     baseURL: 'https://fapi.binance.com',
     wsURL: 'wss://fstream.binance.com',

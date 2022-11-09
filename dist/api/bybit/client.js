@@ -15,8 +15,8 @@ const bybit_api_1 = require("bybit-api");
 const types_1 = require("../../types");
 const logger_1 = require("../../logger");
 const dao_1 = require("../../dao");
-const API_KEY = 'mbcEkFhTDDb6nMtWCK';
-const PRIVATE_KEY = 'sDebFOPwH0Hn9bPl8j7WPXrlw1DIYHMF6yCS';
+const API_KEY = 'iS12CdTOC1SmCs5kQ0';
+const PRIVATE_KEY = 'Vz2L9UokimS6bz5ePwTHzWhcUXkd1qlul3MI';
 const useLivenet = true;
 const client = new LinearClient(API_KEY, PRIVATE_KEY, 
 // optional, uses testnet by default. Set to 'true' to use livenet.

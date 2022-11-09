@@ -16,6 +16,8 @@ const logger_1 = require("../logger");
 const Okex = require("../api/okex");
 const Binance = require("../api/binance");
 const Bybit = require("../api/bybit");
+const moment = require("moment");
+const models_1 = require("../database/models");
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 // */5 * * * * At every 5 minute.
 exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -55,6 +57,15 @@ exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
         yield Binance.initInstruments();
         yield Bybit.initInstruments();
         yield util_1.execJob(util_1.Job_Granularity.TwelveHour);
+    }
+    // At minute 0 on every day.
+    if (hourNow === 0 && minuteNow === 0) {
+        const daysAgo = moment().utc().add(-7, 'd').toDate();
+        yield models_1.UsdtSwapSignal.deleteMany({
+            timestamp: { $lte: daysAgo },
+        }).then((res) => {
+            logger_1.default.info(res);
+        });
     }
     // At minute 15 on Monday.
     if (dayNow === 1 && hourNow === 0 && minuteNow === 15) {
