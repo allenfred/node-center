@@ -8,6 +8,19 @@ export type close = string;
 export type volume = string;
 export type currency_volume = string;
 
+export enum KlineInterval {
+  candle1w = 10080,
+  candle1d = 1440,
+  candle12h = 720,
+  candle6h = 360,
+  candle4h = 240,
+  candle2h = 120,
+  candle1h = 60,
+  candle30m = 30,
+  candle15m = 15,
+  candle5m = 5,
+}
+
 export interface Instrument {
   instrument_id: string; // 合约ID，如BTC-USD-190322
   base_currency: string; // 交易货币币种，如：BTC-USD-190322中的BTC
@@ -92,4 +105,11 @@ export interface HistoryKlinesJobsOpts {
   includeInterval?: number[];
   excludeInterval?: number[];
   updateFunc?: any;
+}
+
+export enum ReadyState {
+  CONNECTING = 0,
+  OPEN = 1,
+  CLOSING = 2,
+  CLOSED = 3,
 }

@@ -48,4 +48,20 @@ const logger = createLogger({
 //   );
 // }
 
+// console.log = function () {
+//   logger.info.apply(logger, arguments);
+// };
+// console.info = function () {
+//   logger.info.apply(logger, arguments);
+// };
+// console.warn = function () {
+//   logger.warn.apply(logger, arguments);
+// };
+// console.error = function () {
+//   logger.error.apply(logger, arguments);
+// };
+// console.debug = function () {
+//   logger.debug.apply(logger, arguments);
+// };
+
 export default logger;

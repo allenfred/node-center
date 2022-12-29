@@ -13,6 +13,36 @@ export interface BybitKline {
   turnover: number;
 }
 
+// kline payload:
+/**
+    {
+      topic: 'candle.240.BTCUSDT',
+      data: [
+        {
+          start: 1657324800,
+          end: 1657339200,
+          period: '240',
+          open: 21590,
+          close: 21439,
+          high: 21688.5,
+          low: 21400,
+          volume: '14423.617',
+          turnover: '310796217.4615',
+          confirm: False,
+          cross_seq: 13772456642,
+          timestamp: 1657330433544253,
+        },
+      ],
+      timestamp_e6: 1657330433544253,
+    }
+   * 
+  */
+export interface BybitWsKlineMsg {
+  topic: string;
+  data: BybitWsKline[];
+  timestamp_e6: number;
+}
+
 export interface BybitWsKline {
   start: number; // 开始时间 秒
   end: number; // 结束时间 秒
@@ -84,6 +114,69 @@ export interface BybitTicker {
   delivery_time: string;
 }
 
+export interface BybitWsTicker {
+  id: number;
+  symbol: string;
+  bid_price: string;
+  ask_price: string;
+  last_price: string;
+  last_price_e4: string;
+  last_tick_direction: string;
+  prev_price_24h: string;
+  prev_price_24h_e4: string;
+  price_24h_pcnt_e6: string;
+  price_24h_pcnt: string;
+  high_price_24h: string;
+  low_price_24h: string;
+  prev_price_1h: string;
+  price_1h_pcnt: string;
+  mark_price: string;
+  index_price: string;
+  open_interest: number;
+  open_value: string;
+  total_turnover: string;
+  turnover_24h: string;
+  total_volume: number;
+  volume_24h: number;
+  funding_rate: string;
+  predicted_funding_rate: string;
+  next_funding_time: string;
+  countdown_hour: number;
+  delivery_fee_rate: string;
+  predicted_delivery_price: string;
+  delivery_time: string;
+  high_price_24h_e4: string;
+  low_price_24h_e4: string;
+  prev_price_1h_e4: string;
+  price_1h_pcnt_e6: string;
+  mark_price_e4: string;
+  index_price_e4: string;
+  open_interest_e8: string;
+  total_turnover_e8: string;
+  turnover_24h_e8: string;
+  total_volume_e8: string;
+  volume_24h_e8: string;
+  funding_rate_e6: string;
+  predicted_funding_rate_e6: string;
+  cross_seq: string;
+  created_at: string;
+  updated_at: string;
+  count_down_hour: number;
+  funding_rate_interval: number;
+  bid1_price_e4: string;
+  ask1_price_e4: string;
+  bid1_price: string;
+  ask1_price: string;
+}
+
+export interface BybitWsTickerMsg {
+  topic: string;
+  type: string;
+  data: BybitWsTicker | { update: BybitWsTicker[] };
+  cross_seq: string;
+  timestamp_e6: string;
+}
+
 export interface BybitKlineApiOpts {
   symbol: string;
   interval: string; // 1m 3m 5m ...
@@ -95,4 +188,9 @@ export interface BybitKlineApiOpts {
 export interface BybitWsMsg {
   topic: string; // candle.15.BTCUSDT
   data: any[];
+}
+
+export enum BybitWsTickerMsgType {
+  snapshot = 'snapshot',
+  delta = 'delta',
 }

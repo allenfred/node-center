@@ -1,9 +1,9 @@
 import connectMongo from '../database/connection';
 import * as commonAPI from '../api/common';
 import { Exchange } from '../types';
-import { UsdtSwapKline, BtcSwapKline } from '../database/models';
-import { initBinanceInsts } from '../api/binance';
-import { initOkxInsts } from '../api/okex';
+import { UsdtSwapKline } from '../database/models';
+import { initInstruments as initBinanceInsts } from '../api/binance';
+import { initInstruments as initOkxInsts } from '../api/okex';
 
 export const task = async () => {
   await connectMongo();

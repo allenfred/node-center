@@ -110,6 +110,12 @@ function getReqOptions(instId, opts = {}) {
             end: opts.end || util_1.getTimestamp(0, 'h'),
             granularity: 43200,
         }));
+        reqOptions.push(Object.assign({}, {
+            instrument_id: instId,
+            start: opts.start || util_1.getTimestamp(12 * 2 * 7 * -count, 'h'),
+            end: opts.end || util_1.getTimestamp(0, 'h'),
+            granularity: 604800,
+        }));
     }
     if (opts && opts.includeInterval && opts.includeInterval.length) {
         reqOptions = reqOptions.filter((i) => opts.includeInterval.includes(i.granularity));

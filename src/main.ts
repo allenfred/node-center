@@ -1,26 +1,75 @@
 import connectMongo from './database/connection';
 import logger from './logger';
+import env from './config/envVars';
+import { App } from './app';
 import * as http from 'http';
-import { setupWsserver } from './wsserver/server';
-// import redisClient from './redis/client';
+import { setupWsserver } from './socket.io/server';
+import { Server } from 'socket.io';
 
-const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('ok');
+const globalAny: any = global;
+const port = normalizePort(env.PORT || '3102');
+const app = new App();
+const server = http.createServer(app.getServer());
+
+globalAny.io = new Server({
+  cors: {
+    origin: env.SOCKET_CORS_ORIGIN,
+  },
 });
 
-server.on('clientError', (err, socket) => {
-  socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
-});
+globalAny.io.attach(server);
 
-server.listen(3002);
+function normalizePort(val: any) {
+  const port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
+
+function onError(error: any) {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      logger.error(bind + ' requires elevated privileges');
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      logger.error(bind + ' is already in use');
+      process.exit(1);
+      break;
+    default:
+      throw error;
+  }
+}
+
+function onListening() {
+  const addr = server.address();
+  const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
+  logger.info(`========= [Node-Center] start, Listening on ${bind} =========`);
+}
 
 (async function main() {
-  logger.info('----- crypto-server start -----');
   //连接数据库
   await connectMongo();
-  // await redisClient.connect();
-  setupWsserver(server);
+  server.listen(port);
+  server.on('error', onError);
+  server.on('listening', onListening);
+  setupWsserver();
 })();
 
 process.stdout.on('error', function (err) {

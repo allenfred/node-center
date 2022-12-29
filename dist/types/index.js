@@ -14,4 +14,5 @@ __exportStar(require("./common"), exports);
 __exportStar(require("./okex"), exports);
 __exportStar(require("./binance"), exports);
 __exportStar(require("./bybit"), exports);
+__exportStar(require("./SocketIO"), exports);
 //# sourceMappingURL=index.js.map

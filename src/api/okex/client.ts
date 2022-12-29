@@ -1,4 +1,3 @@
-import * as moment from 'moment';
 import PublicClient from '../../lib/okex/publicClient';
 import { V3WebsocketClient as OkxWsClient } from '@okfe/okex-node';
 import { OKEX_WS_HOST, OKEX_HTTP_HOST } from '../../config';
@@ -18,10 +17,6 @@ import {
   WsFormatKline,
 } from '../../types';
 import { InstrumentInfoDao, InstrumentKlineDao } from '../../dao';
-import redisClient from '../../redis/client';
-import connect from '../../database/connection';
-import { isKlineMsg, isTickerMsg, getKlineSubChannel } from './util';
-import { getInstrumentAlias } from '../../util';
 
 const API_KEY = '753285f2-3afb-402e-a468-9783c9ef7e5d';
 const PRIVATE_KEY = '4E5CC0FBF38D85827A520D5446F911A7';
@@ -124,46 +119,6 @@ async function getKlines({
     });
 }
 
-function getSwapSubArgs(instruments: Instrument[]): Array<string> {
-  return getBasicArgs(instruments);
-}
-
-function getBasicArgs(instruments: Instrument[]): Array<string> {
-  const klineArgs = [];
-
-  instruments.map((i: Instrument | SimpleIntrument) => {
-    // 公共-K线频道
-    // const subChannels = ['candle15m', 'candle1H', 'candle4H'];
-    const subChannels = ['candle15m', 'candle1H'];
-
-    subChannels.map((candleChannel) => {
-      klineArgs.push({ channel: candleChannel, instId: i.instrument_id });
-    });
-  });
-
-  // 公共-行情频道
-  const tickerArgs = instruments.map((i: Instrument) => {
-    return { channel: 'tickers', instId: i.instrument_id };
-  });
-
-  // 公共-持仓总量频道
-  const openInterstArgs = instruments.map((i: Instrument) => {
-    return { channel: 'open-interest', instId: i.instrument_id };
-  });
-
-  // 公共-交易频道
-  const tradeArgs = instruments.map((i: Instrument) => {
-    return { channel: 'trades', instId: i.instrument_id };
-  });
-
-  // 公共-资金费率频道
-  const fundingRateArgs = instruments.map((i: Instrument) => {
-    return { channel: 'funding-rate', instId: i.instrument_id };
-  });
-
-  return klineArgs.concat(tickerArgs);
-}
-
 /* V5 API 
 {
   "arg": {
@@ -231,142 +186,4 @@ export async function handleKlines(message: OkxWsMsg) {
   await InstrumentKlineDao.upsertOne(klines[0]);
 }
 
-export async function handleMsg(message: OkxWsMsg) {
-  // 每15min更新一次Ticker
-  // if (
-  //   isTickerMsg(message) &&
-  //   new Date().getMinutes() % 10 === 0 &&
-  //   new Date().getSeconds() < 30
-  // ) {
-  //   handleTickers(message);
-  // }
-
-  //  每30秒 更新K线数据
-  if (new Date().getSeconds() % 30 === 0 && isKlineMsg(message)) {
-    handleKlines(message);
-  }
-}
-
-export async function broadCastByWS(msg: OkxWsMsg, clients: any[]) {
-  if (!clients.length) {
-    return;
-  }
-
-  clients.map((client: any) => {
-    let pubMsg: any = null;
-
-    if (new Date().getSeconds() % 2 === 0 && msg.arg.channel === 'tickers') {
-      if (client.isApiServer || client.channels.includes('tickers')) {
-        pubMsg = JSON.stringify({
-          channel: 'tickers',
-          data: msg.data.map((i: OkxWsTicker) => {
-            // [exchange, instrument_id, last, chg_24h, chg_rate_24h, volume_24h]
-            return [
-              Exchange.Okex,
-              i.instId,
-              i.last,
-              i.last - i.open24h,
-              (((i.last - i.open24h) * 100) / i.open24h).toFixed(4),
-              i.vol24h,
-            ];
-          }),
-        });
-      }
-    }
-
-    if (isKlineMsg(msg)) {
-      if (
-        client.isApiServer ||
-        client.channels.includes(getKlineSubChannel(msg.arg))
-      ) {
-        pubMsg = JSON.stringify({
-          channel: getKlineSubChannel(msg.arg),
-          data: msg.data[0] as WsFormatKline,
-        });
-      }
-    }
-
-    if (pubMsg) {
-      client.send(pubMsg);
-    }
-  });
-}
-
-export async function broadCastByRedis(msg: OkxWsMsg) {
-  if (msg.arg.channel === 'tickers') {
-    const pubMsg = JSON.stringify({
-      channel: 'tickers',
-      data: msg.data.map((i) => {
-        // [exchange, instrument_id, last, chg_24h, chg_rate_24h, volume_24h]
-        return [
-          Exchange.Okex,
-          i.instId,
-          i.last,
-          i.last - i.open24h,
-          (((i.last - i.open24h) * 100) / i.open24h).toFixed(4),
-          i.vol24h,
-        ];
-      }),
-    });
-
-    publisher.publish('tickers', pubMsg);
-  }
-
-  if (msg.arg.channel.includes('candle')) {
-    const pubMsg = JSON.stringify({
-      channel: getKlineSubChannel(msg.arg),
-      data: msg.data[0] as WsFormatKline,
-    });
-
-    publisher.publish('klines', pubMsg);
-  }
-}
-
-async function setupWsClient(clients: any[]) {
-  const wsClient = new OkxWsClient(OKEX_WS_HOST);
-  wsClient.connect();
-
-  wsClient.on('open', async () => {
-    logger.info('!!! 与Okx wsserver建立连接成功 !!!');
-    // wsClient.login(apikey, secret, passphrase);
-
-    const instruments: Instrument[] = await InstrumentInfoDao.find({
-      exchange: Exchange.Okex,
-    });
-
-    // 订阅永续频道信息
-    wsClient.subscribe(...getSwapSubArgs(instruments));
-  });
-
-  wsClient.on('close', () => {
-    logger.error('!!! 与Okx wsserver断开连接 !!!');
-    wsClient.connect();
-  });
-
-  wsClient.on('message', (data: any) => {
-    try {
-      // logger.info(`!!! ws message =${data}`);
-      const obj: OkxWsMsg = JSON.parse(data);
-      const eventType = obj.event;
-
-      // if (eventType == 'login') {
-      //   //登录消息
-      //   if (obj?.success == true) {
-      //     event.emit('login');
-      //   }
-
-      //   return;
-      // }
-
-      // 公共频道消息
-      if (eventType == undefined) {
-        // broadCastByWS(obj, clients);
-        handleMsg(obj);
-      }
-    } catch (e) {
-      logger.error('handleMessage catch err: ', e);
-    }
-  });
-}
-
-export { setupWsClient, getInstruments, getKlines };
+export { getInstruments, getKlines };

@@ -1,0 +1,110 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.setupWsClient = exports.broadCastTickers = exports.broadCastKlines = void 0;
+const { Spot } = require('@binance/connector');
+const types_1 = require("../../types");
+const logger_1 = require("../../logger");
+const util_1 = require("./util");
+// #TODO: handleMessage update to Redis
+const globalAny = global;
+const API_KEY = 'MxUyyavVFOC2aWYZLtAG9hQkq9s4rpQAyvlND19gqqIG5iCyDJ15wtrLZhqbjBkT';
+const SECRET_KEY = 'I6eTFNu3YAFOiiWLm2XO27wFxkqjSfPls6OtRL83DZXaMbAkUlo6zSKpuSmC19pX';
+const client = new Spot('', '', {
+    baseURL: 'https://fapi.binance.com',
+    wsURL: 'wss://fstream.binance.com',
+});
+function broadCastKlines(msg) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (util_1.isKlineMsg(msg)) {
+            const interval = msg.k.i; // 1h
+            const instId = msg.s;
+            const subChannel = util_1.getKlineSubChannel(interval, instId.toUpperCase());
+            const k = msg.k;
+            const pubMsg = JSON.stringify({
+                channel: subChannel,
+                data: [k.t, k.o, k.h, k.l, k.c, k.v, k.q],
+            });
+            globalAny.io.to('klines').emit(subChannel, pubMsg);
+        }
+    });
+}
+exports.broadCastKlines = broadCastKlines;
+function broadCastTickers(msg) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let pubMsg;
+        if (msg.length) {
+            pubMsg = JSON.stringify({
+                channel: 'tickers',
+                data: msg
+                    .filter((i) => i.s.endsWith('USDT'))
+                    .map((i) => {
+                    // [exchange, instrument_id, last, chg_24h, chg_rate_24h, volume_24h]
+                    return [
+                        types_1.Exchange.Binance,
+                        i.s,
+                        i.c,
+                        +i.c - +i.o,
+                        (((+i.c - +i.o) * 100) / +i.o).toFixed(4),
+                        i.q,
+                    ];
+                }),
+            });
+        }
+        else {
+            const i = msg;
+            pubMsg = JSON.stringify({
+                channel: 'tickers',
+                data: [
+                    types_1.Exchange.Binance,
+                    i.s,
+                    i.c,
+                    +i.c - +i.o,
+                    (((+i.c - +i.o) * 100) / +i.o).toFixed(4),
+                    i.q,
+                ],
+            });
+        }
+        globalAny.io.to('tickers').emit('tickers', pubMsg);
+    });
+}
+exports.broadCastTickers = broadCastTickers;
+function setupWsClient() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const wsRef = client.subscribe('wss://fstream.binance.com/ws/', {
+            open: () => {
+                logger_1.default.info('!!! 与Binance wsserver建立连接成功 !!!');
+                globalAny.binanceWsConnected = true;
+                wsRef.ws.send(JSON.stringify({
+                    method: types_1.Method.subscribe.toUpperCase(),
+                    params: [`!miniTicker@arr`],
+                    id: new Date().getTime(),
+                }));
+            },
+            close: () => {
+                logger_1.default.error('!!! 与Binance wsserver断开连接 !!!');
+            },
+            message: (data) => {
+                const msg = JSON.parse(data);
+                if (util_1.isKlineMsg(msg)) {
+                    broadCastKlines(msg);
+                }
+                if (util_1.isTickerMsg(data)) {
+                    broadCastTickers(msg);
+                }
+                // handleMsg(JSON.parse(data));
+            },
+        });
+        return wsRef.ws;
+    });
+}
+exports.setupWsClient = setupWsClient;
+//# sourceMappingURL=wsClient.js.map

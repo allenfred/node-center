@@ -48,5 +48,20 @@ const logger = winston_1.createLogger({
 //     }),
 //   );
 // }
+// console.log = function () {
+//   logger.info.apply(logger, arguments);
+// };
+// console.info = function () {
+//   logger.info.apply(logger, arguments);
+// };
+// console.warn = function () {
+//   logger.warn.apply(logger, arguments);
+// };
+// console.error = function () {
+//   logger.error.apply(logger, arguments);
+// };
+// console.debug = function () {
+//   logger.debug.apply(logger, arguments);
+// };
 exports.default = logger;
 //# sourceMappingURL=logger.js.map

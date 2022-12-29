@@ -112,19 +112,6 @@ export interface OkxWsFundingRate {
   fundingTime: string; // 最新的到期结算的资金费时间，Unix时间戳的毫秒数格式，如 1597026383085
 }
 
-export enum KlineInterval {
-  candle1w = 604800,
-  candle1d = 86400,
-  candle12h = 43200,
-  candle6h = 21600,
-  candle4h = 14400,
-  candle2h = 7200,
-  candle1h = 3600,
-  candle30m = 1800,
-  candle15m = 900,
-  candle5m = 300,
-}
-
 export interface OkxWsMsg {
   event?: string;
   arg: any;

@@ -20,6 +20,60 @@ export type BinanceKline = [
   currency_volume,
 ];
 
+// stream名称中所有交易对均为小写
+// !miniTicker@arr 全市场的精简Ticker
+// !ticker@arr 全市场的完整Ticker
+
+export enum BinanceWsStream {
+  miniTicker = '!miniTicker@arr',
+  ticker = '!ticker@arr',
+}
+
+// -------------- websocket Stream  -------------------
+
+export interface BinanceWsMiniTicker {
+  e: string; // 事件类型 24hrMiniTicker
+  E: string; // 事件时间(毫秒) 123456789
+  s: string; // 交易对  BTCUSDT
+  c: string; // 最新成交价格
+  o: string; // 24小时前开始第一笔成交价格
+  h: string; // 24小时内最高成交价
+  l: string; // 24小时内最低成交价
+  v: string; // 成交量
+  q: string; // 成交额
+}
+
+export interface BinanceWsMiniTickersMsg {
+  stream: BinanceWsStream.miniTicker;
+  data: BinanceWsMiniTicker[];
+}
+
+export interface BinanceWsTicker {
+  e: string; // 事件类型 24hrTicker
+  E: string; // 事件时间(毫秒) 123456789
+  s: string; // 交易对  BTCUSDT
+  p: string; // 24小时价格变化
+  P: string; // 24小时价格变化(百分比)
+  w: string; // 平均价格
+  c: string; // 最新成交价格
+  Q: string; // 最新成交价格上的成交量
+  o: string; // 24小时内第一比成交的价格
+  h: string; // 24小时内最高成交价
+  l: string; // 24小时内最低成交价
+  v: string; // 24小时内成交量
+  q: string; // 24小时内成交额
+  O: number; // 统计开始时间
+  C: number; // 统计结束时间
+  F: number; // 24小时内第一笔成交交易ID
+  L: number; // 24小时内最后一笔成交交易ID
+  n: number; // 24小时内成交数
+}
+
+export interface BinanceWsTickersMsg {
+  stream: BinanceWsStream.ticker;
+  data: BinanceWsTicker[];
+}
+
 export interface BinanceWsKline {
   t: any; // 时间戳
   s: string; // symbol
@@ -31,6 +85,60 @@ export interface BinanceWsKline {
   v: string; // 成交量 以币种计量
   q: string; // 成交额 以USDT计量
 }
+
+// Payload:
+/**
+     * {
+        "e": "kline",     // 事件类型
+        "E": 123456789,   // 事件时间
+        "s": "BNBUSDT",    // 交易对
+        "k": {
+          "t": 123400000, // 这根K线的起始时间
+          "T": 123460000, // 这根K线的结束时间
+          "s": "BNBUSDT",  // 交易对
+          "i": "1m",      // K线间隔
+          "f": 100,       // 这根K线期间第一笔成交ID
+          "L": 200,       // 这根K线期间末一笔成交ID
+          "o": "0.0010",  // 开盘价
+          "c": "0.0020",  // 收盘价
+          "h": "0.0025",  // 最高价
+          "l": "0.0015",  // 最低价
+          "v": "1000",    // 这根K线期间成交量
+          "n": 100,       // 这根K线期间成交笔数
+          "x": false,     // 这根K线是否完结(是否已经开始下一根K线)
+          "q": "1.0000",  // 这根K线期间成交额
+          "V": "500",     // 主动买入的成交量
+          "Q": "0.500",   // 主动买入的成交额
+          "B": "123456"   // 忽略此参数
+        }
+      }
+    */
+export interface BinanceWsKlineMsg {
+  e: string; // 事件类型
+  E: number; // 事件时间
+  s: string; // 交易对
+  k: {
+    t: number; // 这根K线的起始时间
+    T: number; // 这根K线的结束时间
+    s: string; // 交易对
+    i: string; // K线间隔
+    f: number; // 这根K线期间第一笔成交ID
+    L: number; // 这根K线期间末一笔成交ID
+    o: string; // 开盘价
+    c: string; // 收盘价
+    h: string; // 最高价
+    l: string; // 最低价
+    v: string; // 这根K线期间成交量
+    n: number; // 这根K线期间成交笔数
+    x: boolean; // 这根K线是否完结(是否已经开始下一根K线)
+    q: string; // 这根K线期间成交额
+    V: string; // 主动买入的成交量
+    Q: string; // 主动买入的成交额
+    B: string; // 忽略此参数
+  };
+}
+
+// -------------- websocket Stream  -------------------
 
 /**
  * "symbols": [ // 交易对信息
@@ -218,8 +326,7 @@ export interface BinanceKlineApiOpts {
 }
 
 export interface BinanceWsMsg {
-  stream: string; // !miniTicker@arr / <symbol>@kline_<interval>
-  data: any | any[];
+  [key: string]: string | number | boolean;
 }
 
 export interface BinanceTicker {
@@ -239,4 +346,21 @@ export interface BinanceTicker {
   firstId: number; // 首笔成交id
   lastId: number; // 末笔成交id
   count: number; // 成交笔数
+}
+
+// Binance Interval:
+// 1m 3m 5m 15m 30m
+// 1h 2h 4h 6h 8h 12h
+// 1d 3d
+export enum BinanceKlineInterval {
+  candle1w = 10080,
+  candle1d = 1440,
+  candle12h = 720,
+  candle6h = 360,
+  candle4h = 240,
+  candle2h = 120,
+  candle1h = 60,
+  candle30m = 30,
+  candle15m = 15,
+  candle5m = 5,
 }

@@ -162,6 +162,18 @@ function getReqOptions(instId: string, opts: HistoryKlinesJobsOpts = {}) {
         },
       ),
     );
+
+    reqOptions.push(
+      Object.assign(
+        {},
+        {
+          instrument_id: instId,
+          start: opts.start || getTimestamp(12 * 2 * 7 * -count, 'h'),
+          end: opts.end || getTimestamp(0, 'h'),
+          granularity: 604800, // 1w
+        },
+      ),
+    );
   }
 
   if (opts && opts.includeInterval && opts.includeInterval.length) {
