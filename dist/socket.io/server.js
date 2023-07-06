@@ -13,7 +13,6 @@ exports.setupWsserver = void 0;
 const lodash_1 = require("lodash");
 const logger_1 = require("../logger");
 const Binance = require("../api/binance");
-const Bybit = require("../api/bybit");
 const Okex = require("../api/okex");
 const types_1 = require("../types");
 const util_1 = require("./util");
@@ -107,8 +106,8 @@ function setupWsserver() {
     return __awaiter(this, void 0, void 0, function* () {
         const binance = yield Binance.setupWsClient();
         const okex = yield Okex.setupWsClient();
-        const bybit = yield Bybit.setupWsClient();
-        setupSocketServer({ binance, okex, bybit });
+        // const bybit = await Bybit.setupWsClient();
+        setupSocketServer({ binance, okex });
     });
 }
 exports.setupWsserver = setupWsserver;

@@ -14,8 +14,8 @@ import {
 
 interface ClientRefs {
   binance: any;
-  bybit: any;
-  okex: any;
+  bybit?: any;
+  okex?: any;
 }
 
 const globalAny: any = global;
@@ -140,7 +140,7 @@ async function setupSocketServer(client: ClientRefs) {
 export async function setupWsserver() {
   const binance = await Binance.setupWsClient();
   const okex = await Okex.setupWsClient();
-  const bybit = await Bybit.setupWsClient();
+  // const bybit = await Bybit.setupWsClient();
 
-  setupSocketServer({ binance, okex, bybit });
+  setupSocketServer({ binance, okex });
 }

@@ -21,7 +21,7 @@ export const startJob = async () => {
   const okexInsts = insts.filter((i: any) => i.exchange === Exchange.Okex);
 
   await binance.getHistoryKlines(binanceInsts, { count: 1000 });
-  await bybit.getHistoryKlines(bybitInsts, { count: 1000 });
+  // await bybit.getHistoryKlines(bybitInsts, { count: 1000 });
   await okex.getHistoryKlines(okexInsts, { count: 1000 });
 
   const endTime = new Date().getTime();
