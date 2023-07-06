@@ -15,7 +15,6 @@ const connection_1 = require("../database/connection");
 const logger_1 = require("../logger");
 const Okex = require("../api/okex");
 const Binance = require("../api/binance");
-const Bybit = require("../api/bybit");
 const moment = require("moment");
 const models_1 = require("../database/models");
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
@@ -35,7 +34,7 @@ exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     if (minuteNow === 0) {
         yield Okex.initInstruments();
         yield Binance.initInstruments();
-        yield Bybit.initInstruments();
+        // await Bybit.initInstruments();
         yield util_1.execJob(util_1.Job_Granularity.OneHour);
     }
     // 2hourly
@@ -55,7 +54,7 @@ exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     if (hourNow % 12 === 0 && minuteNow === 0) {
         yield Okex.initInstruments();
         yield Binance.initInstruments();
-        yield Bybit.initInstruments();
+        // await Bybit.initInstruments();
         yield util_1.execJob(util_1.Job_Granularity.TwelveHour);
     }
     // At minute 0 on every day.

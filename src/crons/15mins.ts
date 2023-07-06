@@ -29,7 +29,7 @@ export const startJob = async () => {
   if (minuteNow === 0) {
     await Okex.initInstruments();
     await Binance.initInstruments();
-    await Bybit.initInstruments();
+    // await Bybit.initInstruments();
     await execJob(Job_Granularity.OneHour);
   }
 
@@ -53,7 +53,7 @@ export const startJob = async () => {
   if (hourNow % 12 === 0 && minuteNow === 0) {
     await Okex.initInstruments();
     await Binance.initInstruments();
-    await Bybit.initInstruments();
+    // await Bybit.initInstruments();
     await execJob(Job_Granularity.TwelveHour);
   }
 
