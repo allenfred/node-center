@@ -79,14 +79,14 @@ async function execJob(granularity: number, limit?: number) {
         includeInterval: [granularity],
       },
     ),
-    Bybit.getHistoryKlines(
-      validInsts.filter((i: any) => i.exchange === Exchange.Bybit),
-      {
-        count,
-        delay: 200,
-        includeInterval: [granularity],
-      },
-    ),
+    // Bybit.getHistoryKlines(
+    //   validInsts.filter((i: any) => i.exchange === Exchange.Bybit),
+    //   {
+    //     count,
+    //     delay: 200,
+    //     includeInterval: [granularity],
+    //   },
+    // ),
   ]);
 }
 
