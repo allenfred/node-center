@@ -127,8 +127,9 @@ function getHistoryKlines(instruments, options) {
             opts = Object.assign(opts, { count: 300 });
         }
         return bluebird.each(instruments, ({ instrument_id }) => {
+            //设置系统限速规则 (okx官方API 限速规则：40次/2s)
             return bluebird
-                .delay(500)
+                .delay(200)
                 .then(() => {
                 return common_1.getOkexKlines(getReqOptions(instrument_id, opts).map((opt) => {
                     return Object.assign({}, opt, { exchange: types_1.Exchange.Okex });

@@ -75,7 +75,7 @@ async function execJob(granularity: number, limit?: number) {
       validInsts.filter((i: any) => i.exchange === Exchange.Binance),
       {
         count,
-        delay: 300,
+        delay: 100,
         includeInterval: [granularity],
       },
     ),

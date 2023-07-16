@@ -161,8 +161,9 @@ export async function getHistoryKlines(
   }
 
   return bluebird.each(instruments, ({ instrument_id }: any) => {
+    //设置系统限速规则 (okx官方API 限速规则：40次/2s)
     return bluebird
-      .delay(500)
+      .delay(200)
       .then(() => {
         return getOkexKlines(
           getReqOptions(instrument_id, opts).map((opt: any) => {

@@ -70,7 +70,7 @@ function execJob(granularity, limit) {
             }),
             Binance.getHistoryKlines(validInsts.filter((i) => i.exchange === types_1.Exchange.Binance), {
                 count,
-                delay: 300,
+                delay: 100,
                 includeInterval: [granularity],
             }),
         ]);
