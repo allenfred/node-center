@@ -160,10 +160,12 @@ export async function getHistoryKlines(
     opts = Object.assign(opts, { count: 300 });
   }
 
+  const delayMillseconds = opts && opts.delay ? opts.delay : 100;
+
   return bluebird.each(instruments, ({ instrument_id }: any) => {
     //设置系统限速规则 (okx官方API 限速规则：40次/2s)
     return bluebird
-      .delay(200)
+      .delay(delayMillseconds)
       .then(() => {
         return getOkexKlines(
           getReqOptions(instrument_id, opts).map((opt: any) => {
