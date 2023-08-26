@@ -16,6 +16,7 @@ const config_1 = require("../../config");
 const logger_1 = require("../../logger");
 const types_1 = require("../../types");
 const util_1 = require("./util");
+// 备注名 hunter
 const API_KEY = '753285f2-3afb-402e-a468-9783c9ef7e5d';
 const PRIVATE_KEY = '4E5CC0FBF38D85827A520D5446F911A7';
 const pass_phrase = 'Qazwsx123=-';

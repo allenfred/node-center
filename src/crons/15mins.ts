@@ -59,7 +59,7 @@ export const startJob = async () => {
 
   // At minute 0 on every day.
   if (hourNow === 0 && minuteNow === 0) {
-    const daysAgo = moment().utc().add(-7, 'd').toDate();
+    const daysAgo = moment().utc().add(-31, 'd').toDate();
     await UsdtSwapSignal.deleteMany({
       timestamp: { $lte: daysAgo },
     }).then((res) => {

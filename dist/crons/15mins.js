@@ -59,7 +59,7 @@ exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     }
     // At minute 0 on every day.
     if (hourNow === 0 && minuteNow === 0) {
-        const daysAgo = moment().utc().add(-7, 'd').toDate();
+        const daysAgo = moment().utc().add(-31, 'd').toDate();
         yield models_1.UsdtSwapSignal.deleteMany({
             timestamp: { $lte: daysAgo },
         }).then((res) => {
