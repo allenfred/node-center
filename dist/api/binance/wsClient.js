@@ -79,15 +79,10 @@ function broadCastTickers(msg) {
 exports.broadCastTickers = broadCastTickers;
 function setupWsClient() {
     return __awaiter(this, void 0, void 0, function* () {
-        const wsRef = client.subscribe('wss://fstream.binance.com/ws/', {
+        const wsRef = client.subscribe('wss://fstream.binance.com/ws/!miniTicker@arr', {
             open: () => {
                 logger_1.default.info('!!! 与Binance wsserver建立连接成功 !!!');
                 globalAny.binanceWsConnected = true;
-                wsRef.ws.send(JSON.stringify({
-                    method: types_1.Method.subscribe.toUpperCase(),
-                    params: [`!miniTicker@arr`],
-                    id: new Date().getTime(),
-                }));
             },
             close: () => {
                 logger_1.default.error('!!! 与Binance wsserver断开连接 !!!');

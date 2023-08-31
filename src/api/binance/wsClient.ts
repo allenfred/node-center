@@ -1,27 +1,15 @@
 const { Spot } = require('@binance/connector');
 import {
-  Instrument,
   Exchange,
   WsFormatKline,
   BinanceWsKlineMsg,
   BinanceWsMiniTicker,
   BinanceWsTicker,
-  BinanceWsTickersMsg,
-  BinanceWsMiniTickersMsg,
-  BinanceWsStream,
-  Method,
 } from '../../types';
 import logger from '../../logger';
-import { InstrumentInfoDao } from '../../dao';
-import {
-  isKlineMsg,
-  isTickerMsg,
-  isKlineFinish,
-  getKlineSubChannel,
-} from './util';
+import { isKlineMsg, isTickerMsg, getKlineSubChannel } from './util';
 
 // #TODO: handleMessage update to Redis
-
 const globalAny: any = global;
 
 const API_KEY =
@@ -90,34 +78,29 @@ export async function broadCastTickers(msg: any) {
 }
 
 async function setupWsClient() {
-  const wsRef = client.subscribe('wss://fstream.binance.com/ws/', {
-    open: () => {
-      logger.info('!!! 与Binance wsserver建立连接成功 !!!');
+  const wsRef = client.subscribe(
+    'wss://fstream.binance.com/ws/!miniTicker@arr',
+    {
+      open: () => {
+        logger.info('!!! 与Binance wsserver建立连接成功 !!!');
+        globalAny.binanceWsConnected = true;
+      },
+      close: () => {
+        logger.error('!!! 与Binance wsserver断开连接 !!!');
+      },
+      message: (data: string) => {
+        const msg = JSON.parse(data);
+        if (isKlineMsg(msg)) {
+          broadCastKlines(msg);
+        }
 
-      globalAny.binanceWsConnected = true;
-      wsRef.ws.send(
-        JSON.stringify({
-          method: Method.subscribe.toUpperCase(),
-          params: [`!miniTicker@arr`],
-          id: new Date().getTime(),
-        }),
-      );
+        if (isTickerMsg(data)) {
+          broadCastTickers(msg);
+        }
+        // handleMsg(JSON.parse(data));
+      },
     },
-    close: () => {
-      logger.error('!!! 与Binance wsserver断开连接 !!!');
-    },
-    message: (data: string) => {
-      const msg = JSON.parse(data);
-      if (isKlineMsg(msg)) {
-        broadCastKlines(msg);
-      }
-
-      if (isTickerMsg(data)) {
-        broadCastTickers(msg);
-      }
-      // handleMsg(JSON.parse(data));
-    },
-  });
+  );
 
   return wsRef.ws;
 }
