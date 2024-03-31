@@ -27,7 +27,7 @@ function initInstruments() {
         instruments = instruments.filter((i) => i.instrument_id.endsWith('USDT'));
         logger_1.default.info(`Binance[永续合约] - 获取公共合约全量信息成功，共: ${instruments.length} 条 ...`);
         if (!instruments.length) {
-            return;
+            return [];
         }
         // ****** 处理下架合约 ******
         const oldInsts = yield dao_1.InstrumentInfoDao.find({
@@ -45,8 +45,9 @@ function initInstruments() {
         // ********************
         //更新永续合约信息
         yield dao_1.InstrumentInfoDao.upsert(instruments);
-        let data = yield dao_1.InstrumentInfoDao.find({ exchange: types_1.Exchange.Binance });
-        // data = data.filter((i: Instrument) => i.klines !== 1);
+        let data = yield dao_1.InstrumentInfoDao.find({
+            exchange: types_1.Exchange.Binance,
+        });
         logger_1.default.info(`Binance[永续合约] - 待初始化K线的合约数量 ${data.length} ...`);
         return _.sortBy(data, ['instrument_id']);
     });

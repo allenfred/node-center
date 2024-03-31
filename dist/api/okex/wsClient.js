@@ -108,7 +108,7 @@ function broadCastTicker(msg) {
     });
 }
 exports.broadCastTicker = broadCastTicker;
-function setupWsClient() {
+function setupWsClient(instruments) {
     return __awaiter(this, void 0, void 0, function* () {
         const wsClient = new okex_node_1.V3WebsocketClient(config_1.OKEX_WS_HOST);
         wsClient.connect();

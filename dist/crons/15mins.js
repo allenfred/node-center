@@ -17,6 +17,7 @@ const Okex = require("../api/okex");
 const Binance = require("../api/binance");
 const moment = require("moment");
 const models_1 = require("../database/models");
+const client_1 = require("../redis/client");
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 // */5 * * * * At every 5 minute.
 exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
@@ -72,6 +73,8 @@ exports.startJob = () => __awaiter(void 0, void 0, void 0, function* () {
     }
     const endTime = new Date().getTime();
     const usedTime = ((endTime - startTime) / 1000).toFixed(1);
+    yield client_1.default.connect();
+    yield client_1.default.publish('klines', JSON.stringify({ status: 1 }));
     logger_1.default.info(`----- Job End Time Used: ${usedTime}s -----`);
     process.exit(0);
 });

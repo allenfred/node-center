@@ -1,9 +1,9 @@
 import { difference } from 'lodash';
 import logger from '../logger';
 import * as Binance from '../api/binance';
-import * as Bybit from '../api/bybit';
 import * as Okex from '../api/okex';
-import { Exchange, ReadyState, ClientWsMsg, EventName, Method } from '../types';
+import { Exchange, ClientWsMsg, EventName, Instrument } from '../types';
+import { InstrumentInfoDao } from '../dao';
 import {
   isChannel,
   isSubscribeMsg,
@@ -22,7 +22,6 @@ const globalAny: any = global;
 
 async function setupSocketServer(client: ClientRefs) {
   globalAny.binanceSubscribed = [];
-  globalAny.bybitSubscribed = [];
   globalAny.okexSubscribed = [];
 
   globalAny.io.on('connection', (socket: any) => {
@@ -30,21 +29,6 @@ async function setupSocketServer(client: ClientRefs) {
 
     socket.on('tickers', (msg: ClientWsMsg) => {
       const commands = getWsTickerCommands(msg);
-      // if (globalAny.binanceWsConnected && commands.binance) {
-      //   client.binance.send(commands.binance);
-      // }
-
-      if (
-        globalAny.bybitWsConnected &&
-        difference(commands.bybit, globalAny.bybitSubscribed).length
-      ) {
-        globalAny.bybitSubscribed = [
-          ...globalAny.bybitSubscribed,
-          ...commands.bybit,
-        ];
-        client.bybit.subscribe(commands.bybit);
-      }
-
       if (
         globalAny.okexWsConnected &&
         difference(commands.okex, globalAny.okexSubscribed).length
@@ -82,6 +66,7 @@ async function setupSocketServer(client: ClientRefs) {
           client.binance.send(payload);
         }
 
+        // ** client message schema:
         //   {
         //     "op": "subscribe",
         //     "args": [{
@@ -101,20 +86,6 @@ async function setupSocketServer(client: ClientRefs) {
 
           client.okex.subscribe(payload);
         }
-
-        // ws.send('{"op":"subscribe","args":["candle.60.BTCUSDT"]}')
-        if (
-          isChannel(msg, Exchange.Bybit) &&
-          globalAny.bybitWsConnected &&
-          difference([channel], globalAny.bybitSubscribed).length
-        ) {
-          globalAny.bybitSubscribed = [
-            ...globalAny.bybitSubscribed,
-            ...difference([channel], globalAny.bybitSubscribed),
-          ];
-
-          client.bybit.subscribe(payload);
-        }
       }
 
       logger.info(
@@ -122,7 +93,7 @@ async function setupSocketServer(client: ClientRefs) {
       );
     });
 
-    // 默认每一个client只能订阅一个合约K线实时行情
+    // ** 默认每一个client只能订阅一个合约K线实时行情
     socket.on(EventName.disconnecting, () => {
       logger.info(
         `[disconnecting:${socket.id}] leave ${JSON.stringify(
@@ -138,9 +109,16 @@ async function setupSocketServer(client: ClientRefs) {
 }
 
 export async function setupWsserver() {
-  const binance = await Binance.setupWsClient();
-  const okex = await Okex.setupWsClient();
-  // const bybit = await Bybit.setupWsClient();
+  const binanceInstruments: Instrument[] = await InstrumentInfoDao.find({
+    exchange: Exchange.Binance,
+  });
 
-  setupSocketServer({ binance, okex });
+  const okexInstruments: Instrument[] = await InstrumentInfoDao.find({
+    exchange: Exchange.Okex,
+  });
+
+  const binanceWsClient = await Binance.setupWsClient(binanceInstruments);
+  const okexWsClient = await Okex.setupWsClient(okexInstruments);
+
+  setupSocketServer({ binance: binanceWsClient, okex: okexWsClient });
 }

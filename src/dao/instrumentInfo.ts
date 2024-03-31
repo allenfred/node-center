@@ -15,7 +15,7 @@ async function upsert(instruments: Instrument[]): Promise<any> {
   });
 }
 
-async function find(opts?: any): Promise<any> {
+async function find(opts?: any): Promise<Instrument[]> {
   return await InstrumentInfo.find(opts);
 }
 

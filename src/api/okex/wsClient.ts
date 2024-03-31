@@ -112,7 +112,7 @@ export async function broadCastTicker(msg: OkxWsMsg) {
   }
 }
 
-async function setupWsClient() {
+async function setupWsClient(instruments: Instrument[]) {
   const wsClient = new OkxWsClient(OKEX_WS_HOST);
   wsClient.connect();
 

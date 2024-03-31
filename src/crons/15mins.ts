@@ -8,6 +8,7 @@ import * as Binance from '../api/binance';
 import * as Bybit from '../api/bybit';
 import * as moment from 'moment';
 import { UsdtSwapSignal } from '../database/models';
+import publisher from '../redis/client';
 
 //设置系统限速规则: (okex官方API 限速规则：20次/2s)
 // */5 * * * * At every 5 minute.
@@ -74,6 +75,9 @@ export const startJob = async () => {
 
   const endTime = new Date().getTime();
   const usedTime = ((endTime - startTime) / 1000).toFixed(1);
+
+  await publisher.connect();
+  await publisher.publish('klines', JSON.stringify({ status: 1 }));
 
   logger.info(`----- Job End Time Used: ${usedTime}s -----`);
 

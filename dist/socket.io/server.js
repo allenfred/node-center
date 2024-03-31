@@ -15,28 +15,17 @@ const logger_1 = require("../logger");
 const Binance = require("../api/binance");
 const Okex = require("../api/okex");
 const types_1 = require("../types");
+const dao_1 = require("../dao");
 const util_1 = require("./util");
 const globalAny = global;
 function setupSocketServer(client) {
     return __awaiter(this, void 0, void 0, function* () {
         globalAny.binanceSubscribed = [];
-        globalAny.bybitSubscribed = [];
         globalAny.okexSubscribed = [];
         globalAny.io.on('connection', (socket) => {
             logger_1.default.info('someone connected: ' + socket.id);
             socket.on('tickers', (msg) => {
                 const commands = util_1.getWsTickerCommands(msg);
-                // if (globalAny.binanceWsConnected && commands.binance) {
-                //   client.binance.send(commands.binance);
-                // }
-                if (globalAny.bybitWsConnected &&
-                    lodash_1.difference(commands.bybit, globalAny.bybitSubscribed).length) {
-                    globalAny.bybitSubscribed = [
-                        ...globalAny.bybitSubscribed,
-                        ...commands.bybit,
-                    ];
-                    client.bybit.subscribe(commands.bybit);
-                }
                 if (globalAny.okexWsConnected &&
                     lodash_1.difference(commands.okex, globalAny.okexSubscribed).length) {
                     globalAny.okexSubscribed = [
@@ -63,6 +52,7 @@ function setupSocketServer(client) {
                         ];
                         client.binance.send(payload);
                     }
+                    // ** client message schema:
                     //   {
                     //     "op": "subscribe",
                     //     "args": [{
@@ -79,20 +69,10 @@ function setupSocketServer(client) {
                         ];
                         client.okex.subscribe(payload);
                     }
-                    // ws.send('{"op":"subscribe","args":["candle.60.BTCUSDT"]}')
-                    if (util_1.isChannel(msg, types_1.Exchange.Bybit) &&
-                        globalAny.bybitWsConnected &&
-                        lodash_1.difference([channel], globalAny.bybitSubscribed).length) {
-                        globalAny.bybitSubscribed = [
-                            ...globalAny.bybitSubscribed,
-                            ...lodash_1.difference([channel], globalAny.bybitSubscribed),
-                        ];
-                        client.bybit.subscribe(payload);
-                    }
                 }
                 logger_1.default.info(`socket: [${socket.id}] join room: [${util_1.getClientSubChannel(msg)}]`);
             });
-            // 默认每一个client只能订阅一个合约K线实时行情
+            // ** 默认每一个client只能订阅一个合约K线实时行情
             socket.on(types_1.EventName.disconnecting, () => {
                 logger_1.default.info(`[disconnecting:${socket.id}] leave ${JSON.stringify([...socket.rooms].filter((room) => room.includes('USDT')))}`);
             });
@@ -104,10 +84,15 @@ function setupSocketServer(client) {
 }
 function setupWsserver() {
     return __awaiter(this, void 0, void 0, function* () {
-        const binance = yield Binance.setupWsClient();
-        const okex = yield Okex.setupWsClient();
-        // const bybit = await Bybit.setupWsClient();
-        setupSocketServer({ binance, okex });
+        const binanceInstruments = yield dao_1.InstrumentInfoDao.find({
+            exchange: types_1.Exchange.Binance,
+        });
+        const okexInstruments = yield dao_1.InstrumentInfoDao.find({
+            exchange: types_1.Exchange.Okex,
+        });
+        const binanceWsClient = yield Binance.setupWsClient(binanceInstruments);
+        const okexWsClient = yield Okex.setupWsClient(okexInstruments);
+        setupSocketServer({ binance: binanceWsClient, okex: okexWsClient });
     });
 }
 exports.setupWsserver = setupWsserver;

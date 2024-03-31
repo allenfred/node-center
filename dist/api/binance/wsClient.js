@@ -18,9 +18,10 @@ const util_1 = require("./util");
 const globalAny = global;
 const API_KEY = 'MxUyyavVFOC2aWYZLtAG9hQkq9s4rpQAyvlND19gqqIG5iCyDJ15wtrLZhqbjBkT';
 const SECRET_KEY = 'I6eTFNu3YAFOiiWLm2XO27wFxkqjSfPls6OtRL83DZXaMbAkUlo6zSKpuSmC19pX';
+const host = 'wss://fstream.binance.com';
 const client = new Spot('', '', {
     baseURL: 'https://fapi.binance.com',
-    wsURL: 'wss://fstream.binance.com',
+    wsURL: host,
 });
 function broadCastKlines(msg) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -77,9 +78,20 @@ function broadCastTickers(msg) {
     });
 }
 exports.broadCastTickers = broadCastTickers;
-function setupWsClient() {
+function setupWsClient(instruments) {
     return __awaiter(this, void 0, void 0, function* () {
-        const wsRef = client.subscribe('wss://fstream.binance.com/ws/!miniTicker@arr', {
+        const subStr = instruments.reduce((acc, { instrument_id }) => {
+            const instId = instrument_id.toLowerCase();
+            return [
+                ...acc,
+                `${instId}@kline_15m`,
+                `${instId}@kline_1h`,
+                `${instId}@kline_4h`,
+                `${instId}@kline_1d`,
+            ];
+        }, []);
+        const subUrl = `${host}/ws/!miniTicker@arr/${subStr.join('/')}`;
+        const wsRef = client.subscribe(subUrl, {
             open: () => {
                 logger_1.default.info('!!! 与Binance wsserver建立连接成功 !!!');
                 globalAny.binanceWsConnected = true;
@@ -95,7 +107,7 @@ function setupWsClient() {
                 if (util_1.isTickerMsg(data)) {
                     broadCastTickers(msg);
                 }
-                // handleMsg(JSON.parse(data));
+                util_1.handleMsg(JSON.parse(data));
             },
         });
         return wsRef.ws;
