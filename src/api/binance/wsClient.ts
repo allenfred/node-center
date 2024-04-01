@@ -17,11 +17,12 @@ const API_KEY =
   'MxUyyavVFOC2aWYZLtAG9hQkq9s4rpQAyvlND19gqqIG5iCyDJ15wtrLZhqbjBkT';
 const SECRET_KEY =
   'I6eTFNu3YAFOiiWLm2XO27wFxkqjSfPls6OtRL83DZXaMbAkUlo6zSKpuSmC19pX';
-const host = 'wss://fstream.binance.com';
+// const host = 'wss://fstream.binance.com';
+const wshost = 'wss://fstream.binance.com';
 
 const client = new Spot('', '', {
-  baseURL: 'https://fapi.binance.com',
-  wsURL: host, // If optional base URL is not provided, wsURL defaults to wss://stream.binance.com:9443
+  baseURL: 'wss://fstream.binance.com',
+  wsURL: wshost, // If optional base URL is not provided, wsURL defaults to wss://stream.binance.com:9443
 });
 
 export async function broadCastKlines(msg: BinanceWsKlineMsg) {
@@ -90,7 +91,8 @@ async function setupWsClient(instruments: Instrument[]) {
       `${instId}@kline_1d`,
     ];
   }, []);
-  const subUrl = `${host}/ws/!miniTicker@arr/${subStr.join('/')}`;
+
+  const subUrl = `${wshost}/ws/!miniTicker@arr/${subStr.join('/')}`;
 
   const wsRef = client.subscribe(subUrl, {
     open: () => {

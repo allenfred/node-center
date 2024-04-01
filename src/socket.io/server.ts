@@ -1,4 +1,4 @@
-import { difference } from 'lodash';
+import { difference, orderBy } from 'lodash';
 import logger from '../logger';
 import * as Binance from '../api/binance';
 import * as Okex from '../api/okex';
@@ -109,9 +109,11 @@ async function setupSocketServer(client: ClientRefs) {
 }
 
 export async function setupWsserver() {
-  const binanceInstruments: Instrument[] = await InstrumentInfoDao.find({
-    exchange: Exchange.Binance,
-  });
+  const binanceInstruments: Instrument[] =
+    await InstrumentInfoDao.findByTopVolume({
+      exchange: Exchange.Binance,
+      limit: 30,
+    });
 
   const okexInstruments: Instrument[] = await InstrumentInfoDao.find({
     exchange: Exchange.Okex,

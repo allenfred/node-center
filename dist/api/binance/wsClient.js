@@ -18,10 +18,11 @@ const util_1 = require("./util");
 const globalAny = global;
 const API_KEY = 'MxUyyavVFOC2aWYZLtAG9hQkq9s4rpQAyvlND19gqqIG5iCyDJ15wtrLZhqbjBkT';
 const SECRET_KEY = 'I6eTFNu3YAFOiiWLm2XO27wFxkqjSfPls6OtRL83DZXaMbAkUlo6zSKpuSmC19pX';
-const host = 'wss://fstream.binance.com';
+// const host = 'wss://fstream.binance.com';
+const wshost = 'wss://fstream.binance.com';
 const client = new Spot('', '', {
-    baseURL: 'https://fapi.binance.com',
-    wsURL: host,
+    baseURL: 'wss://fstream.binance.com',
+    wsURL: wshost,
 });
 function broadCastKlines(msg) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -90,7 +91,7 @@ function setupWsClient(instruments) {
                 `${instId}@kline_1d`,
             ];
         }, []);
-        const subUrl = `${host}/ws/!miniTicker@arr/${subStr.join('/')}`;
+        const subUrl = `${wshost}/ws/!miniTicker@arr/${subStr.join('/')}`;
         const wsRef = client.subscribe(subUrl, {
             open: () => {
                 logger_1.default.info('!!! 与Binance wsserver建立连接成功 !!!');

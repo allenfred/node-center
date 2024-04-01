@@ -84,8 +84,9 @@ function setupSocketServer(client) {
 }
 function setupWsserver() {
     return __awaiter(this, void 0, void 0, function* () {
-        const binanceInstruments = yield dao_1.InstrumentInfoDao.find({
+        const binanceInstruments = yield dao_1.InstrumentInfoDao.findByTopVolume({
             exchange: types_1.Exchange.Binance,
+            limit: 30,
         });
         const okexInstruments = yield dao_1.InstrumentInfoDao.find({
             exchange: types_1.Exchange.Okex,
